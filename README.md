@@ -1,4 +1,4 @@
-# RoonServer Installer for Synology DSM (x64)
+# RoonServer Installer for QNAP NAS (x64)
 Install RoonServer on your x64 QNAP device.
 
 ## Howto use

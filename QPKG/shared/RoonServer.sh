@@ -42,7 +42,7 @@ case "$1" in
             echo ${QPKG_NAME} is already running with PID: $PID
         else
             echo "INFO: Roon Server has previously not been stopped properly."
-            /sbin/write_log "[RoonServer] INFO: Roon Server has prevously not been stopped properly." 2
+            /sbin/write_log "[RoonServer] Roon Server has previously not been stopped properly." 2
             echo "Starting ${QPKG_NAME} ..."
             start_daemon
         fi

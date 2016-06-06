@@ -145,9 +145,8 @@ pkg_install(){
 	fi
 	rm -f RoonServer_linuxx64.tar.bz2
 	if [ $R -ne 0 ]; then
-		echo "Could not download installation archive from Roon Labs website. Please check your internet connection."
+		/sbin/write_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection." 1
 	fi
-	mkdir ${SYS_QPKG_DIR}/settings
 	return $R
 
 }

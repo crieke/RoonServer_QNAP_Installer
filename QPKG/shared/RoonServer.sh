@@ -26,7 +26,7 @@ start_daemon ()
             /sbin/write_log "[RoonServer] Additional library folder = ${ROON_LIB_DIR}" 4
             /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
         else
-            /sbin/setcfg {QPKG_NAME} Enable FALSE -f ${CONF}
+            /sbin/setcfg "${QPKG_NAME}" Enable FALSE -f "${CONF}"
             rm "${ROON_PIDFILE}"
             /sbin/write_log "[RoonServer] Shared folder \"RoonServer\" could not be found. Please create it in the QTS before launching the package." 1
         fi

@@ -132,6 +132,7 @@
 ######################################################################
 
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
+ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 
 #pkg_pre_install(){
 #}
@@ -140,15 +141,13 @@ pkg_install(){
 	curl -s -O "${ROON_PKG_URL}"
 	R=$?
 	if [ $R -eq 0 ]; then
-		tar xjf RoonServer_linuxx64.tar.bz2 -C ${SYS_QPKG_DIR}
+		tar xjf "${ROON_ARCHIVE}" -C ${SYS_QPKG_DIR}
 		R=$?
 	fi
-	rm -f RoonServer_linuxx64.tar.bz2
+	rm -f "${ROON_ARCHIVE}"
 	if [ $R -ne 0 ]; then
-		/sbin/write_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection." 1
+		/sbin/err_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection."
 	fi
-	return $R
-
 }
 
 #pkg_post_install(){

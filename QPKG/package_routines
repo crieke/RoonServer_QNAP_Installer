@@ -138,16 +138,16 @@ ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 #}
 
 pkg_install(){
-	curl -s -O "${ROON_PKG_URL}"
-	R=$?
-	if [ $R -eq 0 ]; then
-		tar xjf "${ROON_ARCHIVE}" -C ${SYS_QPKG_DIR}
-		R=$?
-	fi
-	rm -f "${ROON_ARCHIVE}"
-	if [ $R -ne 0 ]; then
-		/sbin/err_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection."
-	fi
+    "${CMD_WGET}" "${ROON_PKG_URL}"
+    R=$?
+    if [ $R -eq 0 ]; then
+        "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C ${SYS_QPKG_DIR}
+        R=$?
+    fi
+    rm -f "${ROON_ARCHIVE}"
+    if [ $R -ne 0 ]; then
+        /sbin/err_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection."
+    fi
 }
 
 #pkg_post_install(){

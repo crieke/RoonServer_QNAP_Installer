@@ -20,6 +20,7 @@ start_daemon ()
             export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
             export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
             export ALSA_CONFIG_PATH
+            export TMP="${ROON_TMP_DIR}"
             ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARG}" &
             echo $! > "${ROON_PIDFILE}"
             /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4

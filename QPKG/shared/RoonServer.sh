@@ -62,6 +62,7 @@ case "$1" in
     if [ -f "$ROON_PIDFILE" ]; then
         kill ${PID}
         rm "${ROON_PIDFILE}"
+        rm -rf "${ROON_TMP_DIR}"/*
     else
         echo "${QPKG_NAME} is not running."
     fi

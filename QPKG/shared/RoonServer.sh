@@ -2,12 +2,37 @@
 CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
+QTS_VER=`cat /etc/os-release | grep "VERSION_ID" | sed s/VERSION_ID=*// | tr -d '"'`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_ARG="${@:2}"
 ROON_DATAROOT=`/sbin/getcfg $QPKG_NAME path -f /etc/config/smb.conf`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
+
+echo "${QPKG_ROOT}"
+echo "${ROON_DATAROOT}"
+OLD_IFS="$IFS"
+IFS="."
+QTS_VER_ARRAY=( $QTS_VER )
+IFS="$OLD_IFS"
+
+EXPORT_LIB_BELOW=(4 3)
+DIGITCOUNT=0;
+for i in "${EXPORT_LIB_BELOW[@]}"
+do
+   :
+   if [ ${EXPORT_LIB_BELOW[$DIGITCOUNT]} -ge ${QTS_VER_ARRAY[$DIGITCOUNT]} ]; then
+      echo "Bundled 64-Bit libraries do not need to be loaded!"
+      BundledLibPath=false;
+   else
+      BundledLibPath=true;
+      echo "Bundled 64-Bit libraries need to be loaded!"
+      break
+   fi
+   DIGITCOUNT=$(($DIGITCOUNT+1));
+done
+
 if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
@@ -17,7 +42,9 @@ start_daemon ()
         #Launch the service in the background if RoonServer share exists.
         if [ "${ROON_DATAROOT}" != "" ]; then
             export ROON_DATAROOT="$ROON_DATAROOT"
-            export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+            if [ "${BundledLibPath}" ]; then
+               export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+            fi
             export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
             export ALSA_CONFIG_PATH
             export TMP="${ROON_TMP_DIR}"

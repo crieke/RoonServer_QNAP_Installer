@@ -40,7 +40,7 @@ fi
 start_daemon ()
 {			
         #Launch the service in the background if RoonServer share exists.
-        if  "${ROON_DATAROOT}"; then
+        if  [ "${ROON_DATAROOT}" != "" ]; then
             export ROON_DATAROOT="$ROON_DATAROOT"
             if $BundledLibPath; then
                export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"

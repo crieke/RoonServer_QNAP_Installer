@@ -12,26 +12,14 @@ ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 
 echo "${QPKG_ROOT}"
 echo "${ROON_DATAROOT}"
-OLD_IFS="$IFS"
-IFS="."
-QTS_VER_ARRAY=( $QTS_VER )
-IFS="$OLD_IFS"
 
-EXPORT_LIB_BELOW=(4 3)
-DIGITCOUNT=0;
-for i in "${EXPORT_LIB_BELOW[@]}"
-do
-   :
-   if [ ${EXPORT_LIB_BELOW[$DIGITCOUNT]} -ge ${QTS_VER_ARRAY[$DIGITCOUNT]} ]; then
-      echo "Bundled 64-Bit libraries do not need to be loaded!"
-      BundledLibPath=false;
-   else
-      BundledLibPath=true;
-      echo "Bundled 64-Bit libraries need to be loaded!"
-      break
-   fi
-   DIGITCOUNT=$(($DIGITCOUNT+1));
-done
+if [[ $MAJOR_QTS_VER -ge 43 ]]; then
+   BundledLibPath=false;
+   echo "No additional libraries required."
+else
+   BundledLibPath=true;
+   echo "Additional libraries will be loaded."
+fi
 
 if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`

@@ -12,6 +12,7 @@ ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_ARG="${@:2}"
 ROON_DATAROOT=`/sbin/getcfg $QPKG_NAME path -f /etc/config/smb.conf`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
+WATCH_SHARE_PID="${QPKG_ROOT}/share_watchdog.pid"
 
 ## Echoing System Info
 echo "QPKG_ROOT: ${QPKG_ROOT}"
@@ -35,6 +36,10 @@ if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
 
+if [ -f $WATCH_SHARE_PID ]; then
+    PID2=`cat "${WATCH_SHARE_PID}"`
+fi
+
 start_daemon ()
 {			
         #Launch the service in the background if RoonServer share exists.
@@ -46,6 +51,16 @@ start_daemon ()
             export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
             export ALSA_CONFIG_PATH
             export TMP="${ROON_TMP_DIR}"
+            export ROON_FILEBROWSER_IGNORE_ALL_MOUNTS=1
+            export ROON_FILEBROWSER_VIRTUAL_MOUNT1="foo:QNAP $(getsysinfo model):$(/bin/hostname), $(get_hwsn), QTS $(getcfg system version):${QPKG_ROOT}/mnt"
+
+            #Watch /share folders for symlink changes, and add or delete them in Roon's mnt folder.
+            ## Start Watchdog for RoonServer "mnt" directory
+            setsid ${QPKG_ROOT}/share_watchdog.sh &
+            PID2=$!
+            echo $PID2 > "${WATCH_SHARE_PID}"    
+            echo "WatchShare PID: " $PID2
+            ## Start RoonServer
             ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARG}" &
             echo $! > "${ROON_PIDFILE}"
             /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
@@ -91,6 +106,8 @@ case "$1" in
     if [ -f "$ROON_PIDFILE" ]; then
         kill ${PID}
         rm "${ROON_PIDFILE}"
+        kill -- -`cat $WATCH_SHARE_PID`
+        rm "${WATCH_SHARE_PID}"
         rm -rf "${ROON_TMP_DIR}"/*
     else
         echo "${QPKG_NAME} is not running."

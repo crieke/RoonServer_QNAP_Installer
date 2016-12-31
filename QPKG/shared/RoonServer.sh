@@ -3,6 +3,10 @@ CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
 QTS_VER=`cat /etc/os-release | grep "VERSION_ID" | sed s/VERSION_ID=*// | tr -d '"'`
+QTS_VER=`/sbin/getcfg system version`
+QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
+MAJOR_QTS_VER=`echo "$QTS_VER" | tr -d '.' | cut -c1-2`
+ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
@@ -12,6 +16,15 @@ ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 
 echo "${QPKG_ROOT}"
 echo "${ROON_DATAROOT}"
+## Echoing System Info
+echo "QPKG_ROOT: ${QPKG_ROOT}"
+echo "ROON_DATAROOT: ${ROON_DATAROOT}"
+echo "QTS-Version: ${QTS_VER} (Compare Int: ${MAJOR_QTS_VER})"
+echo "RoonServer .qpkg Version: "${QPKG_VERSION}
+
+echo ""; echo "";echo "########## Installed RoonServer Version ##########"
+echo "${ROON_VERSION}"
+echo "##################################################"; echo ""; echo ""
 
 if [[ $MAJOR_QTS_VER -ge 43 ]]; then
    BundledLibPath=false;

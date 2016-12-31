@@ -151,7 +151,7 @@ pkg_install(){
         "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
         R=$?
     fi
-    rm -f "${ROON_ARCHIVE}"
+    "${CMD_RM}" -f "${ROON_ARCHIVE}"
     if [ $R -ne 0 ]; then
         /sbin/err_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection."
     fi

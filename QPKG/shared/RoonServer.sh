@@ -2,7 +2,6 @@
 CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
-QTS_VER=`cat /etc/os-release | grep "VERSION_ID" | sed s/VERSION_ID=*// | tr -d '"'`
 QTS_VER=`/sbin/getcfg system version`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
 MAJOR_QTS_VER=`echo "$QTS_VER" | tr -d '.' | cut -c1-2`
@@ -14,8 +13,6 @@ ROON_ARG="${@:2}"
 ROON_DATAROOT=`/sbin/getcfg $QPKG_NAME path -f /etc/config/smb.conf`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 
-echo "${QPKG_ROOT}"
-echo "${ROON_DATAROOT}"
 ## Echoing System Info
 echo "QPKG_ROOT: ${QPKG_ROOT}"
 echo "ROON_DATAROOT: ${ROON_DATAROOT}"
@@ -41,7 +38,7 @@ fi
 start_daemon ()
 {			
         #Launch the service in the background if RoonServer share exists.
-        if  [ "${ROON_DATAROOT}" != "" ]; then
+        if [ "${ROON_DATAROOT}" != "" ]; then
             export ROON_DATAROOT="$ROON_DATAROOT"
             if $BundledLibPath; then
                export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
@@ -53,7 +50,11 @@ start_daemon ()
             echo $! > "${ROON_PIDFILE}"
             /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
             /sbin/write_log "[RoonServer] ROON_DATAROOT = ${ROON_DATAROOT}" 4
-            /sbin/write_log "[RoonServer] Additional library folder = ${ROON_LIB_DIR}" 4
+            if $BundledLibPath; then
+               /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. Additional library folder = ${ROON_LIB_DIR}" 4
+            else
+               /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. No additional libraries required." 4
+            fi
             /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
             /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARG}" 4
         else

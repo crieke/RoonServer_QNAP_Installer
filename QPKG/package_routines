@@ -134,6 +134,13 @@
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 
+if [[ -f /share/RoonServer/INSTALL_ALPHA ]]; then
+    ALPHA=`"${CMD_CAT}" /share/RoonServer/INSTALL_ALPHA`
+    if [[ ${ALPHA:0:4} == "http" ]]  && [[ $(basename ${ALPHA}) == $(basename ${ROON_PKG_URL}) ]]; then
+        ROON_PKG_URL="${ALPHA}"
+    fi
+fi
+
 #pkg_pre_install(){
 #}
 

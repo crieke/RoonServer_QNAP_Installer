@@ -53,7 +53,7 @@ start_daemon ()
             export ALSA_CONFIG_PATH
             export TMP="${ROON_TMP_DIR}"
             export ROON_FILEBROWSER_IGNORE_ALL_MOUNTS=1
-            export ROON_FILEBROWSER_VIRTUAL_MOUNT1="${QNAP_SERIAL}:QNAP $(getsysinfo model):$(/bin/hostname), ${QNAP_SERIAL}, QTS ${QTS_VER}":${QPKG_ROOT}/mnt"
+            export ROON_FILEBROWSER_VIRTUAL_MOUNT1="${QNAP_SERIAL}:QNAP $(getsysinfo model):$(/bin/hostname), ${QNAP_SERIAL}, QTS ${QTS_VER}:${QPKG_ROOT}/mnt"
 
             #Watch /share folders for symlink changes, and add or delete them in Roon's mnt folder.
             ## Start Watchdog for RoonServer "mnt" directory

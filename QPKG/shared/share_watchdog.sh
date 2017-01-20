@@ -9,7 +9,7 @@ rm -f "${QPKG_ROOT}"/mnt/*
 ## Create symlimks initially in Roon's mnt folder
 find /share -maxdepth 1 -type l -print | while read x; do
    SYMLINK_DEST="${QPKG_ROOT}/mnt/"$(basename "$x")
-   ln -s "$x" "$SYMLINK_DEST"
+   ln -sf "$x" "$SYMLINK_DEST"
 done
 
 ## watch /share directory for changes

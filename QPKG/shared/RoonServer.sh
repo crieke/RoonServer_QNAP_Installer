@@ -10,7 +10,6 @@ ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
-ROON_ARG="${@:2}"
 ROON_DATAROOT=`/sbin/getcfg $QPKG_NAME path -f /etc/config/smb.conf`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 WATCH_SHARE_PID="${QPKG_ROOT}/share_watchdog.pid"
@@ -61,8 +60,17 @@ start_daemon ()
             PID2=$!
             echo $PID2 > "${WATCH_SHARE_PID}"    
             echo "WatchShare PID: " $PID2
+
+            # Checking for additional start arguments.
+            if [[ -f $ROON_DATAROOT/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
+                ROON_ARGS=`cat "$ROON_DATAROOT/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
+            else
+                ROON_ARGS=""
+            fi
+            echo "RoonServer Arguments: ${ROON_ARGS}"
+
             ## Start RoonServer
-            ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARG}" &
+            ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" &
             echo $! > "${ROON_PIDFILE}"
             /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
             /sbin/write_log "[RoonServer] ROON_DATAROOT = ${ROON_DATAROOT}" 4

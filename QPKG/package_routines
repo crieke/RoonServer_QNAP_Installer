@@ -134,10 +134,10 @@
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 
-if [[ -f /share/RoonServer/INSTALL_ALPHA ]]; then
-    ALPHA=`"${CMD_CAT}" /share/RoonServer/INSTALL_ALPHA`
-    if [[ ${ALPHA:0:4} == "http" ]]  && [[ $(basename ${ALPHA}) == $(basename ${ROON_PKG_URL}) ]]; then
-        ROON_PKG_URL="${ALPHA}"
+if [[ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]]; then
+    CUSTOM_INSTALL_URL=`"${CMD_CAT}" /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
+    if [[ ${CUSTOM_INSTALL_URL:0:4} == "http" ]]  && [[ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]]; then
+        ROON_PKG_URL="${CUSTOM_INSTALL_URL}"
     fi
 fi
 

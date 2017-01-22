@@ -79,7 +79,7 @@ start_daemon ()
 
         #Launch the service in the background if RoonServer share exists.
         if [ "${ROON_DATABASE_DIR}" != "" ]; then
-            export ROON_DATABASE_DIR="$ROON_DATABASE_DIR"
+            export ROON_DATAROOT="$ROON_DATABASE_DIR"
             if $BundledLibPath; then
                export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
             fi

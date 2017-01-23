@@ -60,17 +60,17 @@ fi
 
 info()
 {
-## Echoing System Info
-echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR}"
-echolog "ROON_DIR" "${QPKG_ROOT}"
-echolog "Model" "${MODEL}"
-echolog "QNAP Serial" "$QNAP_SERIAL"
-echolog "Architecture" "$ARCH"
-echolog "Hostname" "${HOSTNAME}"
-echolog "QTS Version" "${QTS_VER}"
-echolog "PKG Version" "${QPKG_VERSION}"
-echolog "MTU" "${MTU}"
-echolog "Require additional 64-bit libs" "$BundledLibPath"
+   ## Echoing System Info
+   echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR}"
+   echolog "ROON_DIR" "${QPKG_ROOT}"
+   echolog "Model" "${MODEL}"
+   echolog "QNAP Serial" "${QNAP_SERIAL}"
+   echolog "Architecture" "${ARCH}"
+   echolog "QTS Version" "${QTS_VER}"
+   echolog "PKG Version" "${QPKG_VERSION}"
+   echolog "Hostname" "${HOSTNAME}"
+   echolog "MTU" "${MTU}"
+   echolog "Require additional 64-bit libs" "${BundledLibPath}"
 }
 
 start_daemon ()

@@ -15,7 +15,6 @@ ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME path -f /etc/config/smb.conf`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
-WATCH_SHARE_PID="${QPKG_ROOT}/share_watchdog.pid"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
 ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROON_DEBUG_EXTERNAL_LOG.txt"
 
@@ -54,10 +53,6 @@ if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
 
-if [ -f $WATCH_SHARE_PID ]; then
-    WS_PID=`cat "${WATCH_SHARE_PID}"`
-fi
-
 info()
 {
    ## Echoing System Info
@@ -70,7 +65,7 @@ info()
    echolog "PKG Version" "${QPKG_VERSION}"
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
-   echolog "Require additional 64-bit libs" "${BundledLibPath}"
+   echolog "Loading additional 64-bit libs" "${BundledLibPath}"
 }
 
 start_daemon ()
@@ -86,8 +81,6 @@ start_daemon ()
             export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
             export ALSA_CONFIG_PATH
             export TMP="${ROON_TMP_DIR}"
-            export ROON_FILEBROWSER_IGNORE_ALL_MOUNTS=1
-            export ROON_FILEBROWSER_VIRTUAL_MOUNT1="${QNAP_SERIAL}:QNAP ${MODEL}:${HOSTNAME}, ${QNAP_SERIAL}, QTS ${QTS_VER}:${QPKG_ROOT}/mnt"
 
             # Checking for additional start arguments.
             if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
@@ -96,13 +89,6 @@ start_daemon ()
                 ROON_ARGS=""
             fi
             echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
-            
-            #Watch /share folders for symlink changes, and add or delete them in Roon's mnt folder.
-            ## Start Watchdog for RoonServer "mnt" directory
-            setsid ${QPKG_ROOT}/share_watchdog.sh >> $ROON_LOG_FILE 2>&1 &
-            WS_PID=$!
-            echo $WS_PID > "${WATCH_SHARE_PID}"    
-            echolog "WatchShare PID" "$WS_PID"
 
             ## Start RoonServer
             ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" >> $ROON_LOG_FILE  2>&1 &
@@ -164,9 +150,6 @@ case "$1" in
         echolog "Roon PID to be killed" "$PID"
         kill ${PID} >> $ROON_LOG_FILE
         rm "${ROON_PIDFILE}"
-        echolog "Watchdog PID to be killed" "$WS_PID"
-        kill -- -`cat $WATCH_SHARE_PID` >> $ROON_LOG_FILE
-        rm "${WATCH_SHARE_PID}"
         rm -rf "${ROON_TMP_DIR}"/*
         echolog "RoonServer has been stopped."
     else

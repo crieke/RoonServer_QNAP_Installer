@@ -111,7 +111,7 @@ start_daemon ()
                /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. No additional libraries required." 4
             fi
             /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
-            /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARG}" 4
+            /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
         else
             /sbin/setcfg "${QPKG_NAME}" Enable FALSE -f "${CONF}"
             rm "${ROON_PIDFILE}"

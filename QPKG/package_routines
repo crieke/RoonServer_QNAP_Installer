@@ -129,8 +129,7 @@ pkg_check_requirement(){
 ROON_DATABASE_DIR=`/sbin/getcfg RoonServer path -f /etc/config/smb.conf`
 
 if [[ $ROON_DATABASE_DIR == "" ]]; then
-   err_log "\"RoonServer\" shared folder does not exist. Please create it before installing RoonServer."
-   
+   err_log "\"RoonServer\" shared folder does not exist. Please create it before installing Roon Server."
 fi
 
 }
@@ -162,7 +161,7 @@ pkg_install(){
     fi
     "${CMD_RM}" -f "${ROON_ARCHIVE}"
     if [ $R -ne 0 ]; then
-        err_log "[Roon Server] Could not download installation archive from Roon Labs website. Please check your internet connection."
+        err_log "Could not download installation archive from Roon Labs website. Please check your internet connection."
     fi
     "${CMD_MKDIR}" "${SYS_QPKG_DIR}"/tmp
 }

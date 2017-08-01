@@ -2,6 +2,9 @@
 CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
+WEB_SHARENAME=$(/sbin/getcfg SHARE_DEF defWeb -d Web -f /etc/config/def_share.info)
+WEB_PATH=$(/sbin/getcfg $WEB_SHARENAME path -f /etc/config/smb.conf)
+WEBUI=$(/sbin/getcfg $QPKG_NAME webUI -f ${CONF});
 QTS_VER=`/sbin/getcfg system version`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
 MAJOR_QTS_VER=`echo "$QTS_VER" | tr -d '.' | cut -c1-2`
@@ -91,8 +94,7 @@ start_daemon ()
             echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
 
             ## Start RoonServer
-            ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" >> $ROON_LOG_FILE  2>&1 &
-            echo $! > "${ROON_PIDFILE}"
+            ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
             echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
 
             echo "" | tee -a $ROON_LOG_FILE
@@ -112,6 +114,7 @@ start_daemon ()
             fi
             /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
             /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
+            ln -sf "${QPKG_ROOT}/web" "${WEB_PATH}/${WEBUI}"
         else
             /sbin/setcfg "${QPKG_NAME}" Enable FALSE -f "${CONF}"
             rm "${ROON_PIDFILE}"
@@ -151,6 +154,8 @@ case "$1" in
         kill ${PID} >> $ROON_LOG_FILE
         rm "${ROON_PIDFILE}"
         rm -rf "${ROON_TMP_DIR}"/*
+        rm  "${WEB_PATH}/${WEBUI}"
+
         echolog "RoonServer has been stopped."
     else
         echolog "${QPKG_NAME} is not running."

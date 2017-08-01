@@ -142,6 +142,7 @@ fi
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 
+
 if [[ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]]; then
     CUSTOM_INSTALL_URL=`"${CMD_CAT}" /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
     if [[ ${CUSTOM_INSTALL_URL:0:4} == "http" ]]  && [[ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]]; then
@@ -164,6 +165,7 @@ pkg_install(){
         err_log "Could not download installation archive from Roon Labs website. Please check your internet connection."
     fi
     "${CMD_MKDIR}" "${SYS_QPKG_DIR}"/tmp
+    "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
 }
 
 #pkg_post_install(){

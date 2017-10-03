@@ -2,7 +2,7 @@
 <html>
     <?php
     $WEBAPP_ROOT = explode('/', $_SERVER['REQUEST_URI']);
-    $WEBAPP_ROOT = "/".$WEBAPP_ROOT[1];
+    $WEBAPP_ROOT = "/".$WEBAPP_ROOT[1] . "/qpkg/RoonServer";
     $QPKGconfig = parse_ini_file("/etc/config/qpkg.conf", true, INI_SCANNER_RAW);
     ?>
     <head>
@@ -20,7 +20,6 @@
     <body class="pull_top">
         <script src="<?php echo $WEBAPP_ROOT; ?>/js/jquery-latest.min.js"></script>
         <script src="<?php echo $WEBAPP_ROOT; ?>/js/bootstrap.min.js"></script>
-        <script src="<?php echo $WEBAPP_ROOT; ?>/roon.js"></script>
 
         <script>
         function showmain() {
@@ -57,14 +56,14 @@
             </div>
 
             <div class='section'>
-                <h2>RoonServer for QNAP (x64)</h2>
+                <h1>RoonServer for QNAP (x64)</h1>
                 <p style='max-width: 600px;'>
-                Installed RoonServer: <?php
+                <b>Installed RoonServer:</b> <?php
                 $lines = file(rtrim("$ROON_PATH") . "/RoonServer/VERSION");
                 echo $lines[1]; //line 2
                 ?>
                 <br>
-                QPKG-Version: <?php
+                <b>QPKG-Version:</b> <?php
                 $QPKG_VERSION = $QPKGconfig['RoonServer']['Version'];
                 echo $QPKG_VERSION;
                 ?>

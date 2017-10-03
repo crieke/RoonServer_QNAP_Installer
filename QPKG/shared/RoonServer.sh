@@ -2,8 +2,7 @@
 CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
-WEB_SHARENAME=$(/sbin/getcfg SHARE_DEF defWeb -d Web -f /etc/config/def_share.info)
-WEB_PATH=$(/sbin/getcfg $WEB_SHARENAME path -f /etc/config/smb.conf)
+WEB_PATH="/home/httpd"
 WEBUI=$(/sbin/getcfg $QPKG_NAME webUI -f ${CONF});
 QTS_VER=`/sbin/getcfg system version`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
@@ -97,6 +96,9 @@ start_daemon ()
             ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
             echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
 
+            ln -sf "${QPKG_ROOT}/web" "${WEB_PATH}${WEBUI}"
+
+
             echo "" | tee -a $ROON_LOG_FILE
             echo "" | tee -a $ROON_LOG_FILE
             echo "########## Installed RoonServer Version ##########" | tee -a $ROON_LOG_FILE
@@ -114,7 +116,6 @@ start_daemon ()
             fi
             /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
             /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
-            ln -sf "${QPKG_ROOT}/web" "${WEB_PATH}/${WEBUI}"
         else
             /sbin/setcfg "${QPKG_NAME}" Enable FALSE -f "${CONF}"
             rm "${ROON_PIDFILE}"
@@ -136,7 +137,7 @@ case "$1" in
         else
             echo "" > $ROON_LOG_FILE
             echolog "INFO: Roon Server has previously not been stopped properly."
-            /sbin/write_log "[RoonServer] Roon Server has previously not been stopped properly." 2
+            /sbin/write_log "[${QPKG_NAME}] Roon Server has previously not been stopped properly." 2
             echolog "Starting ${QPKG_NAME} ..."
             start_daemon
         fi
@@ -154,8 +155,10 @@ case "$1" in
         kill ${PID} >> $ROON_LOG_FILE
         rm "${ROON_PIDFILE}"
         rm -rf "${ROON_TMP_DIR}"/*
-        rm  "${WEB_PATH}/${WEBUI}"
-
+        if [[ $2 != "keepwebalive" ]]; then
+           rm -rf "${QPKG_ROOT}/web/tmp"/*
+           rm  "${WEB_PATH}${WEBUI}"
+        fi
         echolog "RoonServer has been stopped."
     else
         echolog "${QPKG_NAME} is not running."

@@ -2,7 +2,7 @@
 <html>
     <?php
     $WEBAPP_ROOT = explode('/', $_SERVER['REQUEST_URI']);
-    $WEBAPP_ROOT = "/".$WEBAPP_ROOT[1];        
+    $WEBAPP_ROOT = "/".$WEBAPP_ROOT[1] . "/qpkg/RoonServer";        
     ?>
     <head>
         <title>Roon Server</title>
@@ -19,7 +19,6 @@
     <body class="pull_top">
         <script src="<?php echo $WEBAPP_ROOT; ?>/js/jquery-latest.min.js"></script>
         <script src="<?php echo $WEBAPP_ROOT; ?>/js/bootstrap.min.js"></script>
-        <script src="<?php echo $WEBAPP_ROOT; ?>/roon.js"></script>
 
         <script>
         function showmain() {
@@ -82,57 +81,58 @@
         <div id="feed-BashLog"></div>
 <script type="text/javascript">
 var refreshtime=10;
-function tc()
+function readBashLog()
 {
-asyncAjax("GET","logfile_Bash.php",Math.random(),display,{});
-setTimeout(tc,refreshtime);
+asyncAjax1("GET","logfile_Bash.php",Math.random(),display1,{});
+setTimeout(readBashLog,refreshtime);
 }
-function display(xhr,cdat)
+function display1(xhr1,cdat1)
 {
- if(xhr.readyState==4 && xhr.status==200)
+ if(xhr1.readyState==4 && xhr1.status==200)
  {
-   document.getElementById("feed-BashLog").innerHTML=xhr.responseText;
+   document.getElementById("feed-BashLog").innerHTML=xhr1.responseText;
  }
 }
-function asyncAjax(method,url,qs,callback,callbackData)
+function asyncAjax1(method1,url1,qs1,callback1,callbackData1)
 {
-    var xmlhttp=new XMLHttpRequest();
-    //xmlhttp.cdat=callbackData;
-    if(method=="GET")
+    var xmlhttp1=new XMLHttpRequest();
+    //xmlhttp1.cdat1=callbackData1;
+    if(method1=="GET")
     {
-        url+="?"+qs;
+        url1+="?"+qs1;
     }
-    var cb=callback;
-    callback=function()
+    var cb1=callback1;
+    callback1=function()
     {
-        var xhr=xmlhttp;
-        //xhr.cdat=callbackData;
-        var cdat2=callbackData;
-        cb(xhr,cdat2);
+        var xhr1=xmlhttp1;
+        //xhr1.cdat1=callbackData1;
+        var cdat1b=callbackData1;
+        cb1(xhr1,cdat1b);
         return;
     }
-    xmlhttp.open(method,url,true);
-    xmlhttp.onreadystatechange=callback;
-    if(method=="POST"){
-            xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-            xmlhttp.send(qs);
+    xmlhttp1.open(method1,url1,true);
+    xmlhttp1.onreadystatechange=callback1;
+    if(method1=="POST"){
+            xmlhttp1.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+            xmlhttp1.send(qs1);
     }
     else
     {
-            xmlhttp.send(null);
+            xmlhttp1.send(null);
     }
 }
-tc();
+readBashLog();
 </script>
+        
         
          <h2>Roon Server Log</h2>
         <div id="feed-RoonLog"></div>
 <script type="text/javascript">
 var refreshtime=10;
-function tc()
+function readRoonLog()
 {
 asyncAjax("GET","logfile_Roon.php",Math.random(),display,{});
-setTimeout(tc,refreshtime);
+setTimeout(readRoonLog,refreshtime);
 }
 function display(xhr,cdat)
 {
@@ -169,9 +169,10 @@ function asyncAjax(method,url,qs,callback,callbackData)
             xmlhttp.send(null);
     }
 }
-tc();
+readRoonLog();
 </script>
-
+        
+  
 <br>
 <?php include 'footer.php';?>
 <script>

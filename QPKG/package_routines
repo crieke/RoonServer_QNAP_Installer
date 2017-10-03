@@ -109,8 +109,12 @@
 #PKG_MAIN_REMOVE="{
 #}"
 #
-#PKG_POST_REMOVE="{
-#}"
+PKG_POST_REMOVE="{
+RoonSymlink="/home/httpd/cgi-bin/qpkg/RoonServer"
+if [ -L $RoonSymlink ]; then
+"${CMD_RM} ${RoonSymlink}"
+fi
+}"
 #
 ######################################################################
 # Define any package specific initialization that shall be performed
@@ -138,15 +142,18 @@ fi
 # Define any package specific operations that shall be performed when
 # the package is installed.
 ######################################################################
+CONF=/etc/config/qpkg.conf
+QPKG_NAME="RoonServer"
 
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 
+BINARIES_URL="${ROON_PKG_URL}"
 
 if [[ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]]; then
     CUSTOM_INSTALL_URL=`"${CMD_CAT}" /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
     if [[ ${CUSTOM_INSTALL_URL:0:4} == "http" ]]  && [[ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]]; then
-        ROON_PKG_URL="${CUSTOM_INSTALL_URL}"
+        BINARIES_URL="${CUSTOM_INSTALL_URL}"
     fi
 fi
 
@@ -154,7 +161,7 @@ fi
 #}
 
 pkg_install(){
-    "${CMD_WGET}" "${ROON_PKG_URL}"
+    "${CMD_WGET}" "${BINARIES_URL}"
     R=$?
     if [ $R -eq 0 ]; then
         "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
@@ -168,5 +175,6 @@ pkg_install(){
     "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
 }
 
-#pkg_post_install(){
-#}
+pkg_post_install(){
+"${CMD_SETCFG}" "${QPKG_NAME}" BINARIES_URL "${ROON_PKG_URL}" -f "${CONF}"
+}

@@ -71,7 +71,7 @@ info()
 }
 
 start_daemon ()
-{			
+{
         info
 
         #Launch the service in the background if RoonServer share exists.
@@ -96,7 +96,7 @@ start_daemon ()
             ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
             echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
 
-            ln -sf "${QPKG_ROOT}/web" "${WEB_PATH}${WEBUI}"
+            ln -sfn "${QPKG_ROOT}/web" "${WEB_PATH}${WEBUI}"
 
 
             echo "" | tee -a $ROON_LOG_FILE
@@ -164,7 +164,7 @@ case "$1" in
         echolog "${QPKG_NAME} is not running."
     fi
     ;;
-    
+
   restart)
     $0 stop
     $0 start

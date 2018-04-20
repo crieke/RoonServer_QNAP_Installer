@@ -15,7 +15,7 @@ ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
-ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME path -f /etc/config/smb.conf`
+ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
 ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROON_DEBUG_EXTERNAL_LOG.txt"
@@ -29,7 +29,7 @@ if [[ -f $ROON_DEBUG_EXTERNAL_LOG ]]; then
 fi
 
 ## Log Function
-echolog() {
+echolog () {
     TIMESTAMP=$(date +%d.%m.%y-%H:%M:%S)
     if [[ $# == 2 ]]; then
         PARAMETER1=$1
@@ -55,7 +55,7 @@ if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
 
-info()
+info ()
 {
    ## Echoing System Info
    echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR}"
@@ -70,58 +70,59 @@ info()
    echolog "Loading additional 64-bit libs" "${BundledLibPath}"
 }
 
+start_RoonServer () {
+  if [ "${ROON_DATABASE_DIR}" != "" ] || [ -d "${ROON_DATABASE_DIR}" ]; then
+      export ROON_DATAROOT="$ROON_DATABASE_DIR"
+      if $BundledLibPath; then
+         export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+      fi
+      export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
+      export ALSA_CONFIG_PATH
+      export TMP="${ROON_TMP_DIR}"
+
+      # Checking for additional start arguments.
+      if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
+          ROON_ARGS=`cat "$ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
+      else
+          ROON_ARGS=""
+      fi
+      echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
+
+      ## Start RoonServer
+      ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
+      echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
+
+      echo "" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a $ROON_LOG_FILE
+      echo "########## Installed RoonServer Version ##########" | tee -a $ROON_LOG_FILE
+      echo "${ROON_VERSION}" | tee -a $ROON_LOG_FILE
+      echo "##################################################" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a $ROON_LOG_FILE
+
+      /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
+      /sbin/write_log "[RoonServer] ROON_DATABASE_DIR = ${ROON_DATABASE_DIR}" 4
+      if $BundledLibPath; then
+         /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. Additional library folder = ${ROON_LIB_DIR}" 4
+      else
+         /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. No additional libraries required." 4
+      fi
+      /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
+      /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
+  else
+      rm "${ROON_PIDFILE}"
+      /sbin/write_log "[RoonServer] A storage location for RoonServer's database has not been set. Please create it in the web user interface in ordner to start RoonServer." 4
+  fi
+
+}
+
 start_daemon ()
 {
         info
-
         #Launch the service in the background if RoonServer share exists.
-        if [ "${ROON_DATABASE_DIR}" != "" ]; then
-            export ROON_DATAROOT="$ROON_DATABASE_DIR"
-            if $BundledLibPath; then
-               export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
-            fi
-            export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
-            export ALSA_CONFIG_PATH
-            export TMP="${ROON_TMP_DIR}"
-
-            # Checking for additional start arguments.
-            if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
-                ROON_ARGS=`cat "$ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
-            else
-                ROON_ARGS=""
-            fi
-            echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
-
-            ## Start RoonServer
-            ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
-            echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
-
-            ln -sfn "${QPKG_ROOT}/web" "${WEB_PATH}${WEBUI}"
-
-
-            echo "" | tee -a $ROON_LOG_FILE
-            echo "" | tee -a $ROON_LOG_FILE
-            echo "########## Installed RoonServer Version ##########" | tee -a $ROON_LOG_FILE
-            echo "${ROON_VERSION}" | tee -a $ROON_LOG_FILE
-            echo "##################################################" | tee -a $ROON_LOG_FILE
-            echo "" | tee -a $ROON_LOG_FILE
-            echo "" | tee -a $ROON_LOG_FILE
-
-            /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
-            /sbin/write_log "[RoonServer] ROON_DATABASE_DIR = ${ROON_DATABASE_DIR}" 4
-            if $BundledLibPath; then
-               /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. Additional library folder = ${ROON_LIB_DIR}" 4
-            else
-               /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. No additional libraries required." 4
-            fi
-            /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
-            /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
-        else
-            /sbin/setcfg "${QPKG_NAME}" Enable FALSE -f "${CONF}"
-            rm "${ROON_PIDFILE}"
-            /sbin/write_log "[RoonServer] Shared folder \"RoonServer\" could not be found. Please create it in the QTS before launching the package." 1
-        fi
-}
+        ln -sfn "${QPKG_ROOT}/web" "${WEB_PATH}${WEBUI}"
+        start_RoonServer
+        }
 
 case "$1" in
   start)

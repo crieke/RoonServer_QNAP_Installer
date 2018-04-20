@@ -1,87 +1,189 @@
+<?php
+include("__include.php");
+include("__functions.php");
+?>
+
 <!DOCTYPE html>
 <html>
-    <?php
-    $WEBAPP_ROOT = explode('/', $_SERVER['REQUEST_URI']);
-    $WEBAPP_ROOT = "/".$WEBAPP_ROOT[1] . "/qpkg/RoonServer";
-    $QPKGconfig = parse_ini_file("/etc/config/qpkg.conf", true, INI_SCANNER_RAW);
-    ?>
-    <head>
-        <title>Roon Server</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <!-- Styles -->
-        <link href="<?php echo $WEBAPP_ROOT; ?>/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-        <link rel="stylesheet" type="text/css" href="<?php echo $WEBAPP_ROOT; ?>/css/roon.css" />
-        <link rel="stylesheet" type="text/css" href="<?php echo $WEBAPP_ROOT; ?>/css/cube-grid.css" />
-        <link href='//fonts.googleapis.com/css?family=Lato:300,400,700,900,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css' />
-
-    </head>
-
-    <body class="pull_top">
-        <script src="<?php echo $WEBAPP_ROOT; ?>/js/jquery-latest.min.js"></script>
-        <script src="<?php echo $WEBAPP_ROOT; ?>/js/bootstrap.min.js"></script>
-
-        <script>
-        function showmain() {
-            $(".allbodyloading").hide();
-            $(".allbody").show();
-        }
-        </script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Christopher Rieke">
+    <title>RoonServer</title>
 
 
-        <div class='allbodyloading'>
-            <div class="sk-cube-grid">
-            <div class="sk-cube sk-cube1"></div>
-            <div class="sk-cube sk-cube2"></div>
-            <div class="sk-cube sk-cube3"></div>
-            <div class="sk-cube sk-cube4"></div>
-            <div class="sk-cube sk-cube5"></div>
-            <div class="sk-cube sk-cube6"></div>
-            <div class="sk-cube sk-cube7"></div>
-            <div class="sk-cube sk-cube8"></div>
-            <div class="sk-cube sk-cube9"></div>
-            </div>
-        </div>
+    <!-- jquery asset -->
+    <script src="assets/js/jquery-2.1.3.js"></script>
 
-        <div class='allbody' style='display:none;'>
+    <!-- popper.js asset -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+            integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+            crossorigin="anonymous"></script>
 
-        <?php include 'topbar.php';?>
+    <!-- bootstrap asset -->
+    <link href="assets/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <script src="assets/bootstrap/js/bootstrap.js"></script>
 
-            <?php
-                $ROON_PATH = $QPKGconfig['RoonServer']['Install_Path'];
+    <!-- gijgo asset -->
+    <script src="assets/gijgo/js/gijgo.js" type="text/javascript"></script>
+    <link href="assets/gijgo/css/gijgo.css" rel="stylesheet" type="text/css"/>
+
+    <!-- Fontawesome asset -->
+    <script src="assets/fontawesome/js/fontawesome-all.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="assets/fontawesome/css/fa-svg-with-js.css">
+    <link rel="stylesheet" href="assets/fontawesome-animated/font-awesome-animation.min.css">
+
+    <script src="assets/filedownload/jquery.fileDownload.js" type="text/javascript"></script>
+
+    <!-- custom css -->
+    <link rel="stylesheet" href="RoonServerQNAP.css">
+
+
+</head>
+<body>
+<!-- /.container -->
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+
+<?php
+$debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
 ?>
-            <div class='section' style='padding: 0; margin-top: 50px;'>
-                <img class='gradient' src='img/section_gradient_top.png'/>
-                <img src='img/roon_logo.png'/>
-            </div>
+<div class="fullcontainer">
 
-            <div class='section'>
-                <h1>RoonServer for QNAP (x64)</h1>
-                <p style='max-width: 600px;'>
-                <b>Installed RoonServer:</b> <?php
-                $lines = file(rtrim("$ROON_PATH") . "/RoonServer/VERSION");
-                echo $lines[1]; //line 2
-                ?>
-                <br>
-                <b>QPKG-Version:</b> <?php
-                $QPKG_VERSION = $QPKGconfig['RoonServer']['Version'];
-                echo $QPKG_VERSION;
-                ?>
-                <br><br>
-                Control Roon Server with a PC running Roon or a mobile device running Roon Remote. For macOS and Windows, open the "More" tab to download from the Roon Labs download page. For iOS and Android devices, get the Roon Remote app in the App Store or Play Store.</p>
-        <br>
-        <div class="allinonedownloads margin-center">
-            <a class="commonbtn" href="https://play.google.com/store/apps/details?id=com.roon.mobile" target="_blank">
-                <img src="img/download-google-play.png">
-            </a>
-            <a class="commonbtn" href="https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=1014764083&mt=8" target="_blank">
-                <img src="img/download-app-store.png">
-            </a>
+
+    <?php
+
+    if ($debug == 1) {
+        echo localize("DEBUG_ARCH") . ': ' . php_uname('m') . '<br>';
+        echo localize("DEBUG_DATABASE") . ': ' . $dblocation . '<br>';
+        echo localize("DEBUG_SID") . ': ' . $_COOKIE['NAS_SID'] . '<br>';
+        echo localize("DEBUG_QPKG_ROOT") . ': ' . QPKGINSTALLPATH . "<br>";
+        if (file_exists(QPKGINSTALLPATH . '/RoonServer.pid')) {
+            $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
+            echo "RoonServer PID: " . $RoonServerPID  . '<br>';
+        }
+        echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCROOT;
+    } ?>
+    <nav id="navigation" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="index.php">
+            <img src="img/roonIcon.svg" style="height: 40px;"/>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+                aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link <?php if ($section != 'about') {
+                        echo ' active';
+                    } ?>" href="index.php"><?php echo localize("NAV_MENU_ROONSERVER"); ?></a>
+                </li>
+            </ul>
+            ';
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown pull-right dropdown-menu-right">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false"><?php echo localize("NAV_MENU_MORE"); ?></a>
+                    <div class="dropdown-menu pull-right" aria-labelledby="dropdown01">
+                        <a class="dropdown-item" href="https://roonlabs.com/downloads.html" target="_blank">
+                            <?php echo localize("NAV_MENU_DOWNLOADS"); ?></a>
+                        <a class="dropdown-item" href="https://community.roonlabs.com" target="_blank"><?php echo localize("NAV_MENU_COMMUNITY"); ?></a>
+                        <a class="dropdown-item" href="https://kb.roonlabs.com/Roon_Server_on_NAS" target="_blank"><?php echo localize("NAV_MENU_ROON_ON_NAS"); ?></a>
+                        <a class="dropdown-item" href="https://roonlabs.com/pricing.html" target="_blank">
+                            <?php echo localize("NAV_MENU_TRY_ROON"); ?></a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link float-right<?php if ($section == 'about') {
+                        echo ' active';
+                    } ?>" data-toggle="modal"
+                       data-target="#modal-about" href="#"><i class="fas fa-info-circle"></i></a>
+                </li>
+            </ul>
         </div>
-<?php include 'footer.php';?>
-        <script>
-            showmain();
-        </script>
-    </body>
-</html>
+    </nav>
 
+    <div id="contentblock">
+    <?php
+    $section = "info";
+    if (!isset($dblocation)) {
+        $section = "main";
+    }
+
+    include "content/{$section}.php"; ?>
+    </div>
+    <div id="modalblock">
+        <?php include "content/modals.php"; ?>
+    </div>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
+    <!--<script src="assets/js/ie10-viewport-bug-workaround.js"></script>-->
+</body>
+
+<script>
+    $('.closemodal').click(function () {
+        setTimeout(function () {
+            location.reload();
+        }, 500);
+    });
+
+    $('#downloadlogs').click(function () {
+        var strUrl = '<?php echo QNAPDOCROOT;?>/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
+
+        $.ajax({
+            url: strUrl,
+            success: function(data){
+                console.log(data);
+                $.fileDownload(data);
+            }
+        });
+
+        $('#download-area').html(
+            '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
+            '<div class="text-center"><?php echo localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER"); ?></div>'
+        );
+    });
+
+    $('#redownload').click(function () {
+
+        $('#btn-close-redownload').prop("disabled", true);
+        $('#btn-close-redownload').addClass('disabled');
+        $('#btn-x-redownload').prop("disabled", true);
+        $('#btn-x-redownload').addClass('disabled');
+
+
+        $('#redownload-area').html(
+            '<div class="fa-4x text-center" style="text-align: center;"><i class="fas fa-sync fa-spin" ></i></div>' +
+            '<div class="text-center"><?php echo localize("MODAL_REINSTALL_LOADING"); ?></div>'
+        );
+
+
+        $.ajax({
+            url: '<?php echo QNAPDOCROOT;?>/qpkg/RoonServer/ajax/ajax.php?a=redownload',
+            success: function()
+            {
+                $('#btn-close-redownload').prop("disabled", false);
+                $('#btn-close-redownload').removeClass('disabled');
+                $('#btn-x-redownload').prop("disabled", false);
+                $('#btn-x-redownload').removeClass('disabled');
+
+                $('#redownload-area').html(
+                    '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
+                    '<div class="text-center"><?php echo localize("MODAL_REINSTALL_DONE"); ?></div>'
+                );
+
+            }
+        });
+    });
+</script>
+
+</html>

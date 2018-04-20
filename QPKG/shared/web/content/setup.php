@@ -97,15 +97,23 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
             });
 
             var dbexist = <?php if (isset($dblocation)) {echo "true";} else {echo "false";} ?>;
-            console.log(dbexist);
 
-            if (dbexist) {
+            console.log('New Path:' + newdbpath + ' --- Old Path: <?php echo $dblocation; ?>')
+
+            var olddbpath = '<?php echo $dblocation; ?>';
+
+
+
+            if (!dbexist) {
+                selectStorageSuccess();
+            }
+            if ( dbexist && newdbpath != olddbpath ) {
                 $('#modal-content-storage').html('<div class="modal-header">\n' +
-                                                    '<h4 class="modal-title"><?php echo localize("MODAL_SETUP_RESTART_HEADLINE") ?></h4>\n' +
+                                                    '<h4 class="modal-title"><?php echo localize("MODAL_SETUP_RESTART_HEADLINE"); ?></h4>\n' +
                                                     '<button type="button" class="close closemodal" data-dismiss="modal" aria-hidden="true">×</button>\n' +
                                                 '</div>\n' +
                                                     '<div id="modal-body modal-body-storage" class="modal-body">\n' +
-                                                        '<?php echo localize("MODAL_SETUP_RESTART_TEXT") ?>' +
+                                                        '<?php echo localize("MODAL_SETUP_RESTART_TEXT"); ?>' +
                                                         '<a id="restartRoonServer" href="#" onclick="restart_roonserver()">\n' +
                                                             '<div class="fa-4x text-center" style="text-align: center;">\n' +
                                                                 '<span class="fa-layers fa-fw">\n' +
@@ -114,21 +122,43 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                                                                 '</span>\n' +
                                                             '</div>\n' +
                                                             '<div class="text-center">\n' +
-                                                                '<?php echo localize("MODAL_SETUP_RESTART_ROONSERVER") ?>\n' +
+                                                                '<?php echo localize("MODAL_SETUP_RESTART_ROONSERVER"); ?>\n' +
                                                             '</div>\n' +
                                                         '</a>\n' +
                                                     '</div>\n');
-
-
             }
             else
             {
-                selectStorageSuccess();
+                $('#modal-content-storage').html('<div class="modal-header">\n' +
+                    '<h4 class="modal-title"><?php echo localize("MODAL_SETUP_RESTART_SAME_PATH"); ?></h4>\n' +
+                    '<button type="button" class="close closemodal" data-dismiss="modal" aria-hidden="true">×</button>\n' +
+                    '</div>\n' +
+                    '<div id="modal-body modal-body-storage" class="modal-body">\n' +
+                    '<?php echo localize("MODAL_SETUP_RESTART_SAME_PATH_TEXT"); ?>' +
+                    '<a id="restartRoonServer" href="#" class="closemodal" onclick="close_modal_pageReload()" data-dismiss="modal">\n' +
+                    '<div class="fa-4x text-center" style="text-align: center;">\n' +
+                    '<span class="fa-layers fa-fw">\n' +
+                    '<i class="fas fa-exclamation-circle faa-shake animated"></i>\n' +
+                    '</span>\n' +
+                    '</div>\n' +
+                    '<div class="text-center">\n' +
+                    '<?php echo localize("BTN_CLOSE"); ?>\n' +
+                    '</div>\n' +
+                    '</a>\n' +
+                    '</div>\n');
+                //selectStorageSuccess();
             }
 
             /// Check if dblocation has changed and display a restart button.
 
         }
+
+        function close_modal_pageReload () {
+            setTimeout(function () {
+                location.reload();
+            }, 500);
+        }
+
         function restart_roonserver() {
             $.ajax({
                 url: '<?php echo QNAPDOCROOT;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
@@ -165,7 +195,7 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                     <span class="input-group-btn">
                         <span class="form form-control"
                               style="background: #F5F5F5; border-radius: 0.25em 0 0 0.25em !important;"
-                              readonly><?php echo localize("MODAL_SETUP_DB_LOCATION") ?></span>
+                              readonly><?php echo localize("MODAL_SETUP_DB_LOCATION"); ?></span>
                         </span>
                 <input id="dblocform" type="text" class="form-control" style="background: #ffffff;" value="<?php
                 if (!is_null($dblocation)) {
@@ -176,7 +206,7 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                 <span class="input-group-btn">
                         <button id="btn_save" class="btn btn-secondary disabled" onclick="db_save_button()"
                                 disabled="disabled" formmethod="post" type="submit"
-                                style="background: #007bff;"><?php echo localize("BTN_SAVE") ?>
+                                style="background: #007bff;"><?php echo localize("BTN_SAVE"); ?>
 
                         </button>
                     </span>

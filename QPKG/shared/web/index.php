@@ -18,16 +18,14 @@ include("__functions.php");
     <script src="assets/js/jquery-2.1.3.js"></script>
 
     <!-- popper.js asset -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
-            integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
-            crossorigin="anonymous"></script>
+    <script src="assets/js/popper.js"></script>
 
     <!-- bootstrap asset -->
-    <link href="assets/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <script src="assets/bootstrap/js/bootstrap.js"></script>
 
     <!-- gijgo asset -->
-    <script src="assets/gijgo/js/gijgo.js" type="text/javascript"></script>
+    <script src="assets/gijgo/js/gijgo.min.js" type="text/javascript"></script>
     <link href="assets/gijgo/css/gijgo.css" rel="stylesheet" type="text/css"/>
 
     <!-- Fontawesome asset -->
@@ -44,9 +42,6 @@ include("__functions.php");
 </head>
 <body>
 <!-- /.container -->
-
-<!-- Bootstrap core JavaScript
-================================================== -->
 
 <?php
 $debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
@@ -120,13 +115,6 @@ $debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
     <div id="modalblock">
         <?php include "content/modals.php"; ?>
     </div>
-
-    <!-- Placed at the end of the document so the pages load faster -->
-
-
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-
-    <!--<script src="assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>
 
 <script>

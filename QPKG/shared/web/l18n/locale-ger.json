@@ -5,7 +5,7 @@
   "NAV_MENU_DOWNLOADS": "Downloads",
   "NAV_MENU_COMMUNITY": "Community Site / Forum",
   "NAV_MENU_ROON_ON_NAS": "Info zu Roon auf NAS",
-  "NAV_MENU_TRY_ROON": "Roon testen",
+  "NAV_MENU_TRY_ROON": "Roon testen!",
 
   "BTN_CLOSE": "Schließen",
   "BTN_SAVE": "Speichern",
@@ -18,10 +18,12 @@
   "MODAL_SETUP_HEADLINE": "Wähle einen Speicherort",
   "MODAL_SETUP_DB_LOCATION": "Speicherort der Datanbank",
   "MODAL_SETUP_FORM_NO_FOLDER_SELECTED": "Kein Ordner ausgewählt",
-  "MODAL_SETUP_BTN_LOCATION_SAVED": "Speicherort gespeichert!",
+  "MODAL_SETUP_BTN_LOCATION_SAVED": "Speicherort festgelegt",
   "MODAL_SETUP_RESTART_HEADLINE": "Neustart",
   "MODAL_SETUP_RESTART_TEXT": "Die Änderungen werden beim nächsten Start von Roon Server aktiv. Sofern im angegebenen Pfad eine Roon Datenbank existiert, wird diese übernommen. Soll Roon Server jetzt neu gestartet werden?",
   "MODAL_SETUP_RESTART_ROONSERVER": "Roon Server jetzt neustarten.",
+  "MODAL_SETUP_RESTART_SAME_PATH": "Keine Änderung",
+  "MODAL_SETUP_RESTART_SAME_PATH_TEXT": "Der ausgewählte Ordner ist bereits als Speicherort festgelegt. Er wird entsprechend auch weiterhin verwendet.",
 
   "OVERVIEW_HEADLINE": "Überblick",
   "OVERVIEW_TEXT1": "Roon Server ist auf deinem QNAP installiert.",

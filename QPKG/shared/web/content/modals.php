@@ -2,14 +2,14 @@
     <div class="modal-dialog">
         <div class="modal-content" id="modal-content-storage" style="width: 600px;">
             <div class="modal-header">
-                <h4 class="modal-title"><?php echo localize("MODAL_SETUP_HEADLINE") ?></h4>
+                <h4 class="modal-title"><?php echo localize("MODAL_SETUP_HEADLINE"); ?></h4>
                 <button type="button" class="close closemodal" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
             <div id="modal-body modal-body-storage" class="modal-body">
                 <p><?php include "content/setup.php" ?></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE") ?>
+                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?>
                 </button>
             </div>
         </div>
@@ -20,14 +20,14 @@
     <div class="modal-dialog">
         <div class="modal-content" id="databasemodal" style="width: 600px;">
             <div class="modal-header">
-                <h4 class="modal-title"><?php echo localize("MODAL_ABOUT_HEADLINE") ?></h4>
+                <h4 class="modal-title"><?php echo localize("MODAL_ABOUT_HEADLINE"); ?></h4>
                 <button type="button" class="close closemodal" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
             <div id="modal-body" class="modal-body">
                 <p><?php include "content/about.php" ?></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE") ?>
+                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?>
                 </button>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 <pre><?php echo $alsatext; ?></pre>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE") ?>
+                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?>
                 </button>
             </div>
         </div>
@@ -57,7 +57,7 @@
     <div class="modal-dialog">
         <div class="modal-content" id="databasemodal" style="width: 600px;">
             <div class="modal-header">
-                <h4 class="modal-title"><?php echo localize("MODAL_REINSTALL_HEADLINE") ?></h4>
+                <h4 class="modal-title"><?php echo localize("MODAL_REINSTALL_HEADLINE"); ?></h4>
                 <button type="button" id="btn-x-redownload" class="close closemodal" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
             <div id="modal-body" class="modal-body">
@@ -76,13 +76,13 @@
                              </span>
                         </div>
                         <div class="text-center">
-                            <?php echo localize("MODAL_REINSTALL_PROCEED_TEXT") ?>
+                            <?php echo localize("MODAL_REINSTALL_PROCEED_TEXT"); ?>
                         </div>
                     </a>
                     </span>
             </div>
             <div class="modal-footer">
-                <button id="btn-close-redownload" type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE") ?>
+                <button id="btn-close-redownload" type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?>
                 </button>
             </div>
         </div>
@@ -93,12 +93,12 @@
     <div class="modal-dialog">
         <div class="modal-content" id="databasemodal" style="width: 600px;">
             <div class="modal-header">
-                <h4 class="modal-title"><?php echo localize("MODAL_LOGFILES_HEADLINE") ?></h4>
+                <h4 class="modal-title"><?php echo localize("MODAL_LOGFILES_HEADLINE"); ?></h4>
                 <button type="button" class="close closemodal" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
             <div id="modal-body" class="modal-body">
-                <p><?php echo localize("MODAL_LOGFILES_DESCRIPTION1") ?><br><br>
-                    <?php echo localize("MODAL_LOGFILES_DESCRIPTION2") ?>
+                <p><?php echo localize("MODAL_LOGFILES_DESCRIPTION1"); ?><br><br>
+                    <?php echo localize("MODAL_LOGFILES_DESCRIPTION2"); ?>
                 </p>
                 <span id="download-area">
                     <a id="downloadlogs" href="#>">
@@ -109,13 +109,13 @@
                             </span>
                         </div>
                         <div class="text-center">
-                            <?php echo localize("MODAL_LOGFILES_DOWNLOAD_BTN_TEXT") ?>
+                            <?php echo localize("MODAL_LOGFILES_DOWNLOAD_BTN_TEXT"); ?>
                         </div>
                     </a>
                     </span>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE") ?>
+                <button type="button" class="btn btn-default closemodal" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?>
                 </button>
             </div>
         </div>

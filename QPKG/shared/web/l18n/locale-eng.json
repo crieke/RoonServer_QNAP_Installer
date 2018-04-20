@@ -18,10 +18,12 @@
   "MODAL_SETUP_HEADLINE": "Select your storage location",
   "MODAL_SETUP_DB_LOCATION": "Database Location",
   "MODAL_SETUP_FORM_NO_FOLDER_SELECTED": "No folder selected",
-  "MODAL_SETUP_BTN_LOCATION_SAVED": "Location saved!",
+  "MODAL_SETUP_BTN_LOCATION_SAVED": "Storage Location set!",
   "MODAL_SETUP_RESTART_HEADLINE": "Restart Roon Server",
   "MODAL_SETUP_RESTART_TEXT": "The selected path will be used, when Roon Server is starting the next time. If a database is present at this path, it will be used. Do you want to restart Roon Server now?",
   "MODAL_SETUP_RESTART_ROONSERVER": "Restart Roon Server now.",
+  "MODAL_SETUP_RESTART_SAME_PATH": "No change",
+  "MODAL_SETUP_RESTART_SAME_PATH_TEXT": "The selected folder is already the current storage location for Roon Server. It will be used further on.",
 
   "OVERVIEW_HEADLINE": "Overview",
   "OVERVIEW_TEXT1": "Roon Server ist auf deinem QNAP installiert.",
@@ -66,8 +68,6 @@
   "DEBUG_SID": "Session ID",
   "DEBUG_QPKG_ROOT": "QPKG-Path",
   "DEBUG_QPKG_DOCROOT": "Local http-directory",
-
-
 
   "MODAL_ABOUT_HEADLINE": "About Roon Server on QNAP",
   "MODAL_ABOUT_BY": "by",

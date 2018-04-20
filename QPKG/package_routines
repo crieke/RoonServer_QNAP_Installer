@@ -103,6 +103,11 @@
 # Define any package specific operations that shall be performed when
 # the package is removed.
 ######################################################################
+
+CONF="/etc/config/qpkg.conf"
+QPKG_NAME="RoonServer"
+
+
 #PKG_PRE_REMOVE="{
 #}"
 #
@@ -120,40 +125,40 @@ fi
 # Define any package specific initialization that shall be performed
 # before the package is installed.
 ######################################################################
-#pkg_init(){
-#}
-#
-######################################################################
-# Define any package specific requirement checks that shall be
-# performed before the package is installed.
-######################################################################
-pkg_check_requirement(){
+pkg_init(){
 
-## Check shared folder
-ROON_DATABASE_DIR=`/sbin/getcfg RoonServer path -f /etc/config/smb.conf`
+# Set default Database path when updating from version 2017-10-03
+PREVERSION=$(${CMD_GETCFG} ${QPKG_NAME} Version -f ${CONF})
+if [ "$PREVERSION" == "2017-10-03" ]; then
+    if [ -d "/share/RoonServer/RoonServer" ] && [ -d "/share/RoonServer/RAATServer" ]; then
+      ${CMD_LOG_TOOL} -t 0 -a "[RoonServer] Storage location of previously installed Roon Server database has been set automatically."
+      ${CMD_SETCFG} ${QPKG_NAME} DB_Path "/share/RoonServer" -f ${CONF}
 
-if [[ $ROON_DATABASE_DIR == "" ]]; then
-   err_log "\"RoonServer\" shared folder does not exist. Please create it before installing Roon Server."
+    fi
 fi
 
 }
 #
 ######################################################################
+# Define any package specific requirement checks that shall be
+# performed before the package is installed.
+######################################################################
+#pkg_check_requirement(){
+#}
+#
+######################################################################
 # Define any package specific operations that shall be performed when
 # the package is installed.
 ######################################################################
-CONF=/etc/config/qpkg.conf
-QPKG_NAME="RoonServer"
 
+## RoonServer Download
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 
-BINARIES_URL="${ROON_PKG_URL}"
-
-if [[ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]]; then
+if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
     CUSTOM_INSTALL_URL=`"${CMD_CAT}" /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
-    if [[ ${CUSTOM_INSTALL_URL:0:4} == "http" ]]  && [[ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]]; then
-        BINARIES_URL="${CUSTOM_INSTALL_URL}"
+    if [ ${CUSTOM_INSTALL_URL:0:4} == "http" ]  && [ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]; then
+        ROON_PKG_URL="${CUSTOM_INSTALL_URL}"
     fi
 fi
 
@@ -161,7 +166,7 @@ fi
 #}
 
 pkg_install(){
-    "${CMD_WGET}" "${BINARIES_URL}"
+    "${CMD_WGET}" "${ROON_PKG_URL}"
     R=$?
     if [ $R -eq 0 ]; then
         "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"

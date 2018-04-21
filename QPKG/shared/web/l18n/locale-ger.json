@@ -68,6 +68,7 @@
   "DEBUG_SID": "Session ID",
   "DEBUG_QPKG_ROOT": "QPKG-Pfad",
   "DEBUG_QPKG_DOCROOT": "Lokales http-Verzeichnis",
+  "DEBUG_LANGUAGE": "Sprache",
 
   "MODAL_ABOUT_HEADLINE": "Über Roon Server auf QNAP",
   "MODAL_ABOUT_BY": "von",

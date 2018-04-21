@@ -26,8 +26,8 @@
   "MODAL_SETUP_RESTART_SAME_PATH_TEXT": "The selected folder is already the current storage location for Roon Server. It will be used further on.",
 
   "OVERVIEW_HEADLINE": "Overview",
-  "OVERVIEW_TEXT1": "Roon Server ist auf deinem QNAP installiert.",
-  "OVERVIEW_TEXT2": "Verbinde dich nun mit einem Roon-fähigem Netzwerkgerät mit deinem Core.",
+  "OVERVIEW_TEXT1": "Roon Server is installed succesfully on your QNAP.",
+  "OVERVIEW_TEXT2": "You can connect to your Core with a Roon capable device over network.",
   "OVERVIEW_ROONSERVER_PANEL_HEADLINE": "Roon Server",
   "OVERVIEW_ROONSERVER_PANEL_STATUS": "Status",
   "OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING": "Running",

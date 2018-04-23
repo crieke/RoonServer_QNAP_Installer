@@ -224,15 +224,12 @@ error_reporting(E_ALL);
             echo "false";
         } ?>;
 
-        console.log('New Path:' + newdbpath + ' --- Old Path: <?php echo $dblocation; ?>')
-
-        var olddbpath = '<?php echo $dblocation; ?>';
-
+        var olddbpath = <?PHP echo (!empty($dblocation) ? json_encode($dblocation) : '""'); ?>;
 
         if (!dbexist) {
             selectStorageSuccess();
         }
-        if (dbexist && newdbpath != olddbpath) {
+        else if (newdbpath != olddbpath) {
             $('#modal-content-storage').html('<div class="modal-header">\n' +
                 '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_HEADLINE")); ?></h4>\n' +
                 '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +

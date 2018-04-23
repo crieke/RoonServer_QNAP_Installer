@@ -36,6 +36,7 @@ function get_web_page($url)
     $header['errmsg'] = $errmsg;
     $header['content'] = $content;
     return $header;
+    unset($options);
 }
 
 function getTreeRoot($strSessionID)
@@ -49,9 +50,9 @@ function getTreeRoot($strSessionID)
     //echo "<pre>";
     foreach ($arrShareTree as $arrTemp) {
         if (
-            substr($arrTemp[''], 0, 1) !== "@" &&
-            substr($arrTemp[''], 0, 1) !== "." &&
-            substr($arrTemp[''], 0, 1) !== ".."
+            substr($arrTemp['text'], 0, 1) != "@" &&
+            substr($arrTemp['text'], 0, 1) != "." &&
+            substr($arrTemp['text'], 0, 1) != ".."
         ) {
             // Set folder icon and check for external devices
             switch ($arrTemp['iconCls']) {
@@ -182,7 +183,7 @@ function localize($phrase)
     }
 }
 
-function isRunning($pidfile, $option)
+function isRunning($pidfile, $option = null)
 {
     if (file_exists($pidfile)) {
         $pidfilecontent = file($pidfile, FILE_IGNORE_NEW_LINES);
@@ -247,23 +248,20 @@ function acardsNice()
 
 function downloadLogs($strSessionID, $dblocation)
 {
-    $dblength = strlen($dblocation);
+    $dbLength = strlen($dblocation);
     $folders = array($dblocation . '/RoonServer/Logs', $dblocation . '/RAATServer/Logs');
 
-    $timestamp = new DateTime();
-    $nice_timestamp = $timestamp->format('Ymd-His');
-
-
-    $urlsnippet = "";
+    $urlSnippet = "";
     $count = 0;
 
     foreach ($folders as $path) {
-        $path = substr($path, $dblength+1);
-        $urlsnippet = $urlsnippet . '&source_file=' . $path;
+        $path = substr($path, $dbLength+1);
+        $urlSnippet = $urlSnippet . '&source_file=' . $path;
         $count++;
 
     }
-    $url = QNAPDOCROOT . '/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlsnippet . '&source_total=' . $count;
+    $url = QNAPDOCROOT . '/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlSnippet . '&source_total=' . $count;
+    echo $url;
     return $url;
 }
 

@@ -1,6 +1,10 @@
 <?php
-include("__include.php");
-include("__functions.php");
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+define("WEBDIR", __DIR__);
+include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
+include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 ?>
 
 <!DOCTYPE html>
@@ -18,7 +22,7 @@ include("__functions.php");
     <script src="assets/js/jquery-2.1.3.js"></script>
 
     <!-- popper.js asset -->
-    <script src="assets/js/popper.js"></script>
+    <script src="assets/js/popper.min.js"></script>
 
     <!-- bootstrap asset -->
     <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
@@ -43,25 +47,27 @@ include("__functions.php");
 <body>
 <!-- /.container -->
 
-<?php
-$debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
-?>
 <div class="fullcontainer">
 
 
     <?php
-
-    if ($debug == 1) {
-        echo localize("DEBUG_ARCH") . ': ' . php_uname('m') . '<br>';
-        echo localize("DEBUG_DATABASE") . ': ' . $dblocation . '<br>';
-        echo localize("DEBUG_SID") . ': ' . $_COOKIE['NAS_SID'] . '<br>';
-        echo localize("DEBUG_QPKG_ROOT") . ': ' . QPKGINSTALLPATH . "<br>";
-        if (file_exists(QPKGINSTALLPATH . '/RoonServer.pid')) {
-            $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
-            echo "RoonServer PID: " . $RoonServerPID  . '<br>';
+    if (!empty($_GET['debug'])) {
+        $debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
+        if ($debug == 1) {
+            echo localize("DEBUG_ARCH") . ': ' . php_uname('m') . '<br>';
+            echo localize("DEBUG_DATABASE") . ': ' . $dblocation . '<br>';
+            echo localize("DEBUG_SID") . ': ' . $_COOKIE['NAS_SID'] . '<br>';
+            echo localize("DEBUG_QPKG_ROOT") . ': ' . QPKGINSTALLPATH . "<br>";
+            echo localize("DEBUG_LANGUAGE") . ': ' . $_COOKIE['nas_lang'] . "<br>";
+            if (file_exists(QPKGINSTALLPATH . '/RoonServer.pid')) {
+                $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
+                echo "RoonServer PID: " . $RoonServerPID . '<br>';
+            }
+            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCROOT;
         }
-        echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCROOT;
-    } ?>
+
+    }
+    ?>
     <nav id="navigation" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
         <a class="navbar-brand" href="index.php">
             <img src="img/roonIcon.svg" style="height: 40px;"/>
@@ -87,8 +93,10 @@ $debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
                     <div class="dropdown-menu pull-right" aria-labelledby="dropdown01">
                         <a class="dropdown-item" href="https://roonlabs.com/downloads.html" target="_blank">
                             <?php echo localize("NAV_MENU_DOWNLOADS"); ?></a>
-                        <a class="dropdown-item" href="https://community.roonlabs.com" target="_blank"><?php echo localize("NAV_MENU_COMMUNITY"); ?></a>
-                        <a class="dropdown-item" href="https://kb.roonlabs.com/Roon_Server_on_NAS" target="_blank"><?php echo localize("NAV_MENU_ROON_ON_NAS"); ?></a>
+                        <a class="dropdown-item" href="https://community.roonlabs.com"
+                           target="_blank"><?php echo localize("NAV_MENU_COMMUNITY"); ?></a>
+                        <a class="dropdown-item" href="https://kb.roonlabs.com/Roon_Server_on_NAS"
+                           target="_blank"><?php echo localize("NAV_MENU_ROON_ON_NAS"); ?></a>
                         <a class="dropdown-item" href="https://roonlabs.com/pricing.html" target="_blank">
                             <?php echo localize("NAV_MENU_TRY_ROON"); ?></a>
                     </div>
@@ -104,74 +112,17 @@ $debug = filter_var($_GET['debug'], FILTER_SANITIZE_NUMBER_FLOAT);
     </nav>
 
     <div id="contentblock">
-    <?php
-    $section = "info";
-    if (!isset($dblocation)) {
-        $section = "main";
-    }
+        <?php
+        $section = "info";
+        if (!isset($dblocation)) {
+            $section = "main";
+        }
 
-    include "content/{$section}.php"; ?>
+        include "content/{$section}.php"; ?>
     </div>
     <div id="modalblock">
-        <?php include "content/modals.php"; ?>
+        <?php include 'modals.php'; ?>
     </div>
 </body>
-
-<script>
-    $('.closemodal').click(function () {
-        setTimeout(function () {
-            location.reload();
-        }, 500);
-    });
-
-    $('#downloadlogs').click(function () {
-        var strUrl = '<?php echo QNAPDOCROOT;?>/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
-
-        $.ajax({
-            url: strUrl,
-            success: function(data){
-                console.log(data);
-                $.fileDownload(data);
-            }
-        });
-
-        $('#download-area').html(
-            '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
-            '<div class="text-center"><?php echo localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER"); ?></div>'
-        );
-    });
-
-    $('#redownload').click(function () {
-
-        $('#btn-close-redownload').prop("disabled", true);
-        $('#btn-close-redownload').addClass('disabled');
-        $('#btn-x-redownload').prop("disabled", true);
-        $('#btn-x-redownload').addClass('disabled');
-
-
-        $('#redownload-area').html(
-            '<div class="fa-4x text-center" style="text-align: center;"><i class="fas fa-sync fa-spin" ></i></div>' +
-            '<div class="text-center"><?php echo localize("MODAL_REINSTALL_LOADING"); ?></div>'
-        );
-
-
-        $.ajax({
-            url: '<?php echo QNAPDOCROOT;?>/qpkg/RoonServer/ajax/ajax.php?a=redownload',
-            success: function()
-            {
-                $('#btn-close-redownload').prop("disabled", false);
-                $('#btn-close-redownload').removeClass('disabled');
-                $('#btn-x-redownload').prop("disabled", false);
-                $('#btn-x-redownload').removeClass('disabled');
-
-                $('#redownload-area').html(
-                    '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
-                    '<div class="text-center"><?php echo localize("MODAL_REINSTALL_DONE"); ?></div>'
-                );
-
-            }
-        });
-    });
-</script>
 
 </html>

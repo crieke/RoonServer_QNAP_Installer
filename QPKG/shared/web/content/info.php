@@ -2,10 +2,14 @@
 if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
     die("not logged in! ;)");
 }
-?>
-<?php
-include("../__include.php");
-include("../__functions.php");
+
+
+include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
+include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 ?>
 
 <div class="container">
@@ -13,7 +17,6 @@ include("../__functions.php");
         <h1><?php echo localize("OVERVIEW_HEADLINE"); ?></h1>
         <p class="lead"><?php echo localize("OVERVIEW_TEXT1"); ?><br>
             <?php echo localize("OVERVIEW_TEXT2"); ?></p>
-
         <div class="row">
             <div class="col-sm-6">
                 <div class="card">
@@ -47,13 +50,13 @@ include("../__functions.php");
                             <div class="progress-bar" role="progressbar" style="width: <?php echo $db_perc ?>%;"
                                  aria-valuenow="<?php echo(100 - $db_perc) ?>" aria-valuemin="0"
                                  aria-valuemax="100"></div>
-                        </div><?php echo $db_perc . '% ' . localize('OVERVIEW_ROONSERVER_PANEL_SPACE_OF') . ' ' . displayStorage($db_vol_cap) . ' ' . localize('OVERVIEW_ROONSERVER_PANEL_SPACE_USED') . '.'; ?>
+                        </div><?php echo $db_perc . '% ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_OF") . ' ' . displayStorage($db_vol_cap) . ' ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_USED") . '.'; ?>
                         </p>
                         <span data-toggle="modal" data-target="#modal-downloadlogs">
                             <a href="#"
                                class="btn btn-light btn-icon float-left"
                                data-toggle="tooltip"
-                               title="<?php echo localize('MODAL_LOGFILES_ICON_TOOLTIP'); ?>">
+                               title="<?php echo localize("MODAL_LOGFILES_ICON_TOOLTIP"); ?>">
                                 <i class="fas fa-ambulance"></i>
                             </a>
                         </span>
@@ -61,15 +64,15 @@ include("../__functions.php");
                             <a href="#"
                                class="btn btn-primary float-right"
                                data-toggle="tooltip"
-                               title="<?php echo localize('OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP'); ?>">
-                                <?php echo localize('OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION'); ?>
+                               title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP"); ?>">
+                                <?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION"); ?>
                             </a>
                         </span>
                         <span data-toggle="modal" data-target="#modal-redownload">
                             <a href="#"
                                class="btn btn-light btn-icon float-left"
                                data-toggle="tooltip"
-                               title="<?php echo localize('MODAL_REINSTALL_ICON_TOOLTIP'); ?>">
+                               title="<?php echo localize("MODAL_REINSTALL_ICON_TOOLTIP"); ?>">
                                     <i class="fas fa-box-open"></i>
                             </a>
                         </span>
@@ -95,8 +98,8 @@ include("../__functions.php");
                                class="btn btn-primary"
                                data-toggle="tooltip"
                                data-html="true"
-                               title="<?php echo localize('OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP'); ?>"">
-                                <i class="fas fa-eye"></i> <?php echo localize('OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES'); ?>
+                               title="<?php echo localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP"); ?>"">
+                                <i class="fas fa-eye"></i> <?php echo localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES"); ?>
                             </a>
                         </span>
                     </div>
@@ -105,26 +108,3 @@ include("../__functions.php");
         </div>
     </div>
 </div>
-<script>
-
-    $(function () {
-        // Enable Tooltips
-        $('[data-toggle="tooltip"]').tooltip()
-    })
-
-    $('.reinstall').click(function () {
-        $.ajax({
-            type: "POST",
-            url: "ajax/ajax.php?a=reinstall"
-        });
-    });
-
-    $('.audiolog').click(function () {
-        $.ajax({
-            type: "POST",
-            url: "ajax/ajax.php?a=audiolog"
-        });
-    });
-
-
-</script>

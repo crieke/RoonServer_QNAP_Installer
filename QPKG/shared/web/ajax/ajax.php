@@ -39,7 +39,6 @@ if ($strVarAction == 'redownload') {
 
 if ($strVarAction == 'downloadlogs') {
     $output = downloadLogs($strSessionID, $dblocation);
-    die($output);
     return $output;
 }
 
@@ -51,46 +50,4 @@ if ($strVarAction == 'startRoonServer') {
 if ($strVarAction == 'restartRoonServer') {
     $startScript = QPKGINSTALLPATH . '/RoonServer.sh restart';
     shell_exec($startScript);
-}
-
-if ($strVarAction == 'reinstallwithphp') {
-
-    //setting vars
-    $remote_file_url = 'http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2';
-    $qpkg_root = '/share/CACHEDEV1_DATA/.qpkg/RoonServer';
-    $tmp_dir = $qpkg_root . '/tmp';
-
-    echo "Creating temp<br>";
-
-    // create temp folder
-    function tempdir($path, $prefix)
-    {
-        $tempfile = tempnam($path, $prefix);
-
-        if (file_exists($tempfile)) {
-            unlink($tempfile);
-        }
-        mkdir($tempfile);
-        if (is_dir($tempfile)) {
-            return $tempfile;
-        }
-    }
-    $updateTmp = tempdir($tmp_dir, 'RS_update_');
-    echo $updateTmp;
-
-    $local_file = $updateTmp . '/RoonServer_linuxx64.tar.bz2';
-
-    $copy = copy($remote_file_url, $local_file);
-
-    if (!$copy) {
-        echo "Doh! failed to copy $file...\n";
-    } else {
-        echo "WOOT! success to copy $file...\n";
-    }
-
-    shell_exec('/bin/tar xjf ' . $local_file . ' -C ' . $tmp_dir );
-    unlink($local_file);
-    unset($local_file);
-
-
 }

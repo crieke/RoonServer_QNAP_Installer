@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-define("WEBDIR", __DIR__);
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 ?>
@@ -16,6 +12,16 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     <meta name="description" content="">
     <meta name="author" content="Christopher Rieke">
     <title>RoonServer</title>
+
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="manifest" href="icons/site.webmanifest">
+    <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#2b5797">
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="theme-color" content="#ffffff">
 
 
     <!-- jquery asset -->
@@ -38,6 +44,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     <link rel="stylesheet" href="assets/fontawesome-animated/font-awesome-animation.min.css">
 
     <script src="assets/filedownload/jquery.fileDownload.js" type="text/javascript"></script>
+    <script src="assets/snapsvg/snap.svg-min.js"></script>
 
     <!-- custom css -->
     <link rel="stylesheet" href="RoonServerQNAP.css">
@@ -63,7 +70,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
                 echo "RoonServer PID: " . $RoonServerPID . '<br>';
             }
-            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCROOT;
+            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCURL;
         }
 
     }
@@ -102,15 +109,13 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link float-right<?php if ($section == 'about') {
+                    <a id="about" class="getModal nav-link float-right<?php if ($section == 'about') {
                         echo ' active';
-                    } ?>" data-toggle="modal"
-                       data-target="#modal-about" href="#"><i class="fas fa-info-circle"></i></a>
+                    } ?>" href="#"><i class="fas fa-info-circle"></i></a>
                 </li>
             </ul>
         </div>
     </nav>
-
     <div id="contentblock">
         <?php
         $section = "info";
@@ -120,9 +125,330 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
         include "content/{$section}.php"; ?>
     </div>
-    <div id="modalblock">
-        <?php include 'modals.php'; ?>
+
+    <div id="modalSection">
+        <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" id="modal-content" style="width: 600px;">
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+</div>
+
+<script>
+
+    // Hide Modal
+    $(document).on('hidden.bs.modal', '.modal', function () {
+    	//$('#modal').modal({backdrop: 'static', keyboard: false});
+        $("#modalblock").html('');
+        $('#modalblock').load("modals.php");
+        $('#contentblock').load("content/info.php");
+
+
+    });
+
+    function downloadLogs () {
+        var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
+        $.ajax({
+            url: strUrl,
+            success: function (data) {
+                console.log("data: " + data);
+                $.fileDownload(data);
+
+                $('#download-area').html(
+                    '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
+                    '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER")); ?></div>'
+                    )
+            }
+        });
+    }
+
+    function reinstall () {
+          $('.btn-close').prop("disabled", true);
+          $('.btn-close').addClass('disabled');
+
+        $('#modal').modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $('#download-area').html(
+            '<br><div class="fa-4x text-center" style="text-align: center;"><svg id="loading" width="70" height="70"></svg></div>' +
+            '<div class="text-center"><b><?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_LOADING")); ?></b></div>'
+        );
+
+        var s = Snap("#loading");
+
+        var svgSize = 70;
+        var RoonCircle = s.circle(svgSize / 2, svgSize / 2, svgSize / 2);
+
+        var maskRect = s.paper.rect(0, 0, svgSize / 2, svgSize);
+        maskRect.attr({
+            fill: "#fff"
+        });
+        RoonCircle.attr({
+            mask: maskRect
+        });
+
+        linespacing = svgSize / 100 * 5;
+        centerpoint = svgSize / 2;
+        linew = svgSize / 100 * 5;
+        line1h = svgSize / 100 * 90;
+        line2h = svgSize / 100 * 40;
+        line3h = svgSize / 100 * 60;
+        line4h = svgSize / 100 * 22;
+        var line1 = s.rect(centerpoint + (0 * (linew + linespacing)) + linespacing, centerpoint - (line1h / 2), linew, line1h);
+        var line2 = s.rect(centerpoint + (1 * (linew + linespacing)) + linespacing, centerpoint - (line2h / 2), linew, line2h);
+        var line3 = s.rect(centerpoint + (2 * (linew + linespacing)) + linespacing, centerpoint - (line3h / 2), linew, line3h);
+        var line4 = s.rect(centerpoint + (3 * (linew + linespacing)) + linespacing, centerpoint - (line4h / 2), linew, line4h);
+
+        function cw($c_height) {
+
+            var $arr = new Array();
+            $arr['y'] = (centerpoint-($c_height / 2) / 100 * svgSize);
+            $arr['height'] = $c_height / 100 * svgSize;
+            return $arr;
+
+        }
+
+        function roonAnimate() {
+
+
+            line1.animate(
+                cw(52), 200, function () {
+                    this.animate(
+                        cw(96), 200, function () {
+                            this.animate(
+                                cw(80), 240, function () {
+                                    this.animate(
+                                        cw(86), 200, function () {
+                                            this.animate(
+                                                cw(92), 40, function () {
+                                                    this.animate(
+                                                        cw(86), 40, function () {
+                                                            this.animate(
+                                                                {height: svgSize / 100 * 90, y: svgSize / 100 * 5}, 40
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    )
+                }
+            );
+
+            line2.animate(
+                cw(76), 280, function () {
+                    this.animate(
+                        cw(30), 200, function () {
+                            this.animate(
+                                cw(50), 240, function () {
+                                    this.animate(
+                                        cw(55), 120, function () {
+                                            this.animate(
+                                                cw(57), 40, function () {
+                                                    this.animate(
+                                                        cw(40), 40, function () {
+                                                            this.animate(
+                                                                {height: svgSize / 100 * 60, y: svgSize / 100 * 20}, 40
+                                                            )
+                                                        }
+                                                    )
+                                                })
+                                        })
+                                })
+                        })
+                });
+
+            line3.animate(
+                cw(63), 120, function () { // 3 frames
+                    this.animate(
+                        cw(30), 240, function () { // 6 frames
+                            this.animate(
+                                cw(70), 200, function () { //5 frames
+                                    this.animate(
+                                        cw(54), 240, function () { // 6 frames
+                                            this.animate(
+                                                cw(56), 40, function () { //1 frame
+                                                    this.animate(
+                                                        cw(42), 40, function () { // 1 frame
+                                                            this.animate(
+                                                                cw(58), 40), function () {
+                                                                this.animate(
+                                                                    {height: svgSize / 100 * 22, y: svgSize / 100 * 56}, 40
+                                                                )
+                                                            }
+                                                        })
+                                                })
+                                        })
+                                })
+                        })
+                });
+
+            line4.animate(
+                cw(14), 200, function () {
+                    this.animate(
+                        cw(26), 200, function () {
+                            this.animate(
+                                cw(8), 240, function () {
+                                    this.animate(
+                                        cw(20), 200, function () {
+                                            this.animate(
+                                                cw(62), 40, function () {
+                                                    this.animate(
+                                                        cw(24), 40, function () {
+                                                            this.animate(
+                                                                {height: svgSize / 100 * 40, y: svgSize / 100 * 30}, 40
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    )
+                }
+            );
+
+
+        }
+
+        roonAnimate();
+        setInterval(roonAnimate, 1000);
+
+        $.ajax({
+            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=redownload',
+            success: function () {
+                 $('.btn-close').prop("disabled", false);
+                 $('.btn-close').removeClass('disabled');
+                 $('#modal').modal({backdrop: 'static', keyboard: true});
+
+                $('#download-area').html(
+                    '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
+                    '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?></div>'
+                );
+
+            }
+        });
+    };
+
+
+	// Enable Tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    $('.reinstall').click(function () {
+        $.ajax({
+            type: "POST",
+            url: "ajax/ajax.php?a=reinstall"
+        });
+    });
+
+    // check if selection is valid and enable/disable button
+
+
+    function db_save_button() {
+        var path = newdbpath;
+        var action = 'updateformfield';
+        var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
+
+        $.ajax({
+            url: strUrl,
+            dataType: 'json'
+        });
+
+        var dbexist = <?php if (isset($dblocation)) {
+            echo "true";
+        } else {
+            echo "false";
+        } ?>;
+
+        if (!dbexist) {
+            selectStorageSuccess();
+        }
+        else if (newdbpath != currentPath) {
+            $('#modal-content').html('<div class="modal-header">\n' +
+                '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_HEADLINE")); ?></h4>\n' +
+                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +
+                '</div>\n' +
+                '<div id="modal-body modal-body-storage" class="modal-body">\n' +
+                '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_TEXT")); ?>' +
+                '<a id="restartRoonServer" href="#" onclick="restartRoonServer()">\n' +
+                '<div class="fa-4x text-center" style="text-align: center;">\n' +
+
+                '<span class="fa-layers fa-fw">\n' +
+                '<i class="fas fa-circle"></i>\n' +
+                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>\n' +
+                '</span>\n' +
+                '</div>\n' +
+                '<div class="text-center">\n' +
+                '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_ROONSERVER")); ?>\n' +
+                '</div>\n' +
+                '</a>\n' +
+                '</div>\n');
+        }
+        else {
+            $('#modal-content').html('<div class="modal-header">\n' +
+                '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH")); ?></h4>\n' +
+                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +
+                '</div>\n' +
+                '<div id="modal-body modal-body-storage" class="modal-body">\n' +
+                '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH_TEXT")); ?>' +
+                '<a id="restartRoonServer" href="#" data-dismiss="modal">\n' +
+                '<div class="fa-4x text-center" style="text-align: center;">\n' +
+                '<span class="fa-layers fa-fw">\n' +
+                '<i class="fas fa-exclamation-circle faa-shake animated"></i>\n' +
+                '</span>\n' +
+                '</div>\n' +
+                '<div class="text-center">\n' +
+                '<?php echo str_replace("'", "\'", localize("BTN_CLOSE")); ?>\n' +
+                '</div>\n' +
+                '</a>\n' +
+                '</div>\n');
+        }
+
+        /// Check if dblocation has changed and display a restart button.
+
+    }
+
+
+
+
+    function selectStorageSuccess() {
+        var checkani = "<svg class=\"checkmark\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 52 52\"><circle class=\"checkmark__circle\" cx=\"26\" cy=\"26\" r=\"25\" fill=\"none\"/><path class=\"checkmark__check\" fill=\"none\" d=\"M14.1 27.2l7.1 7.2 16.7-16.8\"/></svg>";
+
+        $('#modal-content').html(checkani + '<div class="roon-template"><h4><?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?></h4></div>');
+
+        $.ajax({
+            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=startRoonServer'
+        });
+
+
+
+        //
+        // QPKG Control: Restart RoonServer
+        //
+    }
+    function restartRoonServer() {
+            $.ajax({
+                url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
+            });
+            selectStorageSuccess();
+
+        }
+</script>
+
 </body>
 
 </html>

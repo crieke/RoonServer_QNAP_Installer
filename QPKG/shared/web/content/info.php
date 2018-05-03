@@ -52,7 +52,9 @@ error_reporting(E_ALL);
                                  aria-valuemax="100"></div>
                         </div><?php echo $db_perc . '% ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_OF") . ' ' . displayStorage($db_vol_cap) . ' ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_USED") . '.'; ?>
                         </p>
-                        <span data-toggle="modal" data-target="#modal-downloadlogs">
+
+
+                        <span id="log" class="getModal">
                             <a href="#"
                                class="btn btn-light btn-icon float-left"
                                data-toggle="tooltip"
@@ -60,7 +62,7 @@ error_reporting(E_ALL);
                                 <i class="fas fa-ambulance"></i>
                             </a>
                         </span>
-                        <span data-toggle="modal" data-target="#modal-storage">
+                        <span id="setStorage" class="getModal">
                             <a href="#"
                                class="btn btn-primary float-right"
                                data-toggle="tooltip"
@@ -68,7 +70,7 @@ error_reporting(E_ALL);
                                 <?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION"); ?>
                             </a>
                         </span>
-                        <span data-toggle="modal" data-target="#modal-redownload">
+                        <span id="reinstall" class="getModal">
                             <a href="#"
                                class="btn btn-light btn-icon float-left"
                                data-toggle="tooltip"
@@ -93,7 +95,7 @@ error_reporting(E_ALL);
                         </ul>
 
                         </p>
-                        <span data-toggle="modal" data-target="#modal-alsa">
+                        <span id="alsa" class="getModal">
                             <a href="#"
                                class="btn btn-primary"
                                data-toggle="tooltip"
@@ -108,3 +110,28 @@ error_reporting(E_ALL);
         </div>
     </div>
 </div>
+
+<script>
+        // Action when button for Modal is clicked
+        $('.getModal').on('click', function(e) {
+
+            // Check which button fired
+            e.preventDefault();
+            var modalContent = $(this).attr('id');
+
+            $('#modal-content').load("modals.php?s=" + modalContent);
+            //$('#modal-body').load("modals.php?s=" + modalContent + "&r=DESCRIPTION");
+
+            // Request Modal with content
+
+
+            //Open Modal
+            $('#modal').modal({
+                backdrop: true,
+                keyboard: true
+            });
+
+            $('#modal').modal('show');
+            return false;
+         });
+</script>

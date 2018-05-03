@@ -27,7 +27,7 @@
 
   "OVERVIEW_HEADLINE": "Überblick",
   "OVERVIEW_TEXT1": "Roon Server ist auf deinem QNAP installiert.",
-  "OVERVIEW_TEXT2": "Verbinde dich nun mit einem Roon-fähigem Netzwerkgerät mit deinem Core.",
+  "OVERVIEW_TEXT2": "Verbinde dich nun über ein Roon-fähiges Netzwerkgerät mit deinem Core.",
   "OVERVIEW_ROONSERVER_PANEL_HEADLINE": "Roon Server",
   "OVERVIEW_ROONSERVER_PANEL_STATUS": "Status",
   "OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING": "Wird ausgeführt",
@@ -72,8 +72,7 @@
 
   "MODAL_ABOUT_HEADLINE": "Über Roon Server auf QNAP",
   "MODAL_ABOUT_BY": "von",
-  "MODAL_ABOUT_THANKS": "Danke an alle Github-Contributer",
-  "MODAL_ABOUT_SPECIALTHANKS": "Besonderen Dank an",
+  "MODAL_ABOUT_THANKS": "Danke an alle Unterstützer und mitwirkenden Personen",
   "MODAL_ABOUT_LICENSE": "Lizenz",
   "MODAL_ABOUT_ASSETS": "Diese Weboberfläche nutzt folgende Frameworks/Bibliotheken:"
 }

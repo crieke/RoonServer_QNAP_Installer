@@ -3,11 +3,6 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
     die("not logged in! ;)");
 }
 
-$qpkg_conf = parse_ini_file('/etc/config/qpkg.conf', 1, INI_SCANNER_RAW);
-$roon_qpkg_conf = $qpkg_conf['RoonServer'];
-$qpkgpath = $roon_qpkg_conf['Install_Path'];
-
-
 function get_web_page($url)
 {
     $options = array(
@@ -41,7 +36,7 @@ function get_web_page($url)
 
 function getTreeRoot($strSessionID)
 {
-    $strUrl = QNAPDOCROOT . '/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=share_root';
+    $strUrl = QNAPDOCURL . '/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=share_root';
     $arrData = get_web_page($strUrl);
     $arrShareTree = json_decode($arrData['content'], 1);
     $arrShareTreeData = array();
@@ -262,7 +257,7 @@ function downloadLogs($strSessionID, $dblocation)
     }
     $url = QNAPDOCROOT . '/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlSnippet . '&source_total=' . $count;
     echo $url;
-    return $url;
+    //return $url;
 }
 
 function displayStorage($diskspace){

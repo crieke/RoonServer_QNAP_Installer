@@ -6,44 +6,44 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
 
 
 <?php
-        $ContributorsManual = array(
-            array(
-                'login' => 'RoonLabs',
-                'avatar_url' => 'https://avatars2.githubusercontent.com/u/15744118?v=4',
-                'html_url' => 'https://github.com/RoonLabs',
-                'description' => 'Thanks for the continuous support and help.'
-            ),
-            array(
-                'login' => 'QNAP',
-                'avatar_url' => 'https://www.qnap.com/i/images/q_logo.jpg',
-                'html_url' => 'https://www.qnap.com',
-                'description' => ''
-            ),
-            array(
-                'login' => 'marianoglas',
-                'avatar_url' => 'https://avatars0.githubusercontent.com/u/5198307?v=4',
-                'html_url' => 'https://github.com/marianoglas',
-                'description' => 'Thanks for your help with the API and some AJAX.'
-            ),
-            array(
-                'login' => 'Ignaas Vanden Poel',
-                'description' => 'Dutch translation'
-            ),
-            array(
-                'login' => 'Albin Johansson',
-                'html_url' => 'http://www.albinjo.com',
-                'description' => 'Swedish translation'
+$ContributorsManual = array(
+    array(
+        'login' => 'RoonLabs',
+        'avatar_url' => 'https://avatars2.githubusercontent.com/u/15744118?v=4',
+        'html_url' => 'https://github.com/RoonLabs',
+        'description' => 'Thanks for the continuous support and help.'
+    ),
+    array(
+        'login' => 'QNAP',
+        'avatar_url' => 'https://www.qnap.com/i/images/q_logo.jpg',
+        'html_url' => 'https://www.qnap.com',
+        'description' => ''
+    ),
+    array(
+        'login' => 'marianoglas',
+        'avatar_url' => 'https://avatars0.githubusercontent.com/u/5198307?v=4',
+        'html_url' => 'https://github.com/marianoglas',
+        'description' => 'Thanks for your help with the API and some AJAX.'
+    ),
+    array(
+        'login' => 'Ignaas Vanden Poel',
+        'description' => 'Dutch translation'
+    ),
+    array(
+        'login' => 'Albin Johansson',
+        'html_url' => 'http://www.albinjo.com',
+        'description' => 'Swedish translation'
 
-            ),
-            array(
-                'login' => 'Estefania San Lorenzo'
-            ),
-            array(
-                'login' => 'Soraya Mentiply',
-                'description' => 'French translation'
-            )
-        );
-        ?>
+    ),
+    array(
+        'login' => 'Estefania San Lorenzo'
+    ),
+    array(
+        'login' => 'Soraya Mentiply',
+        'description' => 'French translation'
+    )
+);
+?>
 
 <div class="modal-header">
     <h4 id="modal-title" class="modal-title"><?php echo localize("MODAL_ABOUT_HEADLINE"); ?></h4>
@@ -57,6 +57,60 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
         </div>
         Copyright 2016-2018 Christopher Rieke<br><br>
 
+        <div style="border: 5px; padding: 10px; text-align: center; border-style: dotted;">
+            <?php echo localize("MODAL_ABOUT_COFFEE"); ?>
+            <div style="text-align: center; font-size: 50px;">
+                <i class="fas fa-coffee fa-fw" data-fa-transform="shrink-8" data-fa-mask="fas fa-circle"></i>
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+            </div>
+            <div style="text-align: center;">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="hosted_button_id" value="27D9FUZPC3JNC">
+                <input type="image"
+                       src="https://www.paypalobjects.com/<?php echo localize("SYSTEM_LOCALE"); ?>/i/btn/btn_donate_SM.gif"
+                       border="0"
+                       name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1"
+                     height="1">
+                </form>
+            </div>
+        </div>
+        <br><br>
+
+
+        <div id="about-github" style="background-color: #d7d7d7; padding: 20px; text-align: center;">
+            <div>
+                <?php echo localize("MODAL_ABOUT_GITHUB"); ?><br>
+                <div style="text-align: center; font-size: 50px;">
+                    <i class="fab fa-github-alt"></i>
+                </div>
+            </div>
+            <div class="row" style="justify-content: center; align-items: center; text-align: center;">
+                <button id="btnFA" class="btn btn-primary"
+                        onclick="window.open('https://github.com/crieke/RoonServer_QNAP_Installer')">
+                    <i class="fab fa-github"></i>
+                    <?php echo localize("MODAL_ABOUT_BTN_GITHUB"); ?><br>
+                </button>
+            </div>
+        </div>
+        <!--
+        <div id="about-github" style="background-color: #d7d7d7;">
+            <div class="row text-center" style="justify-content: center; align-items: center;text-align: center;">
+                <?php //echo localize("MODAL_ABOUT_GITHUB"); ?><br>
+                <div style="text-align: center; font-size: 50px;">
+                    <i class="fab fa-github-alt"></i>
+                </div>
+            </div>
+            <div class="row" style="justify-content: center; align-items: center; text-align: center;">
+                <button id="btnFA" class="btn btn-primary text-center"
+                        onclick="window.open('https://github.com/crieke/RoonServer_QNAP_Installer')">
+                    <i class="fab fa-github"></i>
+                    <?php //echo localize("MODAL_ABOUT_BTN_GITHUB"); ?><br>
+                </button>
+            </div>
+        </div>
+
+-->
         <br><br>
 
         <h4><?php echo localize("MODAL_ABOUT_THANKS"); ?>:</h4><br>
@@ -84,22 +138,34 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                         var contr = obj.contributions;
                         var descrText = obj.description;
 
-                        if ( aviurl == undefined ){
+                        if (aviurl == undefined) {
                             aviurl = 'assets/identicon.php?string=' + username;
                         }
 
                         outhtml = outhtml + '<li id="contriblist" class="media contriblist">';
                         outhtml = outhtml + '<span class="pull-left">';
-                        if ( userprofile != undefined ) {outhtml = outhtml + '<a href="' + userprofile + '" target="_blank">';}
+                        if (userprofile != undefined) {
+                            outhtml = outhtml + '<a href="' + userprofile + '" target="_blank">';
+                        }
                         outhtml = outhtml + '<img class="media-object d-block" style="max-height: 80px" src="' + aviurl + '" alt="...">';
-                        if ( userprofile != undefined ) {outhtml = outhtml + '</a>';}
+                        if (userprofile != undefined) {
+                            outhtml = outhtml + '</a>';
+                        }
                         outhtml = outhtml + '</span>';
                         outhtml = outhtml + '<div class="media-body" style="padding-left: 15px; display:inline;">';
-                        if ( userprofile != undefined ) {outhtml = outhtml + '<a href="' + userprofile + '" target="_blank">';}
+                        if (userprofile != undefined) {
+                            outhtml = outhtml + '<a href="' + userprofile + '" target="_blank">';
+                        }
                         outhtml = outhtml + '<h4 class="media-heading">' + username + '</h4>';
-                        if ( userprofile != undefined ) {outhtml = outhtml + '</a>';}
-                        if ( contr != undefined ) {outhtml = outhtml + '<div  style="ghicon"><i class="fab fa-github"></i>-Contributions: ' + contr + '</div>';}
-                        if ( descrText != undefined ) {outhtml = outhtml + '<p> ' + descrText + '</p>';}
+                        if (userprofile != undefined) {
+                            outhtml = outhtml + '</a>';
+                        }
+                        if (contr != undefined) {
+                            outhtml = outhtml + '<div  style="ghicon"><i class="fab fa-github"></i>-Contributions: ' + contr + '</div>';
+                        }
+                        if (descrText != undefined) {
+                            outhtml = outhtml + '<p> ' + descrText + '</p>';
+                        }
                         outhtml = outhtml + '</div>';
                         outhtml = outhtml + '</li>';
                     }); // end each
@@ -149,7 +215,7 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
             function cw($c_height) {
 
                 var $arr = new Array();
-                $arr['y'] = (centerpoint-($c_height / 2) / 100 * svgSize);
+                $arr['y'] = (centerpoint - ($c_height / 2) / 100 * svgSize);
                 $arr['height'] = $c_height / 100 * svgSize;
                 return $arr;
 
@@ -169,7 +235,10 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                                                         this.animate(
                                                             cw(86), 40, function () {
                                                                 this.animate(
-                                                                    {height: svgSize / 100 * 90, y: svgSize / 100 * 5}, 40
+                                                                    {
+                                                                        height: svgSize / 100 * 90,
+                                                                        y: svgSize / 100 * 5
+                                                                    }, 40
                                                                 )
                                                             }
                                                         )
@@ -197,7 +266,10 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                                                         this.animate(
                                                             cw(40), 40, function () {
                                                                 this.animate(
-                                                                    {height: svgSize / 100 * 60, y: svgSize / 100 * 20}, 40
+                                                                    {
+                                                                        height: svgSize / 100 * 60,
+                                                                        y: svgSize / 100 * 20
+                                                                    }, 40
                                                                 )
                                                             }
                                                         )
@@ -222,7 +294,10 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                                                                 this.animate(
                                                                     cw(58), 40), function () {
                                                                     this.animate(
-                                                                        {height: svgSize / 100 * 22, y: svgSize / 100 * 56}, 40
+                                                                        {
+                                                                            height: svgSize / 100 * 22,
+                                                                            y: svgSize / 100 * 56
+                                                                        }, 40
                                                                     )
                                                                 }
                                                             })
@@ -245,7 +320,10 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
                                                         this.animate(
                                                             cw(24), 40, function () {
                                                                 this.animate(
-                                                                    {height: svgSize / 100 * 40, y: svgSize / 100 * 30}, 40
+                                                                    {
+                                                                        height: svgSize / 100 * 40,
+                                                                        y: svgSize / 100 * 30
+                                                                    }, 40
                                                                 )
                                                             }
                                                         )
@@ -262,6 +340,7 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
 
 
             }
+
             roonAnimate();
             setInterval(roonAnimate, 1000);
         </script>
@@ -336,4 +415,5 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
             ?>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?></button>
+        <button type="button" class="btn btn-outline-secondary"
+                data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?></button>

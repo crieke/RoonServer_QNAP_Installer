@@ -60,9 +60,13 @@ $ContributorsManual = array(
         <div style="border: 5px; padding: 10px; text-align: center; border-style: dotted;">
             <?php echo localize("MODAL_ABOUT_COFFEE"); ?>
             <div style="text-align: center; font-size: 50px;">
-                <i class="fas fa-coffee fa-fw" data-fa-transform="shrink-8" data-fa-mask="fas fa-circle"></i>
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                  <span class="fa-layers fa-fw">
+                    <i class="fas fa-coffee" data-fa-transform="shrink-8" data-fa-mask="fas fa-circle"></i>
+                    <i class="far fa-heart" style="color: #000000" data-fa-transform="shrink-12.5w left-0.5 up-0.8"></i>
+                  </span>
             </div>
+
+            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
             <div style="text-align: center;">
                 <input type="hidden" name="cmd" value="_s-xclick">
                 <input type="hidden" name="hosted_button_id" value="27D9FUZPC3JNC">

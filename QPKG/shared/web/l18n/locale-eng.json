@@ -1,11 +1,13 @@
 {
-  "NAV_MENU_ROONSERVER": "Roon Server",
+  "SYSTEM_LOCALE": "en_US",
 
+  "NAV_MENU_ROONSERVER": "Roon Server",
   "NAV_MENU_MORE":"More",
   "NAV_MENU_DOWNLOADS": "Downloads",
   "NAV_MENU_COMMUNITY": "Community Site / Forum",
   "NAV_MENU_ROON_ON_NAS": "Roon on NAS info",
   "NAV_MENU_TRY_ROON": "Try Roon!",
+  "NAV_MENU_INFO":"Info",
 
   "BTN_CLOSE": "Close",
   "BTN_SAVE": "Save",
@@ -71,6 +73,9 @@
   "DEBUG_LANGUAGE": "Language",
 
   "MODAL_ABOUT_HEADLINE": "About Roon Server on QNAP",
+  "MODAL_ABOUT_COFFEE": "I created the NAS packages in my spare time as a fun and educational project. Sometimes it can be quite time consuming and involves costs as well. If you'd like to appreciate this effort, you could send some motivation by spending a coffee!",
+  "MODAL_ABOUT_GITHUB": "This installation routine is open source and published on github. Please feel free to send me a pull request. This could also be just a translation file for a language, that is currently not included.",
+  "MODAL_ABOUT_BTN_GITHUB": "Visit the repository on github!",
   "MODAL_ABOUT_BY": "by",
   "MODAL_ABOUT_THANKS": "Thanks to all supporters and contributors",
   "MODAL_ABOUT_LICENSE": "License",

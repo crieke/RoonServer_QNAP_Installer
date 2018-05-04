@@ -86,9 +86,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link <?php if ($section != 'about') {
-                        echo ' active';
-                    } ?>" href="index.php"><?php echo localize("NAV_MENU_ROONSERVER"); ?></a>
+                    <a class="nav-link active" href="index.php"><?php echo localize("NAV_MENU_ROONSERVER"); ?></a>
                 </li>
             </ul>
             ';
@@ -109,9 +107,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a id="about" class="getModal nav-link float-right<?php if ($section == 'about') {
-                        echo ' active';
-                    } ?>" href="#"><i class="fas fa-info-circle"></i></a>
+                    <a id="about" class="getModal nav-link float-right" href="#"><i class="fas fa-info-circle"></i> <?php echo localize('NAV_MENU_INFO'); ?></a>
                 </li>
             </ul>
         </div>

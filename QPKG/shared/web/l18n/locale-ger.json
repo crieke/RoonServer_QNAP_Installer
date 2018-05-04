@@ -1,4 +1,6 @@
 {
+  "SYSTEM_LOCALE": "de_DE",
+
   "NAV_MENU_ROONSERVER": "Roon Server",
 
   "NAV_MENU_MORE":"Mehr",
@@ -6,6 +8,7 @@
   "NAV_MENU_COMMUNITY": "Community Site / Forum",
   "NAV_MENU_ROON_ON_NAS": "Info zu Roon auf NAS",
   "NAV_MENU_TRY_ROON": "Roon testen!",
+  "NAV_MENU_INFO":"Info",
 
   "BTN_CLOSE": "Schließen",
   "BTN_SAVE": "Speichern",
@@ -72,6 +75,9 @@
 
   "MODAL_ABOUT_HEADLINE": "Über Roon Server auf QNAP",
   "MODAL_ABOUT_BY": "von",
+  "MODAL_ABOUT_COFFEE": "Ich habe die Installationen für NAS-Laufwerke in meiner Freizeit als Spaßprojekt und zum Lernen begonnen. Manchmal beansprucht es viel Zeit und verlangt einige Ausgaben. Falls du dich erkenntlich zeigen möchtest, motiviere mich doch, indem du mir einen Kaffee ausgibst.",
+  "MODAL_ABOUT_GITHUB": "This installation routine is open source and published on github. Please feel free to send me a pull request. This could also be just a translation file for a language, that is currently not included.",
+  "MODAL_ABOUT_BTN_GITHUB": "Besuche das GitHub Repository",
   "MODAL_ABOUT_THANKS": "Danke an alle Unterstützer und mitwirkenden Personen",
   "MODAL_ABOUT_LICENSE": "Lizenz",
   "MODAL_ABOUT_ASSETS": "Diese Weboberfläche nutzt folgende Frameworks/Bibliotheken:"

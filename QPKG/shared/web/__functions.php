@@ -221,9 +221,9 @@ function parseCardsLine($str)
 {
     $result = array();
     $r = explode(" - ", $str);
-    $result["name"] = substr($r[0], strpos($r[0], ']: ') +3 );
+    $result["connection"] = substr($r[0], strpos($r[0], ']: ') +3 );
     preg_match('/\[([\s\S])\w+/', $r[0], $matches, PREG_OFFSET_CAPTURE);
-    $result["id"] = str_replace("[", "", $matches[0][0]);
+    $result["name"] = $r[1];
     return $result;
 }
 
@@ -233,9 +233,9 @@ function acardsNice()
     $strOutput = "";
     foreach ($arrSCards as &$value) {
         $strSCardName = $value['name'];
-        $strSCardId = $value['id'];
+        $strSCardConnection = $value['connection'];
 
-        $strOutput = $strOutput . '<li class="list-group-item justify-content-between"><b>' . $strSCardId . '</b><br>' . $strSCardName . '</li>';
+        $strOutput = $strOutput . '<li class="list-group-item justify-content-between"><b>' . $strSCardName . '</b><br>' . $strSCardConnection . '</li>';
 
     }
     return $strOutput;

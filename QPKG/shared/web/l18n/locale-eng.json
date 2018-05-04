@@ -73,8 +73,8 @@
   "DEBUG_LANGUAGE": "Language",
 
   "MODAL_ABOUT_HEADLINE": "About Roon Server on QNAP",
-  "MODAL_ABOUT_COFFEE": "I created the NAS packages in my spare time as a fun and educational project. Sometimes it can be quite time consuming and involves costs as well. If you'd like to appreciate this effort, you could send some motivation by spending a coffee!",
-  "MODAL_ABOUT_GITHUB": "This installation routine is open source and published on github. Please feel free to send me a pull request. This could also be just a translation file for a language, that is currently not included.",
+  "MODAL_ABOUT_COFFEE": "I  create the NAS packages in my spare time as a fun and educational project. If you would like to show your appreciation for the energy and resources I spend on this, and help to motivate me further, feel free to buy me a coffee.",
+  "MODAL_ABOUT_GITHUB": "This installation routine is open source and published on GitHub. You are welcome to send me a pull request. This could also be just a translation file for a language that is currently not included.",
   "MODAL_ABOUT_BTN_GITHUB": "Visit the repository on github!",
   "MODAL_ABOUT_BY": "by",
   "MODAL_ABOUT_THANKS": "Thanks to all supporters and contributors",

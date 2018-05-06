@@ -119,17 +119,9 @@ error_reporting(E_ALL);
             e.preventDefault();
             var modalContent = $(this).attr('id');
 
-            $('#modal-content').load("modals.php?s=" + modalContent);
-            //$('#modal-body').load("modals.php?s=" + modalContent + "&r=DESCRIPTION");
+             $('#modal-content').load("modals.php?s=" + modalContent);
 
             // Request Modal with content
-
-
-            //Open Modal
-            $('#modal').modal({
-                backdrop: true,
-                keyboard: true
-            });
 
             $('#modal').modal('show');
             return false;

@@ -28,19 +28,6 @@ $ContributorsManual = array(
     array(
         'login' => 'Ignaas Vanden Poel',
         'description' => 'Dutch translation'
-    ),
-    array(
-        'login' => 'Albin Johansson',
-        'html_url' => 'http://www.albinjo.com',
-        'description' => 'Swedish translation'
-
-    ),
-    array(
-        'login' => 'Estefania San Lorenzo'
-    ),
-    array(
-        'login' => 'Soraya Mentiply',
-        'description' => 'French translation'
     )
 );
 ?>
@@ -53,9 +40,10 @@ $ContributorsManual = array(
 
 
     <div class="container">
-        <div class="roon-template">
-        </div>
-        Copyright 2016-2018 Christopher Rieke<br><br>
+        <div id="cr">
+            <img src="img/cr_logo.svg" width="70px" height="70px"><br>
+            Copyright 2016-2018 Christopher Rieke
+        </div><br><br>
 
         <div style="border: 5px; padding: 10px; text-align: center; border-style: dotted;">
             <?php echo localize("MODAL_ABOUT_COFFEE"); ?>
@@ -97,24 +85,7 @@ $ContributorsManual = array(
                 </button>
             </div>
         </div>
-        <!--
-        <div id="about-github" style="background-color: #d7d7d7;">
-            <div class="row text-center" style="justify-content: center; align-items: center;text-align: center;">
-                <?php //echo localize("MODAL_ABOUT_GITHUB"); ?><br>
-                <div style="text-align: center; font-size: 50px;">
-                    <i class="fab fa-github-alt"></i>
-                </div>
-            </div>
-            <div class="row" style="justify-content: center; align-items: center; text-align: center;">
-                <button id="btnFA" class="btn btn-primary text-center"
-                        onclick="window.open('https://github.com/crieke/RoonServer_QNAP_Installer')">
-                    <i class="fab fa-github"></i>
-                    <?php //echo localize("MODAL_ABOUT_BTN_GITHUB"); ?><br>
-                </button>
-            </div>
-        </div>
 
--->
         <br><br>
 
         <h4><?php echo localize("MODAL_ABOUT_THANKS"); ?>:</h4><br>

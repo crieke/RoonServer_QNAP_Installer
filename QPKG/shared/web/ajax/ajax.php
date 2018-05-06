@@ -19,10 +19,25 @@ $strModalContent = filter_var($_GET['c'], FILTER_SANITIZE_STRING);
 
 if ($strVarAction == 'gettree') {
     $arr = getTreeAt(urlencode($strVarTree), $strSessionID);
-    console . log($arr);
     print json_encode($arr);
     flush();
     exit();
+}
+
+if ($strVarAction == 'checkHelperScript') {
+    $running = file_exists(QPKGINSTALLPATH . '/.helperscript.lock');
+    header('Content-Type: application/json');
+    if ($running) {
+        echo json_encode(array(
+            'success' => true
+        ));
+    } else {
+        echo json_encode(array(
+            'success' => false
+        ));
+    }
+
+    return true;
 }
 
 if ($strVarAction == 'updateformfield') {
@@ -32,7 +47,7 @@ if ($strVarAction == 'updateformfield') {
 }
 
 if ($strVarAction == 'redownload') {
-    $helper_script = QPKGINSTALLPATH     . '/helper-scripts/roon-helper-actions.sh';
+    $helper_script = QPKGINSTALLPATH . '/helper-scripts/roon-helper-actions.sh';
     $output = shell_exec($helper_script . ' reinstall');
     return $output;
 }

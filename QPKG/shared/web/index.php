@@ -38,12 +38,11 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     <script src="assets/gijgo/js/gijgo.min.js" type="text/javascript"></script>
     <link href="assets/gijgo/css/gijgo.css" rel="stylesheet" type="text/css"/>
 
-    <!-- Fontawesome asset -->
+    <!-- fontawesome asset -->
     <script src="assets/fontawesome/js/fontawesome-all.min.js" type="text/javascript"></script>
     <link rel="stylesheet" href="assets/fontawesome/css/fa-svg-with-js.css">
     <link rel="stylesheet" href="assets/fontawesome-animated/font-awesome-animation.min.css">
 
-    <script src="assets/filedownload/jquery.fileDownload.js" type="text/javascript"></script>
     <script src="assets/snapsvg/snap.svg-min.js"></script>
 
     <!-- custom css -->
@@ -134,31 +133,53 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 </div>
 
 <script>
+    // "Show Modal"-action in info.php
 
     // Hide Modal
     $(document).on('hidden.bs.modal', '.modal', function () {
-    	//$('#modal').modal({backdrop: 'static', keyboard: false});
-        $("#modalblock").html('');
-        $('#modalblock').load("modals.php");
-        $('#contentblock').load("content/info.php");
+
+        var helperScriptRunning = "";
+
+        // Check and open modal again if helper script action is running.
+        $.ajax({
+            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=checkHelperScript',
+            dataType: 'json',
+            success: function (response) {
+                if (!response.success) {
+                    $("#modalblock").html('');
+                    $('#contentblock').load("content/info.php");
+                    $('#modal').modal('hide');
+                } else {
+                    $('#modal').modal('show');
+                }
+            }
+        });
+
 
 
     });
 
     function downloadLogs () {
         var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
+        var dlLink = "";
+        var linkrcvd = false;
         $.ajax({
             url: strUrl,
+            async: false,
             success: function (data) {
-                console.log("data: " + data);
-                $.fileDownload(data);
-
-                $('#download-area').html(
-                    '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
-                    '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER")); ?></div>'
-                    )
+                dlLink = data;
+                linkrcvd = true;
             }
-        });
+        })
+        if ( linkrcvd ) {
+            window.open(dlLink);
+            console.log(dlLink);
+
+            $('#download-area').html(
+                '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
+                '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER")); ?></div>'
+            )
+        }
     }
 
     function reinstall () {

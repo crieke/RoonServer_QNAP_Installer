@@ -41,8 +41,6 @@ function getTreeRoot($strSessionID)
     $arrShareTree = json_decode($arrData['content'], 1);
     $arrShareTreeData = array();
 
-
-    //echo "<pre>";
     foreach ($arrShareTree as $arrTemp) {
         if (
             substr($arrTemp['text'], 0, 1) != "@" &&
@@ -94,13 +92,11 @@ function getTreeAt($folder, $strSessionID)
 {
     $folder = str_replace('+', '%20', filter_var($folder, FILTER_SANITIZE_STRING));
     if (strlen($folder) > 3) {
-        $strUrl = QNAPDOCROOT . '/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=' . $folder;
+        $strUrl = QNAPDOCURL . '/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=' . $folder;
         $arrData = get_web_page($strUrl);
         $arrShareTree = json_decode($arrData['content'], 1);
 
-
         $arrShareTreeData = array();
-        //echo "<pre>";
 
         foreach ($arrShareTree as $arrTemp) {
             if (
@@ -161,19 +157,31 @@ function localize($phrase)
     /* Static keyword is used to ensure the file is loaded only once */
     static $translations = NULL;
     if (is_null($translations)) {
+        $default_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-eng.json';
         $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-' . strtolower($_COOKIE['nas_lang']) . '.json';
         /* If no instance of $translations has occured load the language file */
         if (!file_exists($lang_file)) {
-            $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-eng.json';
+            $lang_file = $default_file;
         }
         $lang_file_content = file_get_contents($lang_file);
         /* Load the language file as a JSON object
            and transform it into an associative array */
         $translations = json_decode($lang_file_content, true);
     }
+    // Use english as a fallback option if string does not exist in translated file
     if (is_null($translations[$phrase])) {
-        return $phrase;
+        $default_file_content = file_get_contents($default_file);
+        $default_translations = json_decode($default_file_content, true);
+
+        if (is_null($default_translations[$phrase])) {
+            // Return $phrase if also fallback option fails.
+            return $phrase;
+        } else {
+            // Return fallback language
+            return $default_translations[$phrase];
+        }
     } else {
+        // Return Translation
         return $translations[$phrase];
     }
 }
@@ -255,7 +263,7 @@ function downloadLogs($strSessionID, $dblocation)
         $count++;
 
     }
-    $url = QNAPDOCROOT . '/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlSnippet . '&source_total=' . $count;
+    $url = QNAPDOCURL . '/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlSnippet . '&source_total=' . $count;
     echo $url;
     //return $url;
 }

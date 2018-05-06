@@ -1,23 +1,18 @@
 {
   "SYSTEM_LOCALE": "de_DE",
-
   "NAV_MENU_ROONSERVER": "Roon Server",
-
   "NAV_MENU_MORE":"Mehr",
   "NAV_MENU_DOWNLOADS": "Downloads",
   "NAV_MENU_COMMUNITY": "Community Site / Forum",
   "NAV_MENU_ROON_ON_NAS": "Info zu Roon auf NAS",
   "NAV_MENU_TRY_ROON": "Roon testen!",
   "NAV_MENU_INFO":"Info",
-
   "BTN_CLOSE": "Schließen",
   "BTN_SAVE": "Speichern",
-
   "SETUP_HEADLINE": "Roon auf QNAP",
   "SETUP_BTN_CONFIGURE": "Konfigurieren",
   "SETUP_DESCRIPTION_1": "Roon Server wurde erfolgreich installiert.",
   "SETUP_DESCRIPTION_2": "Zur Nutzung muss noch ein Speicherort für die Datenbank festgelegt werden.",
-
   "MODAL_SETUP_HEADLINE": "Wähle einen Speicherort",
   "MODAL_SETUP_DB_LOCATION": "Speicherort der Datanbank",
   "MODAL_SETUP_FORM_NO_FOLDER_SELECTED": "Kein Ordner ausgewählt",
@@ -27,7 +22,6 @@
   "MODAL_SETUP_RESTART_ROONSERVER": "Roon Server jetzt neustarten.",
   "MODAL_SETUP_RESTART_SAME_PATH": "Keine Änderung",
   "MODAL_SETUP_RESTART_SAME_PATH_TEXT": "Der ausgewählte Ordner ist bereits als Speicherort festgelegt. Er wird entsprechend auch weiterhin verwendet.",
-
   "OVERVIEW_HEADLINE": "Überblick",
   "OVERVIEW_TEXT1": "Roon Server ist auf deinem QNAP installiert.",
   "OVERVIEW_TEXT2": "Verbinde dich nun über ein Roon-fähiges Netzwerkgerät mit deinem Core.",
@@ -44,11 +38,9 @@
   "OVERVIEW_ROONSERVER_PANEL_SPACE_USED": "belegt",
   "OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION": "Speicherort ändern",
   "OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP": "Speicherort ändern, an dem Roon Server seine Datenbank sichert.",
-
   "OVERVIEW_AUDIO_PANEL_HEADLINE": "Verbundene Audiogeräte",
   "OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES": "Audiogeräte",
   "OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP": "Zeigt den Inhalt der Datei '<i>/proc/asound/cards</i>'",
-
   "MODAL_REINSTALL_HEADLINE": "Roon Server erneut installieren?",
   "MODAL_REINSTALL_DESCRIPTION_1": "Möchtest du die aktuelle Version von Roon Server installieren?",
   "MODAL_REINSTALL_DESCRIPTION_2": "Bei diesem Vorgang werden die Programmdateien, durch die aktuelle Version von der Roon Labs Webseite ersetzt.",
@@ -58,27 +50,24 @@
   "MODAL_REINSTALL_ROONSERVER_WILL_STOP": "Roon Server wird für diesen Vorgang kurzzeitig beendet.",
   "MODAL_REINSTALL_PROCEED_TEXT": "Ja, mein QNAP soll die aktuelle Roon Server Version laden und installieren",
   "MODAL_REINSTALL_DONE": "Roon Server wurde durch die aktuelle Version von der Roon Labs Webseite ersetzt.",
-
   "MODAL_LOGFILES_HEADLINE": "Log-Dateien laden",
   "MODAL_LOGFILES_ICON_TOOLTIP": "Sämtliche Log-Dateien als .zip-Datei laden.",
   "MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER": "Bitte schaue in deinen Download-Ordner.",
   "MODAL_LOGFILES_DESCRIPTION1": "In einigen Fällen kann es notwendig sein, Roon Servers Log-Dateien zu laden, um sie an das Support-Team weiterzuleiten.",
   "MODAL_LOGFILES_DESCRIPTION2": "Du kannst sie hier einfach mit einem Klick als .zip-Datei laden, ohne deine Verzeichnisstruktur durchzustöbern.",
   "MODAL_LOGFILES_DOWNLOAD_BTN_TEXT": ".zip-Datei laden",
-
   "DEBUG_ARCH": "Architektur",
   "DEBUG_DATABASE": "Datenbank",
   "DEBUG_SID": "Session ID",
   "DEBUG_QPKG_ROOT": "QPKG-Pfad",
   "DEBUG_QPKG_DOCROOT": "Lokales http-Verzeichnis",
   "DEBUG_LANGUAGE": "Sprache",
-
   "MODAL_ABOUT_HEADLINE": "Über Roon Server auf QNAP",
   "MODAL_ABOUT_BY": "von",
-  "MODAL_ABOUT_COFFEE": "Ich habe die Installationen für NAS-Laufwerke in meiner Freizeit als Spaßprojekt und zum Lernen begonnen. Manchmal beansprucht es viel Zeit und verlangt einige Ausgaben. Falls du dich erkenntlich zeigen möchtest, motiviere mich doch, indem du mir einen Kaffee ausgibst.",
-  "MODAL_ABOUT_GITHUB": "This installation routine is open source and published on github. Please feel free to send me a pull request. This could also be just a translation file for a language, that is currently not included.",
+  "MODAL_ABOUT_COFFEE": "Ich arbeite an den Installationen für NAS-Laufwerke in meiner Freizeit. Es beansprucht viel Zeit und erfordert finanzielle Ausgaben. Wenn du dich dafür erkenntlich zeigen möchtest, spendiere mir doch einfach einen Kaffee.",
+  "MODAL_ABOUT_GITHUB": "Diese Installationroutine ist OpenSource und bei Github veröffentlicht. Ich freue mich über Pull-Requests jeglicher Art. Dies umfasst ebenfalls die Übersetzung in weitere Sprachen.",
   "MODAL_ABOUT_BTN_GITHUB": "Besuche das GitHub Repository",
-  "MODAL_ABOUT_THANKS": "Danke an alle Unterstützer und mitwirkenden Personen",
+  "MODAL_ABOUT_THANKS": "Danke an alle Unterstützer und Mitwirkenden",
   "MODAL_ABOUT_LICENSE": "Lizenz",
   "MODAL_ABOUT_ASSETS": "Diese Weboberfläche nutzt folgende Frameworks/Bibliotheken:"
 }

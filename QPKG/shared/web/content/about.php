@@ -11,7 +11,7 @@ $ContributorsManual = array(
         'login' => 'RoonLabs',
         'avatar_url' => 'https://avatars2.githubusercontent.com/u/15744118?v=4',
         'html_url' => 'https://github.com/RoonLabs',
-        'description' => 'Thanks for the continuous support and help.'
+        'description' => 'For the continuous support and help.'
     ),
     array(
         'login' => 'QNAP',
@@ -23,7 +23,7 @@ $ContributorsManual = array(
         'login' => 'marianoglas',
         'avatar_url' => 'https://avatars0.githubusercontent.com/u/5198307?v=4',
         'html_url' => 'https://github.com/marianoglas',
-        'description' => 'Thanks for your help with the API and some AJAX.'
+        'description' => 'For your help with the API and AJAX.'
     ),
     array(
         'login' => 'Ignaas Vanden Poel',
@@ -365,12 +365,6 @@ $ContributorsManual = array(
                     'assetName' => 'Fontawesome Animation',
                     'author' => 'Louis LIN',
                     'href' => 'https://github.com/l-lin/font-awesome-animation',
-                    'license' => 'MIT'
-                ),
-                array(
-                    'assetName' => 'jquery.fileDownload',
-                    'author' => 'John Culviner',
-                    'href' => 'https://github.com/johnculviner/jquery.fileDownload',
                     'license' => 'MIT'
                 ),
                 array(

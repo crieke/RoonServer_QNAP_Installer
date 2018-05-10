@@ -156,9 +156,9 @@ function localize($phrase)
 {
     /* Static keyword is used to ensure the file is loaded only once */
     static $translations = NULL;
+    $default_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-eng.json';
     if (is_null($translations)) {
-        $default_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-eng.json';
-        $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-' . strtolower($_COOKIE['nas_lang']) . '.json';
+        $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-' . NAS_LANG . '.json';
         /* If no instance of $translations has occured load the language file */
         if (!file_exists($lang_file)) {
             $lang_file = $default_file;

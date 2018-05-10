@@ -90,20 +90,27 @@ error_reporting(E_ALL);
                         </span>
                         <h5 class="card-title"><?php echo localize("OVERVIEW_AUDIO_PANEL_HEADLINE"); ?></h5>
                         <p class="card-text">
-                        <ul class="list-group">
-                            <?php echo acardsNice(); ?>
-                        </ul>
+                        <?php
+
+                        if (!$multimediaDisabled) {
+                            echo '<ul class="list-group">'.
+                            acardsNice() .
+                        '</ul>'.
+                                '</p>' .
+                            '<span id="alsa" class="getModal">' .
+                            '<a href="#"' .
+                               'class="btn btn-primary"' .
+                               'data-toggle="tooltip"' .
+                               'data-html="true"'.
+                               'title="' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP") . '">' .
+                                '<i class="fas fa-eye"></i> ' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES") .
+                            '</a>' .
+                        '</span>';
+                        }
+                        else
+                            { echo '<b>Home Multimedia</b> is disabled on your QNAP. To use audio devices on your NAS, you\'ll need to turn it on in the "<b>General</b>" tab of the QNAP <b>Control Panel</b>.';} ?>
 
                         </p>
-                        <span id="alsa" class="getModal">
-                            <a href="#"
-                               class="btn btn-primary"
-                               data-toggle="tooltip"
-                               data-html="true"
-                               title="<?php echo localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP"); ?>"">
-                                <i class="fas fa-eye"></i> <?php echo localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES"); ?>
-                            </a>
-                        </span>
                     </div>
                 </div>
             </div>

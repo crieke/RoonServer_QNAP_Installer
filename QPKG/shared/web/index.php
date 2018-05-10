@@ -69,7 +69,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
                 echo "RoonServer PID: " . $RoonServerPID . '<br>';
             }
-            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCURL;
+            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCURL . '<br>';
+            echo "HomeFeature disabled: " . $multimediaDisabled . '<br>';
         }
 
     }

@@ -4,11 +4,10 @@ CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
-ROON_DATABASE_DIR=`/sbin/getcfg "${QPKG_NAME}" path -f /etc/config/smb.conf`
+ROON_DATABASE_DIR=`/sbin/getcfg "${QPKG_NAME}" DB_Path -f ${CONF}`
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 lockfile="${QPKG_ROOT}/.helperscript.lock"
 CONFIRMATION="NO"
-
 
 lockfile() {
     case $1 in
@@ -37,8 +36,8 @@ lockfile() {
 installRoon() {
     echo "Checking Download-URL..."
     ## Check if alternate binary URL is set
-    if [[ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]]; then
-        CUSTOM_INSTALL_URL=`cat /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
+    if [[ -f "${ROON_DATABASE_DIR}/ROON_DEBUG_INSTALL_URL.txt" ]]; then
+        CUSTOM_INSTALL_URL=`cat "${ROON_DATABASE_DIR}/ROON_DEBUG_INSTALL_URL.txt"`
         if [[ ${CUSTOM_INSTALL_URL:0:4} == "http" ]]  && [[ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]]; then
             ROON_PKG_URL="${CUSTOM_INSTALL_URL}"
             echo "<b>Using custom download URL.</b>"
@@ -69,35 +68,6 @@ ${QPKG_ROOT}/RoonServer.sh stop keepwebalive > /dev/null 2>&1
     ${QPKG_ROOT}/RoonServer.sh start > /dev/null 2>&1
 }
 
-removedb() {
-if [ "${ROON_DATABASE_DIR}" != "" ]; then
-   echo "Database directory found at \"${ROON_DATABASE_DIR}\"."
-   RoonServerDir="${ROON_DATABASE_DIR}/RoonServer"
-   RAATServerDir="${ROON_DATABASE_DIR}/RAATServer"
-else
-   echo "Could not find Database directory! :-( "
-   rm -f "${lockfile}"
-   exit 1
-fi
-
-if [ "$1" == "--force" ]; then
-   CONFIRMATION="YES"
-else
-   echo "Do you really want to delete your RoonServer database? Enter YES followed by [ENTER]:"
-   read CONFIRMATION
-fi
-
-if [ -d "${RoonServerDir}" ] && [ -d "${RAATServerDir}" ] && [ "${CONFIRMATION}" == "YES" ]; then
-   ${QPKG_ROOT}/RoonServer.sh stop keepwebalive > /dev/null 2>&1
-   echo -e "<br><b>Deleting:</b>\n${RoonServerDir}\n${RAATServerDir}<br>"
-   echo "Deleting RoonServer database directory..."
-   rm -R "${RoonServerDir}"
-   echo "Deleting RAATServer database directory..."
-   rm -R "${RAATServerDir}"
-   ${QPKG_ROOT}/RoonServer.sh start > /dev/null 2>&1
-fi
-}
-
 case "$1" in
     reinstall)
         lockfile create
@@ -105,14 +75,8 @@ case "$1" in
         lockfile remove
         echo "<span style=\"color:#468847;\"><b>Everything done.</b></span>"
     ;;
-    removedb)
-        lockfile create
-        removedb $2
-        lockfile remove
-        echo "<span style=\"color:#468847;\"><b>Everything done.</b></span>"
-    ;;
     *)
-        echo "Usage: $0 {reinstall|removedb|restart}"
+        echo "Usage: $0 {reinstall|restart}"
         exit 1
     ;;
 esac

@@ -39,6 +39,8 @@
   "OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION": "Speicherort ändern",
   "OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP": "Speicherort ändern, an dem Roon Server seine Datenbank sichert.",
   "OVERVIEW_AUDIO_PANEL_HEADLINE": "Verbundene Audiogeräte",
+  "OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE": "Multimediafunktionen deaktiviert",
+  "OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1": "Zur Verwendung von lokalen Audiogeräten am QNAP, aktiviere Multimediafunktionen in den allgemeinen Einstellungen des QNAP ControlPanels.",
   "OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES": "Audiogeräte",
   "OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP": "Zeigt den Inhalt der Datei '<i>/proc/asound/cards</i>'",
   "MODAL_REINSTALL_HEADLINE": "Roon Server erneut installieren?",

@@ -169,11 +169,11 @@ function localize($phrase)
         $translations = json_decode($lang_file_content, true);
     }
     // Use english as a fallback option if string does not exist in translated file
-    if (is_null($translations[$phrase])) {
+    if (!isset($translations[$phrase])) {
         $default_file_content = file_get_contents($default_file);
         $default_translations = json_decode($default_file_content, true);
 
-        if (is_null($default_translations[$phrase])) {
+        if (!isset($default_translations[$phrase])) {
             // Return $phrase if also fallback option fails.
             return $phrase;
         } else {

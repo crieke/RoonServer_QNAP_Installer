@@ -88,7 +88,13 @@ error_reporting(E_ALL);
                             <i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>
                             <i class="fas fa-volume-up fa-stack-1x fa-inverse"></i>
                         </span>
-                        <h5 class="card-title"><?php echo localize("OVERVIEW_AUDIO_PANEL_HEADLINE"); ?></h5>
+                        <h5 class="card-title"><?php
+                            if (!$multimediaDisabled) {
+                                echo localize("OVERVIEW_AUDIO_PANEL_HEADLINE");
+                            } else
+                            {echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE");
+                            }
+                            ?></h5>
                         <p class="card-text">
                         <?php
 
@@ -108,8 +114,7 @@ error_reporting(E_ALL);
                         '</span>';
                         }
                         else
-                            { echo '<b>Home Multimedia</b> is disabled on your QNAP. To use audio devices on your NAS, you\'ll need to turn it on in the "<b>General</b>" tab of the QNAP <b>Control Panel</b>.';} ?>
-
+                            { echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1");} ?>
                         </p>
                     </div>
                 </div>

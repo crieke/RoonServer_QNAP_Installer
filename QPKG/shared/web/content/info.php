@@ -84,10 +84,22 @@ error_reporting(E_ALL);
             <div class="col-sm-6">
                 <div class="card">
                     <div class="card-body">
-                        <span class="fa-stack fa-2x">
-                            <i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>
-                            <i class="fas fa-volume-up fa-stack-1x fa-inverse"></i>
-                        </span>
+                       <?php if (!$multimediaDisabled) {
+                           echo '<span class="fa-stack fa-2x">'.
+                            '<i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>' .
+                            '<i class="fas fa-volume-up fa-stack-1x fa-inverse"></i>' .
+                        '</span>';
+                        }
+                        else
+                        {
+                            echo '<span class="fa-stack fa-2x">'.
+                            '<i class="fa fa-circle fa-stack-2x" style="color: #dddddd;"></i>' .
+                            '<i class="fas fa-volume-off fa-stack-1x fa-inverse" data-fa-transform="left-3"></i>' .
+                            '<i class="fas fa-times fa-stack-1x fa-inverse" data-fa-transform="shrink-10 right-5" ></i>' .
+                        '</span>';
+                        }
+                        ?>
+
                         <h5 class="card-title"><?php
                             if (!$multimediaDisabled) {
                                 echo localize("OVERVIEW_AUDIO_PANEL_HEADLINE");

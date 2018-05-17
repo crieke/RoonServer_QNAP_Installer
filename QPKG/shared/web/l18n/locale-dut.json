@@ -39,6 +39,9 @@
   "OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION": "Opslaglocatie wijzigen",
   "OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP": "Wijzig de locatie waar Roon Server haar database opslaat.",
   "OVERVIEW_AUDIO_PANEL_HEADLINE": "Aangesloten audio-apparaten",
+  "OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE": "Multimediafuncties uitgeschakeld.",
+  "OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1": "Om gebruik te kunnen maken van je audio-apparaten op je NAS moet je deze eerst aanzetten via de Algemene Instellingen van je QNAP Configuratischerm.",
+  "OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION2": "Je moet je Roon Server herstarten alvorens gebruik te kunnen maken van je audio-apparaten op je QNAP.",
   "OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES": "Audio-apparaten",
   "OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP": "Toon inhoud van '<i>/proc/asound/cards</i>'",
   "MODAL_REINSTALL_HEADLINE": "Roon Server opnieuw installeren?",
@@ -70,4 +73,5 @@
   "MODAL_ABOUT_THANKS": "Dank aan alle medewerkers & sympathisanten",
   "MODAL_ABOUT_LICENSE": "Licentie",
   "MODAL_ABOUT_ASSETS": "Dit web-platform markt gebruik van volgende frameworks/bibiotheken:"
+
 }

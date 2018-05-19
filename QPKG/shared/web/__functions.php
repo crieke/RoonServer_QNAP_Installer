@@ -64,10 +64,6 @@ function getTreeRoot($strSessionID)
                 'anychildren' => true
             );
 
-
-            //$arrNodes = getTreeAt(utf8_encode($arrTemp['text']),$strSessionID );
-
-
         }
     }
 
@@ -156,9 +152,9 @@ function localize($phrase)
 {
     /* Static keyword is used to ensure the file is loaded only once */
     static $translations = NULL;
-    $default_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-eng.json';
+    $default_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/i18n/locale-eng.json';
     if (is_null($translations)) {
-        $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/l18n/locale-' . NAS_LANG . '.json';
+        $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/i18n/locale-' . NAS_LANG . '.json';
         /* If no instance of $translations has occured load the language file */
         if (!file_exists($lang_file)) {
             $lang_file = $default_file;
@@ -273,7 +269,6 @@ $bytes = $diskspace;
 $si_prefix = array( 'B', 'KB', 'MB', 'GB', 'TB', 'EB', 'ZB', 'YB' );
 $base = 1024;
 $class = min((int)log($bytes , $base) , count($si_prefix) - 1);
-//echo $bytes . '<br />';
 return sprintf('%1.2f' , $bytes / pow($base,$class)) . ' ' . $si_prefix[$class];
 }
 

@@ -28,7 +28,13 @@ $ContributorsManual = array(
     array(
         'login' => 'Ignaas Vanden Poel',
         'description' => 'Dutch translation'
+    ),
+    array(
+        'login' => 'Aldewin Bedoya',
+        'description' => 'Spanish translation'
     )
+
+
 );
 ?>
 
@@ -58,6 +64,7 @@ $ContributorsManual = array(
             <div style="text-align: center;">
                 <input type="hidden" name="cmd" value="_s-xclick">
                 <input type="hidden" name="hosted_button_id" value="27D9FUZPC3JNC">
+                <input type="hidden" name="lc" value="<?php echo substr(localize("SYSTEM_LOCALE"), -2); ?>">
                 <input type="image"
                        src="https://www.paypalobjects.com/<?php echo localize("SYSTEM_LOCALE"); ?>/i/btn/btn_donate_SM.gif"
                        border="0"

@@ -465,6 +465,20 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             selectStorageSuccess();
 
         }
+
+    function restartRoonServerAndRefresh() {
+
+            $.ajax({
+                url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
+            });
+
+            $('#restartRoonServerAudioPanel').html('');
+
+            setTimeout(function() {
+                $('#contentblock').load("content/info.php");
+            }, 2000);
+
+    }
 </script>
 
 </body>

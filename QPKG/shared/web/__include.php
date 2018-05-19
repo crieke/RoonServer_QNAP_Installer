@@ -45,6 +45,10 @@ if (array_key_exists('DB_Path', $roon_qpkg_conf)) {
     $dblocation = implode('/', $originalpath);
 }
 
+if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
+    $multimedia_disabled_on_start = $qpkg_conf['RoonServer']['MULTIMEDIA_DISABLE_ON_START'];
+}
+
 
 $RoonVersion = file(rtrim(QPKGINSTALLPATH) . "/RoonServer/VERSION");
 $alsafull = file_get_contents('/proc/asound/cards');
@@ -60,6 +64,6 @@ if (isset($qpkg_conf_db)) {
 }
 $application_conf = parse_ini_file('/var/.application.conf', 1, INI_SCANNER_RAW);
 $multimediaDisabled = $application_conf['DISABLE']['HomeFeature'];
-
+unset($application_conf);
 ?>
 

@@ -6,6 +6,7 @@ WEB_PATH="/home/httpd"
 WEBUI=$(/sbin/getcfg $QPKG_NAME webUI -f ${CONF});
 QTS_VER=`/sbin/getcfg system version`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
+MULTIMEDIA_DISABLE=`/sbin/getcfg DISABLE HomeFeature -f /var/.application.conf`
 MAJOR_QTS_VER=`echo "$QTS_VER" | tr -d '.' | cut -c1-2`
 ARCH=$(uname -m)
 MODEL=`getsysinfo model`
@@ -89,6 +90,7 @@ start_RoonServer () {
       echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
 
       ## Start RoonServer
+      setcfg ${QPKG_NAME} MULTIMEDIA_DISABLE_ON_START ${MULTIMEDIA_DISABLE} -f "${CONF}"
       ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
       echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
 

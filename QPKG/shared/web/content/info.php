@@ -84,49 +84,64 @@ error_reporting(E_ALL);
             <div class="col-sm-6">
                 <div class="card">
                     <div class="card-body">
-                       <?php if (!$multimediaDisabled) {
-                           echo '<span class="fa-stack fa-2x">'.
-                            '<i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>' .
-                            '<i class="fas fa-volume-up fa-stack-1x fa-inverse"></i>' .
-                        '</span>';
-                        }
-                        else
-                        {
-                            echo '<span class="fa-stack fa-2x">'.
-                            '<i class="fa fa-circle fa-stack-2x" style="color: #dddddd;"></i>' .
-                            '<i class="fas fa-volume-off fa-stack-1x fa-inverse" data-fa-transform="left-3"></i>' .
-                            '<i class="fas fa-times fa-stack-1x fa-inverse" data-fa-transform="shrink-10 right-5" ></i>' .
-                        '</span>';
+                        <?php if (!$multimediaDisabled) {
+                            echo '<span class="fa-stack fa-2x">' .
+                                '<i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>' .
+                                '<i class="fas fa-volume-up fa-stack-1x fa-inverse"></i>' .
+                                '</span>';
+                        } else {
+                            echo '<span class="fa-stack fa-2x">' .
+                                '<i class="fa fa-circle fa-stack-2x" style="color: #dddddd;"></i>' .
+                                '<i class="fas fa-volume-off fa-stack-1x fa-inverse" data-fa-transform="left-3"></i>' .
+                                '<i class="fas fa-times fa-stack-1x fa-inverse" data-fa-transform="shrink-10 right-5" ></i>' .
+                                '</span>';
                         }
                         ?>
 
                         <h5 class="card-title"><?php
                             if (!$multimediaDisabled) {
                                 echo localize("OVERVIEW_AUDIO_PANEL_HEADLINE");
-                            } else
-                            {echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE");
+                            } else {
+                                echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE");
                             }
                             ?></h5>
                         <p class="card-text">
-                        <?php
+                            <?php
 
-                        if (!$multimediaDisabled) {
-                            echo '<ul class="list-group">'.
-                            acardsNice() .
-                        '</ul>'.
-                                '</p>' .
-                            '<span id="alsa" class="getModal">' .
-                            '<a href="#"' .
-                               'class="btn btn-primary"' .
-                               'data-toggle="tooltip"' .
-                               'data-html="true"'.
-                               'title="' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP") . '">' .
-                                '<i class="fas fa-eye"></i> ' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES") .
-                            '</a>' .
-                        '</span>';
-                        }
-                        else
-                            { echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1");} ?>
+                            if (!$multimediaDisabled) {
+                                if (!$multimedia_disabled_on_start) {
+                                    echo '<ul class="list-group">' .
+                                        acardsNice() .
+                                        '</ul>' .
+                                        '</p>' .
+                                        '<span id="alsa" class="getModal">' .
+                                        '<a href="#"' .
+                                        'class="btn btn-primary"' .
+                                        'data-toggle="tooltip"' .
+                                        'data-html="true"' .
+                                        'title="' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP") . '">' .
+                                        '<i class="fas fa-eye"></i> ' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES") .
+                                        '</a>' .
+                                        '</span>';
+                                } else {
+                                    echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION2");
+                                    echo '<div id="restartRoonServerAudioPanel">'.
+                                            '<a id="restartRoonServer" href="#" onclick="restartRoonServerAndRefresh()">' .
+                                                '<div class="fa-4x text-center" style="text-align: center;">' .
+                                                    '<span class="fa-layers fa-fw">' .
+                                                        '<i class="fas fa-circle"></i>' .
+                                                        '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' .
+                                                    '</span>' .
+                                                '</div>' .
+                                                '<div class="text-center">' .
+                                                    str_replace("'", "\'", localize("MODAL_SETUP_RESTART_ROONSERVER")) .
+                                                '</div>' .
+                                            '</a>'.
+                                        '</div>';
+                                }
+                            } else {
+                                echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1");
+                            } ?>
                         </p>
                     </div>
                 </div>
@@ -136,18 +151,18 @@ error_reporting(E_ALL);
 </div>
 
 <script>
-        // Action when button for Modal is clicked
-        $('.getModal').on('click', function(e) {
+    // Action when button for Modal is clicked
+    $('.getModal').on('click', function (e) {
 
-            // Check which button fired
-            e.preventDefault();
-            var modalContent = $(this).attr('id');
+        // Check which button fired
+        e.preventDefault();
+        var modalContent = $(this).attr('id');
 
-             $('#modal-content').load("modals.php?s=" + modalContent);
+        $('#modal-content').load("modals.php?s=" + modalContent);
 
-            // Request Modal with content
+        // Request Modal with content
 
-            $('#modal').modal('show');
-            return false;
-         });
+        $('#modal').modal('show');
+        return false;
+    });
 </script>

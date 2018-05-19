@@ -134,11 +134,11 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 </div>
 
 <script>
-    // "Show Modal"-action in info.php
+    var dbSet = false;
 
     // Hide Modal
     $(document).on('hidden.bs.modal', '.modal', function () {
-
+        dbSet = <?php if (!isset($dblocation)) { echo 'false';} else {echo 'true';} ?>;
         var helperScriptRunning = "";
 
         // Check and open modal again if helper script action is running.
@@ -148,7 +148,9 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             success: function (response) {
                 if (!response.success) {
                     $("#modalblock").html('');
+                    if (dbSet) {
                     $('#contentblock').load("content/info.php");
+                    }
                     $('#modal').modal('hide');
                 } else {
                     $('#modal').modal('show');
@@ -380,6 +382,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         var path = newdbpath;
         var action = 'updateformfield';
         var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
+        dbSet = true;
 
         $.ajax({
             url: strUrl,

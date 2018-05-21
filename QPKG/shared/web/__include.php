@@ -47,6 +47,9 @@ if (array_key_exists('DB_Path', $roon_qpkg_conf)) {
 
 if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
     $multimedia_disabled_on_start = $qpkg_conf['RoonServer']['MULTIMEDIA_DISABLE_ON_START'];
+} else {
+    $multimedia_disabled_on_start = "";
+
 }
 
 

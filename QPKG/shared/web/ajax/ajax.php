@@ -40,6 +40,22 @@ if ($strVarAction == 'checkHelperScript') {
     return true;
 }
 
+if ($strVarAction == 'dbPathIsSet') {
+    $qpkg_conf = parse_ini_file('/etc/config/qpkg.conf', 1, INI_SCANNER_RAW);
+    $roon_qpkg_conf = $qpkg_conf['RoonServer'];
+    header('Content-Type: application/json');
+    if (array_key_exists('DB_Path', $roon_qpkg_conf)) {
+        echo json_encode(array(
+            'success' => true
+        ));
+    } else {
+        echo json_encode(array(
+            'success' => false
+        ));
+    }
+    return true;
+}
+
 if ($strVarAction == 'updateformfield') {
     set_db_path($strVarTree);
     flush();

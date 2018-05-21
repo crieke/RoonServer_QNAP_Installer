@@ -151,17 +151,25 @@ error_reporting(E_ALL);
 </div>
 
 <script>
+    // Enable Tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+
     // Action when button for Modal is clicked
     $('.getModal').on('click', function (e) {
+
+        // Hide Tooltips when modal opens
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip('dispose')
+        });
 
         // Check which button fired
         e.preventDefault();
         var modalContent = $(this).attr('id');
-
         $('#modal-content').load("modals.php?s=" + modalContent);
 
         // Request Modal with content
-
         $('#modal').modal('show');
         return false;
     });

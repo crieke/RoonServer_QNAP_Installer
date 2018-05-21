@@ -134,12 +134,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 </div>
 
 <script>
-    var dbSet = false;
-
     // Hide Modal
     $(document).on('hidden.bs.modal', '.modal', function () {
-        dbSet = <?php if (!isset($dblocation)) { echo 'false';} else {echo 'true';} ?>;
-        var helperScriptRunning = "";
 
         // Check and open modal again if helper script action is running.
         $.ajax({
@@ -147,19 +143,24 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             dataType: 'json',
             success: function (response) {
                 if (!response.success) {
-                    $("#modalblock").html('');
-                    if (dbSet) {
-                    $('#contentblock').load("content/info.php");
-                    }
                     $('#modal').modal('hide');
+                    $('#modalblock').html('');
                 } else {
                     $('#modal').modal('show');
                 }
             }
         });
 
-
-
+        var action = 'dbPathIsSet';
+        $.ajax({
+            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action,
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    $('#contentblock').load("content/info.php");
+                }
+            }
+        });
     });
 
     function downloadLogs () {
@@ -173,10 +174,10 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 dlLink = data;
                 linkrcvd = true;
             }
-        })
+        });
+
         if ( linkrcvd ) {
             window.open(dlLink);
-            console.log(dlLink);
 
             $('#download-area').html(
                 '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
@@ -186,8 +187,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     }
 
     function reinstall () {
-          $('.btn-close').prop("disabled", true);
-          $('.btn-close').addClass('disabled');
+        $('.btn-close').prop("disabled", true);
+        $('.btn-close').addClass('disabled');
 
         $('#modal').modal({
             backdrop: 'static',
@@ -349,24 +350,17 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         $.ajax({
             url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=redownload',
             success: function () {
-                 $('.btn-close').prop("disabled", false);
-                 $('.btn-close').removeClass('disabled');
-                 $('#modal').modal({backdrop: 'static', keyboard: true});
+                $('.btn-close').prop("disabled", false);
+                $('.btn-close').removeClass('disabled');
+                $('#modal').modal({backdrop: 'static', keyboard: true});
 
                 $('#download-area').html(
                     '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
                     '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?></div>'
                 );
-
             }
         });
-    };
-
-
-	// Enable Tooltips
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
+    }
 
     $('.reinstall').click(function () {
         $.ajax({
@@ -382,7 +376,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         var path = newdbpath;
         var action = 'updateformfield';
         var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
-        dbSet = true;
 
         $.ajax({
             url: strUrl,
@@ -438,9 +431,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 '</a>\n' +
                 '</div>\n');
         }
-
-        /// Check if dblocation has changed and display a restart button.
-
     }
 
 
@@ -449,7 +439,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     function selectStorageSuccess() {
         var checkani = "<svg class=\"checkmark\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 52 52\"><circle class=\"checkmark__circle\" cx=\"26\" cy=\"26\" r=\"25\" fill=\"none\"/><path class=\"checkmark__check\" fill=\"none\" d=\"M14.1 27.2l7.1 7.2 16.7-16.8\"/></svg>";
 
-        $('#modal-content').html(checkani + '<div class="roon-template"><h4><?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?></h4></div>');
+        $('#modal-body').html(checkani + '<div class="roon-template"><h4><?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?></h4></div>');
 
         $.ajax({
             url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=startRoonServer'
@@ -462,24 +452,24 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         //
     }
     function restartRoonServer() {
-            $.ajax({
-                url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
-            });
-            selectStorageSuccess();
+        $.ajax({
+            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
+        });
+        selectStorageSuccess();
 
-        }
+    }
 
     function restartRoonServerAndRefresh() {
 
-            $.ajax({
-                url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
-            });
+        $.ajax({
+            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
+        });
 
-            $('#restartRoonServerAudioPanel').html('');
+        $('#restartRoonServerAudioPanel').html('');
 
-            setTimeout(function() {
-                $('#contentblock').load("content/info.php");
-            }, 2000);
+        setTimeout(function() {
+            $('#contentblock').load("content/info.php");
+        }, 2000);
 
     }
 </script>

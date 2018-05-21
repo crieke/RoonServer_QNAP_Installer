@@ -5,17 +5,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
 $section = filter_var($_GET['s'], FILTER_SANITIZE_STRING);
 $req = filter_var($_GET['r'], FILTER_SANITIZE_STRING);
-/*
-if ($section == "alsa") {
-    switch ($req) {
-        case "HEADLINE":
-            echo "Alsa";
-            break;
-        case "DESCRIPTION":
-            echo "Some Sample Content";
-            break;
-    }
-}*/
 
 $modalTitle = "Alsa";
 $modalContent = "Content";

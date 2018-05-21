@@ -3,13 +3,8 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
     die("not logged in! ;)");
 }
 
-
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 ?>
 
 <div class="container">

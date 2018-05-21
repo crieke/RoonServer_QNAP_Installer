@@ -2,9 +2,7 @@
 if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
     die("not logged in! ;)");
 }
-?>
 
-<?php
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 ?>

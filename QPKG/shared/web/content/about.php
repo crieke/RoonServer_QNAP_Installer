@@ -2,10 +2,7 @@
 if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
     die("not logged in! ;)");
 }
-?>
 
-
-<?php
 $ContributorsManual = array(
     array(
         'login' => 'RoonLabs',

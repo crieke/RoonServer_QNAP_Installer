@@ -125,7 +125,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     <div id="modalSection">
         <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content" id="modal-content" style="width: 600px;">
+                <div  id="modal-content" class="modal-content" style="width: 600px;">
                 </div>
             </div>
         </div>
@@ -134,6 +134,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 </div>
 
 <script>
+
     // Hide Modal
     $(document).on('hidden.bs.modal', '.modal', function () {
 
@@ -143,7 +144,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             dataType: 'json',
             success: function (response) {
                 if (!response.success) {
-                    $('#modal').modal('hide');
                     $('#modalblock').html('');
                 } else {
                     $('#modal').modal('show');
@@ -151,6 +151,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             }
         });
 
+        // Prevent Reload of info if database path is not set
         var action = 'dbPathIsSet';
         $.ajax({
             url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action,
@@ -163,6 +164,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         });
     });
 
+
+    // Function to download log files
     function downloadLogs () {
         var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
         var dlLink = "";
@@ -176,25 +179,29 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             }
         });
 
+        // if download link received
         if ( linkrcvd ) {
             window.open(dlLink);
 
-            $('#download-area').html(
-                '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
-                '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER")); ?></div>'
-            )
+            MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER = '<?php echo str_replace("'", "\'", localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER"));?>';
+            SuccessAni('#download-area', MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER);
         }
     }
 
+    function SuccessAni(targetDiv, checkmarkText) {
+        if (targetDiv == null) {targetDiv = 'modal-body'};
+        var checkani = "<svg class=\"checkmark\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 52 52\"><circle class=\"checkmark__circle\" cx=\"26\" cy=\"26\" r=\"25\" fill=\"none\"/><path class=\"checkmark__check\" fill=\"none\" d=\"M14.1 27.2l7.1 7.2 16.7-16.8\"/></svg>";
+
+        $(targetDiv).html(checkani + '<div class="text-center">' +  checkmarkText + '</div>');
+
+        setTimeout(function() {
+            $('#modal').modal('hide');
+        }, 4000);
+    }
+
+
+    // Reinstall Roon Server
     function reinstall () {
-        $('.btn-close').prop("disabled", true);
-        $('.btn-close').addClass('disabled');
-
-        $('#modal').modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-
         $('#download-area').html(
             '<br><div class="fa-4x text-center" style="text-align: center;"><svg id="loading" width="70" height="70"></svg></div>' +
             '<div class="text-center"><b><?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_LOADING")); ?></b></div>'
@@ -340,8 +347,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                     )
                 }
             );
-
-
         }
 
         roonAnimate();
@@ -354,10 +359,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 $('.btn-close').removeClass('disabled');
                 $('#modal').modal({backdrop: 'static', keyboard: true});
 
-                $('#download-area').html(
-                    '<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg><br>' +
-                    '<div class="text-center"><?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?></div>'
-                );
+                label_ReinstallDone = '<?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?>';
+                SuccessAni('#download-area', label_ReinstallDone);
             }
         });
     }
@@ -371,8 +374,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
     // check if selection is valid and enable/disable button
 
-
-    function db_save_button() {
+    // Save Database Path
+    function save_location() {
         var path = newdbpath;
         var action = 'updateformfield';
         var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
@@ -381,6 +384,9 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             url: strUrl,
             dataType: 'json'
         });
+    }
+
+    function db_save_button() {
 
         var dbexist = <?php if (isset($dblocation)) {
             echo "true";
@@ -388,7 +394,9 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             echo "false";
         } ?>;
 
+
         if (!dbexist) {
+            save_location();
             selectStorageSuccess();
         }
         else if (newdbpath != currentPath) {
@@ -396,9 +404,9 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_HEADLINE")); ?></h4>\n' +
                 '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +
                 '</div>\n' +
-                '<div id="modal-body modal-body-storage" class="modal-body">\n' +
+                '<div id="modal-body" class="modal-body">\n' +
                 '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_TEXT")); ?>' +
-                '<a id="restartRoonServer" href="#" onclick="restartRoonServer()">\n' +
+                '<a id="restartRoonServer" href="#" onclick="saveAndRestart()">\n' +
                 '<div class="fa-4x text-center" style="text-align: center;">\n' +
 
                 '<span class="fa-layers fa-fw">\n' +
@@ -417,7 +425,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH")); ?></h4>\n' +
                 '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +
                 '</div>\n' +
-                '<div id="modal-body modal-body-storage" class="modal-body">\n' +
+                '<div id="modal-body" class="modal-body">\n' +
                 '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH_TEXT")); ?>' +
                 '<a id="restartRoonServer" href="#" data-dismiss="modal">\n' +
                 '<div class="fa-4x text-center" style="text-align: center;">\n' +
@@ -433,24 +441,21 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         }
     }
 
-
-
-
     function selectStorageSuccess() {
-        var checkani = "<svg class=\"checkmark\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 52 52\"><circle class=\"checkmark__circle\" cx=\"26\" cy=\"26\" r=\"25\" fill=\"none\"/><path class=\"checkmark__check\" fill=\"none\" d=\"M14.1 27.2l7.1 7.2 16.7-16.8\"/></svg>";
 
-        $('#modal-body').html(checkani + '<div class="roon-template"><h4><?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?></h4></div>');
+        btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';
+        SuccessAni('#modal-body', btn_LocationSaved);
 
         $.ajax({
             url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=startRoonServer'
         });
-
-
-
-        //
-        // QPKG Control: Restart RoonServer
-        //
     }
+
+    function saveAndRestart() {
+        save_location();
+        restartRoonServer();
+    }
+
     function restartRoonServer() {
         $.ajax({
             url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'

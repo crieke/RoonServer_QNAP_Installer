@@ -51,8 +51,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
 </head>
 <body>
+<iframe id="frame" style="display:none"></iframe>
 <!-- /.container -->
-
 <div class="fullcontainer">
 
 
@@ -179,9 +179,12 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             }
         });
 
+
+
         // if download link received
         if ( linkrcvd ) {
-            window.open(dlLink);
+            var ifrm = document.getElementById("frame");
+            ifrm.src = dlLink;
 
             MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER = '<?php echo str_replace("'", "\'", localize("MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER"));?>';
             SuccessAni('#download-area', MODAL_LOGFILES_CHECK_DOWNLOAD_FOLDER);
@@ -355,10 +358,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         $.ajax({
             url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=redownload',
             success: function () {
-                $('.btn-close').prop("disabled", false);
-                $('.btn-close').removeClass('disabled');
-                $('#modal').modal({backdrop: 'static', keyboard: true});
-
                 label_ReinstallDone = '<?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?>';
                 SuccessAni('#download-area', label_ReinstallDone);
             }
@@ -478,7 +477,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
     }
 </script>
-
 </body>
 
 </html>

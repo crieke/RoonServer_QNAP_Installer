@@ -39,7 +39,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                         </p>
                         <p>
                         <h5><?php echo localize("OVERVIEW_ROONSERVER_PANEL_SUBHEAD_DATABASE"); ?></h5>
-                        <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_LOCATION"); ?>:</b> <?php echo $dblocation; ?>
+                        <span data-toggle="tooltip" title="<?php echo $dblocation; ?>"><b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_LOCATION"); ?>: </b><?php echo $dblocation; ?></span>
                         <br>
                         <div class="progress" style="height: 20px;">
                             <div class="progress-bar" role="progressbar" style="width: <?php echo $db_perc ?>%;"

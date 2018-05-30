@@ -386,17 +386,10 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     }
 
     function db_save_button() {
-
-        var dbexist = <?php if (isset($dblocation)) {
-            echo "true";
-        } else {
-            echo "false";
-        } ?>;
-
-
         if (!dbexist) {
             save_location();
             selectStorageSuccess();
+            dbexist = true;
         }
         else if (newdbpath != currentPath) {
             $('#modal-content').html('<div class="modal-header">\n' +

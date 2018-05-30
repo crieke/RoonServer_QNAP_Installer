@@ -19,6 +19,12 @@ if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
 </div>
 
 <script>
+    var dbexist = <?php if (isset($dblocation)) {
+        echo "true";
+    } else {
+        echo "false";
+    } ?>;
+
     // Action when button for Modal is clicked
     $('.getModal').on('click', function(e) {
 

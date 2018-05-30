@@ -146,6 +146,12 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 </div>
 
 <script>
+    var dbexist = <?php if (isset($dblocation)) {
+        echo "true";
+    } else {
+        echo "false";
+    } ?>;
+
     // Enable Tooltips
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()

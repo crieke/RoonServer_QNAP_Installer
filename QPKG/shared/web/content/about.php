@@ -45,7 +45,8 @@ $ContributorsManual = array(
     <div class="container">
         <div id="cr">
             <img src="img/cr_logo.svg" width="70px" height="70px"><br>
-            Copyright 2016-2018 Christopher Rieke
+            Copyright 2016-2018 Christopher Rieke<br>
+            <a href="https://roononnas.org" target="_blank">roononnas.org</a>
         </div><br><br>
 
         <div style="border: 5px; padding: 10px; text-align: center; border-style: dotted;">

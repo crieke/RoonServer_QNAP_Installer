@@ -104,9 +104,7 @@
 # the package is removed.
 ######################################################################
 
-CONF="/etc/config/qpkg.conf"
 QPKG_NAME="RoonServer"
-
 
 #PKG_PRE_REMOVE="{
 #}"
@@ -128,11 +126,11 @@ fi
 pkg_init(){
 
 # Set default Database path when updating from version 2017-10-03
-PREVERSION=$(${CMD_GETCFG} ${QPKG_NAME} Version -f ${CONF})
+PREVERSION=$(${CMD_GETCFG} ${QPKG_NAME} Version -f ${SYS_QPKG_CONFIG_FILE})
 if [ "$PREVERSION" == "2017-10-03" ]; then
     if [ -d "/share/RoonServer/RoonServer" ] && [ -d "/share/RoonServer/RAATServer" ]; then
-      ${CMD_LOG_TOOL} -t 0 -a "[RoonServer] Storage location of previously installed Roon Server database has been set automatically."
-      ${CMD_SETCFG} ${QPKG_NAME} DB_Path "/share/RoonServer" -f ${CONF}
+      ${CMD_LOG_TOOL} -t 0 -a "[${QPKG_NAME}] Storage location of previously installed Roon Server database has been set automatically."
+      ${CMD_SETCFG} ${QPKG_NAME} DB_Path "/share/RoonServer" -f ${SYS_QPKG_CONFIG_FILE}
 
     fi
 fi
@@ -181,5 +179,6 @@ pkg_install(){
 }
 
 pkg_post_install(){
-"${CMD_SETCFG}" "${QPKG_NAME}" BINARIES_URL "${ROON_PKG_URL}" -f "${CONF}"
+"${CMD_SETCFG}" "${QPKG_NAME}" BINARIES_URL "${ROON_PKG_URL}" -f "${SYS_QPKG_CONFIG_FILE}"
+"${CMD_SETCFG}" "${QPKG_NAME}" Force_Visible 1 -f "${SYS_QPKG_CONFIG_FILE}"
 }

@@ -72,7 +72,7 @@ info ()
 }
 
 start_RoonServer () {
-  if [ "${ROON_DATABASE_DIR}" != "" ] || [ -d "${ROON_DATABASE_DIR}" ]; then
+  if [ "${ROON_DATABASE_DIR}" != "" ] && [ -d "${ROON_DATABASE_DIR}" ]; then
       export ROON_DATAROOT="$ROON_DATABASE_DIR"
       if $BundledLibPath; then
          export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"

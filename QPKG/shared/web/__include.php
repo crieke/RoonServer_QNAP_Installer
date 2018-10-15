@@ -26,16 +26,18 @@ if (isset($_COOKIE['nas_lang'])) {
 define("NAS_LANG", $nas_lang);
 
 // Set URL
-$QNAPDOCURL = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/cgi-bin";
+$NASLOCALHOST = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://127.0.0.1:$_SERVER[SERVER_PORT]";
+
+$NASHOST = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]";
 
 // Set specific variables by qpkg.conf
 $qpkg_conf = parse_ini_file('/etc/config/qpkg.conf', 1, INI_SCANNER_RAW);
 $roon_qpkg_conf = $qpkg_conf['RoonServer'];
 
 // Make vars accessible
-define("QNAPDOCURL", $QNAPDOCURL);
-define("QNAPLOCALDOC", $_SERVER['DOCUMENT_ROOT']);
-define("QPKGINSTALLPATH", $qpkg_conf['RoonServer']['Install_Path']);
+define("NASHOST", $NASHOST);
+define("NASLOCALHOST", $NASLOCALHOST);
+define("APPINSTALLPATH", $qpkg_conf['RoonServer']['Install_Path']);
 
 # Getting free space of database directory
 if (array_key_exists('DB_Path', $roon_qpkg_conf)) {
@@ -53,7 +55,7 @@ if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
 }
 
 
-$RoonVersion = file(rtrim(QPKGINSTALLPATH) . "/RoonServer/VERSION");
+$RoonVersion = file(rtrim(APPINSTALLPATH) . "/RoonServer/VERSION");
 $alsafull = file_get_contents('/proc/asound/cards');
 $alsaraw = fopen("/proc/asound/cards", 'r');
 $alsatext = fread($alsaraw, 25000);

@@ -76,7 +76,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
                     var path = encodeURIComponent(nodeData['path']);
                     var action = 'gettree';
-                    var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
+                    var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
 
                     $.ajax({
                         url: strUrl,

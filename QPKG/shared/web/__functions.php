@@ -36,7 +36,7 @@ function get_web_page($url)
 
 function getTreeRoot($strSessionID)
 {
-    $strUrl = QNAPDOCURL . '/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=share_root';
+    $strUrl = NASLOCALHOST . '/cgi-bin/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=share_root';
     $arrData = get_web_page($strUrl);
     $arrShareTree = json_decode($arrData['content'], 1);
     $arrShareTreeData = array();
@@ -81,14 +81,14 @@ function removeFirstChildDir($path)
 function set_db_path($folder)
 {
     shell_exec('setcfg RoonServer DB_Path "/share' . $folder . '" -f /etc/config/qpkg.conf');
-    shell_exec(QPKGINSTALLPATH . '/Roonserver.sh start');
+    shell_exec(APPINSTALLPATH . '/Roonserver.sh start');
 }
 
 function getTreeAt($folder, $strSessionID)
 {
     $folder = str_replace('+', '%20', filter_var($folder, FILTER_SANITIZE_STRING));
     if (strlen($folder) > 3) {
-        $strUrl = QNAPDOCURL . '/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=' . $folder;
+        $strUrl = NASLOCALHOST . '/cgi-bin/filemanager/utilRequest.cgi?func=get_tree&sid=' . $strSessionID . '&is_iso=0&node=' . $folder;
         $arrData = get_web_page($strUrl);
         $arrShareTree = json_decode($arrData['content'], 1);
 
@@ -152,9 +152,9 @@ function localize($phrase)
 {
     /* Static keyword is used to ensure the file is loaded only once */
     static $translations = NULL;
-    $default_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/i18n/locale-eng.json';
+    $default_file = $_SERVER['DOCUMENT_ROOT'] . '/cgi-bin/qpkg/RoonServer/i18n/locale-eng.json';
     if (is_null($translations)) {
-        $lang_file = QNAPLOCALDOC . '/cgi-bin/qpkg/RoonServer/i18n/locale-' . NAS_LANG . '.json';
+        $lang_file = $_SERVER['DOCUMENT_ROOT'] . '/cgi-bin/qpkg/RoonServer/i18n/locale-' . NAS_LANG . '.json';
         /* If no instance of $translations has occured load the language file */
         if (!file_exists($lang_file)) {
             $lang_file = $default_file;
@@ -259,7 +259,7 @@ function downloadLogs($strSessionID, $dblocation)
         $count++;
 
     }
-    $url = QNAPDOCURL . '/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlSnippet . '&source_total=' . $count;
+    $url = NASHOST . '/cgi-bin/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=0&source_path=' . $dblocation . '/' . $urlSnippet . '&source_total=' . $count;
     echo $url;
     //return $url;
 }

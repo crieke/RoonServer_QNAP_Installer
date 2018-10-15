@@ -63,13 +63,13 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             echo localize("DEBUG_ARCH") . ': ' . php_uname('m') . '<br>';
             echo localize("DEBUG_DATABASE") . ': ' . $dblocation . '<br>';
             echo localize("DEBUG_SID") . ': ' . $_COOKIE['NAS_SID'] . '<br>';
-            echo localize("DEBUG_QPKG_ROOT") . ': ' . QPKGINSTALLPATH . "<br>";
+            echo localize("DEBUG_QPKG_ROOT") . ': ' . APPINSTALLPATH . "<br>";
             echo localize("DEBUG_LANGUAGE") . ': ' . $_COOKIE['nas_lang'] . "<br>";
-            if (file_exists(QPKGINSTALLPATH . '/RoonServer.pid')) {
+            if (file_exists(APPINSTALLPATH . '/RoonServer.pid')) {
                 $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
                 echo "RoonServer PID: " . $RoonServerPID . '<br>';
             }
-            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . QNAPDOCURL . '<br>';
+            echo localize("DEBUG_QPKG_DOCROOT") . ': ' . NASHOST . '<br>';
             echo "HomeFeature disabled: " . $multimediaDisabled . '<br>';
         }
 
@@ -140,7 +140,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
         // Check and open modal again if helper script action is running.
         $.ajax({
-            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=checkHelperScript',
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=checkHelperScript',
             dataType: 'json',
             success: function (response) {
                 if (!response.success) {
@@ -154,7 +154,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         // Prevent Reload of info if database path is not set
         var action = 'dbPathIsSet';
         $.ajax({
-            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action,
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action,
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
@@ -167,7 +167,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
     // Function to download log files
     function downloadLogs () {
-        var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
+        var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=downloadlogs';
         var dlLink = "";
         var linkrcvd = false;
         $.ajax({
@@ -356,7 +356,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         setInterval(roonAnimate, 1000);
 
         $.ajax({
-            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=redownload',
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=redownload',
             success: function () {
                 label_ReinstallDone = '<?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?>';
                 SuccessAni('#download-area', label_ReinstallDone);
@@ -377,7 +377,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     function save_location() {
         var path = newdbpath;
         var action = 'updateformfield';
-        var strUrl = '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
+        var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action + '&t=' + path;
 
         $.ajax({
             url: strUrl,
@@ -439,7 +439,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         SuccessAni('#modal-body', btn_LocationSaved);
 
         $.ajax({
-            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=startRoonServer'
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=startRoonServer'
         });
     }
 
@@ -450,7 +450,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
     function restartRoonServer() {
         $.ajax({
-            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
         });
         selectStorageSuccess();
 
@@ -459,7 +459,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     function restartRoonServerAndRefresh() {
 
         $.ajax({
-            url: '<?php echo QNAPDOCURL;?>/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
         });
 
         $('#restartRoonServerAudioPanel').html('');

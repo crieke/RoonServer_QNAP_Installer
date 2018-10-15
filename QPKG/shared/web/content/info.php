@@ -24,7 +24,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                         <h5 class="card-title">Roon Server</h5>
                         <p class="card-text">
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_STATUS"); ?>
-                                :</b> <?php if (isRunning(QPKGINSTALLPATH . '/RoonServer.pid')) {
+                                :</b> <?php if (isRunning(APPINSTALLPATH . '/RoonServer.pid')) {
                                 echo '<span style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
                             } else {
                                 echo '<span style="color: red;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_STOPPED") . '</span>';
@@ -34,7 +34,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_QPKG_VERSION"); ?>
                                 :</b> <?php echo $qpkg_conf['RoonServer']['Version']; ?><br>
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_PID"); ?>
-                                :</b> <?php echo isRunning(QPKGINSTALLPATH . '/RoonServer.pid', "getpid"); ?><br>
+                                :</b> <?php echo isRunning(APPINSTALLPATH . '/RoonServer.pid', "getpid"); ?><br>
                             <br>
                         </p>
                         <p>

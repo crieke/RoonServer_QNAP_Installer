@@ -25,7 +25,7 @@ if ($strVarAction == 'gettree') {
 }
 
 if ($strVarAction == 'checkHelperScript') {
-    $running = file_exists(QPKGINSTALLPATH . '/.helperscript.lock');
+    $running = file_exists(APPINSTALLPATH . '/.helperscript.lock');
     header('Content-Type: application/json');
     if ($running) {
         echo json_encode(array(
@@ -63,7 +63,7 @@ if ($strVarAction == 'updateformfield') {
 }
 
 if ($strVarAction == 'redownload') {
-    $helper_script = QPKGINSTALLPATH . '/helper-scripts/roon-helper-actions.sh';
+    $helper_script = APPINSTALLPATH . '/helper-scripts/roon-helper-actions.sh';
     $output = shell_exec($helper_script . ' reinstall');
     return $output;
 }
@@ -74,11 +74,11 @@ if ($strVarAction == 'downloadlogs') {
 }
 
 if ($strVarAction == 'startRoonServer') {
-    $startScript = QPKGINSTALLPATH . '/RoonServer.sh start';
+    $startScript = APPINSTALLPATH . '/RoonServer.sh start';
     shell_exec($startScript);
 }
 
 if ($strVarAction == 'restartRoonServer') {
-    $startScript = QPKGINSTALLPATH . '/RoonServer.sh restart';
+    $startScript = APPINSTALLPATH . '/RoonServer.sh restart';
     shell_exec($startScript);
 }

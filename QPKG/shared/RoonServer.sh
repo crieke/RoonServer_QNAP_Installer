@@ -5,6 +5,8 @@ QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
 WEB_PATH="/home/httpd"
 WEBUI=$(/sbin/getcfg $QPKG_NAME webUI -f ${CONF});
 QTS_VER=`/sbin/getcfg system version`
+QNAP_MEMTOTAL=`awk '/MemTotal/ {print $2}' /proc/meminfo`
+QNAP_MEMFREE=`awk '/MemFree/ {print $2}' /proc/meminfo`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
 MULTIMEDIA_DISABLE=`/sbin/getcfg DISABLE HomeFeature -f /var/.application.conf`
 MAJOR_QTS_VER=`echo "$QTS_VER" | tr -d '.' | cut -c1-2`
@@ -17,9 +19,11 @@ ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
+ROON_DATABASE_DIR_FS=`df -T "${ROON_DATABASE_DIR}" | grep "^/dev" | awk '{print $2}'`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
 ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROON_DEBUG_EXTERNAL_LOG.txt"
+QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
 
 ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"
@@ -60,12 +64,16 @@ info ()
 {
    ## Echoing System Info
    echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR}"
+   echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
    echolog "ROON_DIR" "${QPKG_ROOT}"
    echolog "Model" "${MODEL}"
    echolog "QNAP Serial" "${QNAP_SERIAL}"
    echolog "Architecture" "${ARCH}"
+   echolog "Total Memory" "${QNAP_MEMTOTAL}"
+   echolog "Available Memory" "${QNAP_MEMFREE}"
    echolog "QTS Version" "${QTS_VER}"
    echolog "PKG Version" "${QPKG_VERSION}"
+   echolog "Installed QTS Apps" "${QTS_INSTALLED_APPS}"
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
    echolog "Loading additional 64-bit libs" "${BundledLibPath}"

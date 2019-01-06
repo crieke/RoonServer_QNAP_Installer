@@ -45,7 +45,9 @@ function getTreeRoot($strSessionID)
         if (
             substr($arrTemp['text'], 0, 1) != "@" &&
             substr($arrTemp['text'], 0, 1) != "." &&
-            substr($arrTemp['text'], 0, 1) != ".."
+            substr($arrTemp['text'], 0, 2) != ".." &&
+            $arrTemp['text'] != "home" &&
+            $arrTemp['text'] != "homes"
         ) {
             // Set folder icon and check for external devices
             switch ($arrTemp['iconCls']) {

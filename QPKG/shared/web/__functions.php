@@ -100,7 +100,7 @@ function getTreeAt($folder, $strSessionID)
             if (
                 substr($arrTemp['text'], 0, 1) != "@" &&
                 substr($arrTemp['text'], 0, 1) != "." &&
-                substr($arrTemp['text'], 0, 1) != ".."
+                substr($arrTemp['text'], 0, 2) != ".."
             ) {
 
                 $arrTemp['iconCls'] = 'far fa-folder';

@@ -1,0 +1,35 @@
+{
+  "general" : {
+    "package" : "RoonServer",
+    "name" : "Roon Server",
+    "version" : "2019-03-02",
+    "depends" : [
+      "entware",
+      "ffmpeg"
+    ],
+    "conflicts" : [],
+    "developer" : "Roon Labs LLC",
+    "maintainer" : "Christopher Rieke",
+    "email" : "roonlabs@mail.rieke.tv",
+    "website" : "https://roononnas.org",
+    "architecture" : "x86-64",
+    "firmware" : "3.0"
+  },
+  "adm-desktop" : {
+    "app" : {
+      "type" : "webserver",
+      "session-id" : true
+    },
+    "privilege" : {
+      "accessible" : "users",
+      "customizable" : true
+    }
+  },
+  "register" : {
+    "prerequisites" : {
+      "enable-service" : [
+        "httpd"
+      ]
+    }
+  }
+}

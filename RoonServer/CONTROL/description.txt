@@ -1,0 +1,1 @@
+Roon organizes your personal music files, TIDAL streams, and internet radio stations and adds rich data like artist photos, bios, tour dates, lyrics, credits, and more. Using Roon Server with remote apps for Mac, Windows, iOS, and Android you can stream audio around your home to Sonos, AirPlay, Squeezebox, and Roon Ready devices.

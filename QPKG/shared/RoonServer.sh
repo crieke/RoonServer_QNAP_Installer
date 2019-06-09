@@ -4,7 +4,8 @@ QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
 WEB_PATH="/home/httpd"
 WEBUI=$(/sbin/getcfg $QPKG_NAME webUI -f ${CONF});
-QTS_VER=`/sbin/getcfg system version`
+QTS_VER=$(/sbin/getcfg system version)
+QTS_BUILD=$(getcfg system 'Build Number')
 QNAP_MEMTOTAL=`awk '/MemTotal/ {print $2}' /proc/meminfo`
 QNAP_MEMFREE=`awk '/MemFree/ {print $2}' /proc/meminfo`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
@@ -71,7 +72,7 @@ info ()
    echolog "Architecture" "${ARCH}"
    echolog "Total Memory" "${QNAP_MEMTOTAL}"
    echolog "Available Memory" "${QNAP_MEMFREE}"
-   echolog "QTS Version" "${QTS_VER}"
+   echolog "QTS Version" "${QTS_VER} - Build: ${QTS_BUILD}"
    echolog "PKG Version" "${QPKG_VERSION}"
    echolog "Installed QTS Apps" "${QTS_INSTALLED_APPS}"
    echolog "Hostname" "${HOSTNAME}"

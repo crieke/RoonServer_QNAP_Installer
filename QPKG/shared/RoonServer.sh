@@ -22,14 +22,14 @@ ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ROON_DATABASE_DIR_FS=`df -T "${ROON_DATABASE_DIR}" | grep "^/dev" | awk '{print $2}'`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
-ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROON_DEBUG_EXTERNAL_LOG.txt"
+ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROONSERVER_QNAP_LOG.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
 
 ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"
 REG_COLOR="\033[0m"
 
-if [[ -f $ROON_DEBUG_EXTERNAL_LOG ]]; then
+if [ $ROON_DATABASE_DIR != "" ]; then
                 ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
 fi
 

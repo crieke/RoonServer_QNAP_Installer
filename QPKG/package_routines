@@ -152,7 +152,10 @@ fi
 ## RoonServer Download
 ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
+ROON_OFFLINE_ARCHIVE="/share/Public/$ROON_ARCHIVE"
+ONLINEINSTALL=true
 
+## Check for a different install URL in case of ALPHA or NIGHLTY installs
 if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
     CUSTOM_INSTALL_URL=`"${CMD_CAT}" /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
     if [ ${CUSTOM_INSTALL_URL:0:4} == "http" ]  && [ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]; then
@@ -160,20 +163,31 @@ if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
     fi
 fi
 
+## Check if archive has been supplied on the public shared folder 
+if [ -f $ROON_OFFLINE_ARCHIVE ]; then
+    ONLINEINSTALL=false
+    ROON_ARCHIVE="$ROON_OFFLINE_ARCHIVE"
+    log "Performing offline installation with binary archive from Public share."
+fi
+
+
 #pkg_pre_install(){
 #}
 
 pkg_install(){
-    "${CMD_WGET}" "${ROON_PKG_URL}"
-    R=$?
-    if [ $R -eq 0 ]; then
-        "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
+    if $ONLINEINSTALL; then
+        "${CMD_WGET}" "${ROON_PKG_URL}"
         R=$?
+        if [ $R -ne 0 ]; then
+            err_log "Could not download binary archive from Roon Labs website. Please check your internet connection."
+        fi
+    fi
+    "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
+    R=$?
+    if [ $R -ne 0 ]; then
+        err_log "Error while decompressing the binary archive."
     fi
     "${CMD_RM}" -f "${ROON_ARCHIVE}"
-    if [ $R -ne 0 ]; then
-        err_log "Could not download installation archive from Roon Labs website. Please check your internet connection."
-    fi
     "${CMD_MKDIR}" "${SYS_QPKG_DIR}"/tmp
     "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
 }

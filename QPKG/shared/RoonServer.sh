@@ -20,7 +20,8 @@ ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
-ROON_DATABASE_DIR_FS=`df -T "${ROON_DATABASE_DIR}" | grep "^/dev" | awk '{print $2}'`
+ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $2}' | tail -1`
+ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $5}' | tail -1`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
 ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROONSERVER_QNAP_LOG.txt"
@@ -66,6 +67,7 @@ info ()
    ## Echoing System Info
    echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR}"
    echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
+   echolog "Free Inodes" "${ROON_DATABASE_DIR_FREE_INODES}"
    echolog "ROON_DIR" "${QPKG_ROOT}"
    echolog "Model" "${MODEL}"
    echolog "QNAP Serial" "${QNAP_SERIAL}"

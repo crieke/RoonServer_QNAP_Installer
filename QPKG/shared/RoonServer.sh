@@ -32,15 +32,6 @@ ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"
 REG_COLOR="\033[0m"
 
-# Check if ALSA is installed and running
-if [ x$BLUE_UDEV_ENABLE = x0 ]; then
-    [ ! -x /etc/init.d/bluetooth.sh ] || /etc/init.d/bluetooth.sh start 2>/dev/null
-fi
-
-if [ $ROON_DATABASE_DIR != "" ]; then
-    ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
-fi
-
 ## Log Function
 echolog () {
     TIMESTAMP=$(date +%d.%m.%y-%H:%M:%S)
@@ -57,6 +48,16 @@ echolog () {
         echo -e "The echolog function requires 1 or 2 parameters."
     fi
 }
+
+# Check if ALSA (part of the bluetooth package) is installed and running
+if [ x$BLUE_UDEV_ENABLE = x0 ]; then
+    [ ! -x /etc/init.d/bluetooth.sh ] || /etc/init.d/bluetooth.sh start >> ${ROON_LOG_FILE}
+fi
+
+if [ $ROON_DATABASE_DIR != "" ]; then
+    ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
+fi
+
 
 if [[ $MAJOR_QTS_VER -ge 43 ]]; then
    BundledLibPath=false;
@@ -86,6 +87,7 @@ info ()
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
    echolog "Loading additional 64-bit libs" "${BundledLibPath}"
+   echolog "Bluetoorh udev enabled" ${BLUE_UDEV_ENABLE}
 }
 
 start_RoonServer () {

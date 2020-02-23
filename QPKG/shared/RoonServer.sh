@@ -22,6 +22,7 @@ ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $2}' | tail -1`
 ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $5}' | tail -1`
+BLUE_UDEV_ENABLE=`grep -c bluetooth /lib/udev/rules.d/*.rules 2>/dev/null`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
 ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROONSERVER_QNAP_LOG.txt"
@@ -31,8 +32,13 @@ ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"
 REG_COLOR="\033[0m"
 
+# Check if ALSA is installed and running
+if [ x$BLUE_UDEV_ENABLE = x0 ]; then
+    [ ! -x /etc/init.d/bluetooth.sh ] || /etc/init.d/bluetooth.sh start 2>/dev/null
+fi
+
 if [ $ROON_DATABASE_DIR != "" ]; then
-                ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
+    ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
 fi
 
 ## Log Function

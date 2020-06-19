@@ -18,6 +18,7 @@ MTU=`ifconfig | grep eth[0-9] -A1 | grep MTU | grep MTU | cut -d ":" -f 2 | awk 
 ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
+ROON_ID_DIR="${QPKG_ROOT}/id"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $2}' | tail -1`
@@ -99,6 +100,7 @@ start_RoonServer () {
       export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export ALSA_CONFIG_PATH
       export TMP="${ROON_TMP_DIR}"
+      export ROON_ID_DIR
 
       # Checking for additional start arguments.
       if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then

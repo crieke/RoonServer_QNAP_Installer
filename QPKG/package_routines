@@ -188,8 +188,8 @@ pkg_install(){
         err_log "Error while decompressing the binary archive."
     fi
     "${CMD_RM}" -f "${ROON_ARCHIVE}"
-    "${CMD_MKDIR}" "${SYS_QPKG_DIR}"/tmp
-    "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
+    "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/tmp
+    "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/id
 }
 
 pkg_post_install(){

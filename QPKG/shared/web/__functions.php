@@ -261,7 +261,7 @@ function downloadLogs($strSessionID, $dblocation)
         $count++;
 
     }
-    $url = NASHOST . '/cgi-bin/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=1&source_path=' . $dblocation . $urlSnippet . '&source_total=' . $count;
+    $url = NASHOST . '/cgi-bin/filemanager/utilRequest.cgi?func=download&sid=' . $strSessionID . '&isfolder=1&compress=2&source_path=' . $dblocation . $urlSnippet . '&source_total=' . $count;
     echo $url;
     //return $url;
 }

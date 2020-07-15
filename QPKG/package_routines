@@ -121,7 +121,7 @@ PKG_POST_REMOVE="{
 
     RoonSymlink="/home/httpd/cgi-bin/qpkg/RoonServer"
     if [ -L $RoonSymlink ]; then
-        "${CMD_RM} ${RoonSymlink}"
+        "${CMD_RM}" "${RoonSymlink}"
     fi
 }"
 #
@@ -179,8 +179,8 @@ if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
     fi
 fi
 
-pkg_pre_install(){
-}
+#pkg_pre_install(){
+#}
 
 pkg_install(){
     if $ONLINEINSTALL; then
@@ -201,10 +201,11 @@ pkg_install(){
 
     "${CMD_RM}" -f "${ROON_ARCHIVE}"
 
-    ## Creating required folders
+    ## Creating required folders and setting permissions
 
     "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/tmp
     "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/id
+    "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
 }
 
 pkg_post_install(){

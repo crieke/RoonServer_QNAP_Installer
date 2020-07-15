@@ -73,8 +73,9 @@ fi
 info ()
 {
    ## Echoing System Info
-   echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR}"
+   echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR} - [`[ -d \"$ROON_DATABASE_DIR\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
+   echolog "ROON_ID_DIR" "$ROON_ID_DIR - [`[ -d \"$ROON_ID_DIR\" ] && echo \"available\" || echo \"not available\"`]"  
    echolog "Free Inodes" "${ROON_DATABASE_DIR_FREE_INODES}"
    echolog "ROON_DIR" "${QPKG_ROOT}"
    echolog "Model" "${MODEL}"
@@ -88,7 +89,7 @@ info ()
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
    echolog "Loading additional 64-bit libs" "${BundledLibPath}"
-   echolog "Bluetoorh udev enabled" ${BLUE_UDEV_ENABLE}
+   echolog "Bluetooth udev enabled" ${BLUE_UDEV_ENABLE}
 }
 
 start_RoonServer () {
@@ -101,6 +102,11 @@ start_RoonServer () {
       export ALSA_CONFIG_PATH
       export TMP="${ROON_TMP_DIR}"
       export ROON_ID_DIR
+      
+      ## Creating required directories, if they do not exist
+      [ -d "$ROON_ID_DIR" ] || mkdir "$ROON_ID_DIR"
+      [ -d "$ROON_TMP_DIR" ] || mkdir "$ROON_TMP_DIR"
+
 
       # Checking for additional start arguments.
       if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then

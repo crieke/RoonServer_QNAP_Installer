@@ -17,6 +17,8 @@ $strModalContent = filter_var($_GET['c'], FILTER_SANITIZE_STRING);
  * funktion prüfen auf etc
  */
 
+
+
 if ($strVarAction == 'gettree') {
     $arr = getTreeAt(urlencode($strVarTree), $strSessionID);
     print json_encode($arr);
@@ -56,6 +58,13 @@ if ($strVarAction == 'dbPathIsSet') {
     return true;
 }
 
+if ($strVarAction == 'provideffmpeg') {
+    $ffmpegfoldername="PROVIDE_FFMPEG_HERE";
+    if (!file_exists('/share' . $dblocation . '/' . $ffmpegfoldername)) {
+        mkdir('/share' . $dblocation . '/' . $ffmpegfoldername, 0777, true);
+    }
+}
+
 if ($strVarAction == 'updateformfield') {
     set_db_path($strVarTree);
     flush();
@@ -74,11 +83,11 @@ if ($strVarAction == 'downloadlogs') {
 }
 
 if ($strVarAction == 'startRoonServer') {
-    $startScript = APPINSTALLPATH . '/RoonServer.sh start';
+    $startScript = '/sbin/qpkg_service restart RoonServer';
     shell_exec($startScript);
 }
 
 if ($strVarAction == 'restartRoonServer') {
-    $startScript = APPINSTALLPATH . '/RoonServer.sh restart';
+    $startScript = '/sbin/qpkg_service restart RoonServer';
     shell_exec($startScript);
 }

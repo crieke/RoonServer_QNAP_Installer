@@ -58,10 +58,10 @@ if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
 $RoonVersion = file(rtrim(APPINSTALLPATH) . "/RoonServer/VERSION");
 $WHICH_FFMPEG = trim(shell_exec('PATH='.APPINSTALLPATH.'/bin:$PATH && which ffmpeg'));
 if (strpos($WHICH_FFMPEG, APPINSTALLPATH) !== false) {
-    $usedFfmpeg = "MODAL_FFMPEG_USER_SUPPLIED_VERSION";
+    $customFfmpeg = true;
 }
 else {
-        $usedFfmpeg = "MODAL_FFMPEG_SYSTEM_DEFAULT";
+        $customFfmpeg = false;
 }
 $ffmpegVersion=trim(shell_exec('PATH='.APPINSTALLPATH.'/bin:$PATH && ffmpeg -version | sed -n "s/ffmpeg version \([^ ]*\).*/\1/p;"'));
 
@@ -80,3 +80,4 @@ $application_conf = parse_ini_file('/var/.application.conf', 1, INI_SCANNER_RAW)
 $multimediaDisabled = $application_conf['DISABLE']['HomeFeature'];
 unset($application_conf);
 ?>
+

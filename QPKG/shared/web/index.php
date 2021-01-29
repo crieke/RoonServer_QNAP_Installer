@@ -432,7 +432,16 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 '</div>\n');
         }
     }
-
+    
+    
+        function ffmpeg_folder_info(clientos) {
+            
+            $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_4")) ?><br><br>' +
+            '<img width="300" height="112" style="text-align: center; display:block; margin: auto;" src="img/dropffmpeg_'+ clientos +'.png" \> <br>' +
+            '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_5")) ?><br><br>' +
+            '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_6")) ?>');
+        }
+    
     function selectStorageSuccess() {
 
         btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';

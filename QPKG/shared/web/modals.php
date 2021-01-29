@@ -1,3 +1,15 @@
+<style>
+    .file-field.medium .file-path-wrapper {
+    height: 3rem; }
+    .file-field.medium .file-path-wrapper .file-path {
+    height: 2.8rem; }
+    
+    .file-field.big-2 .file-path-wrapper {
+    height: 3.7rem; }
+    .file-field.big-2 .file-path-wrapper .file-path {
+    height: 3.5rem; }
+</style>
+    
 <?php
 
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
@@ -87,18 +99,19 @@ if ($section == "ffmpeg") {
             localize("MODAL_FFMPEG_DESCRIPTION_1") . '<br>' .
             localize("MODAL_FFMPEG_DESCRIPTION_2") .'<br><br>' .
             localize("MODAL_FFMPEG_DESCRIPTION_3") . '</b><br>' .
-        '<span id="download-area">' .
-            '<a class="provideffmpeg" href="#">' .
-                '<div class="fa-4x text-center" style="text-align: center;">' .
-                     '<span class="fa-layers fa-fw">' .
-                        '<i class="fas fa-folder"></i>' .
-                        '<i class="fa-inverse fas fa-plus-square" data-fa-transform="shrink-10 down-1"></i>' .
-                    '</span>' .                '</div>' .
-                '<div class="text-center">' .
-                    localize("MODAL_FFMPEG_CREATE_FOLDER") .
-                '</div>' .
-            '</a>' .
-        '</span>' .
+            '<span id="download-area">' .
+                '<a class="provideffmpeg" href="#">' .
+                    '<div class="fa-4x text-center" style="text-align: center;">' .
+                        '<span class="fa-layers fa-fw">' .
+                            '<i class="fas fa-folder"></i>' .
+                            '<i class="fa-inverse fas fa-plus-square" data-fa-transform="shrink-10 down-1"></i>' .
+                        '</span>' .
+                    '</div>' .
+                    '<div class="text-center">' .
+                        localize("MODAL_FFMPEG_CREATE_FOLDER") .
+                    '</div>' .
+                '</a>' .
+            '</span>' .
         '</div>' .
         '<div class="modal-footer">' .
             '<button type="button" class="btn btn-outline-secondary btn-close" data-dismiss="modal">' . localize("BTN_CLOSE") . '</button>');
@@ -133,10 +146,14 @@ if(isset($_POST["submit"])) {
             var action = 'provideffmpeg';
             var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action;
 
+            var is_OSX = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+            if (is_OSX) { clientos = "apple" } else { clientos = "pc"} 
             $.ajax({
                 type: 'POST',
                 url: strUrl,
-                success: function(data) {}
+                success: function(data) {
+                    ffmpeg_folder_info(clientos);
+                }
             });
         });
     });

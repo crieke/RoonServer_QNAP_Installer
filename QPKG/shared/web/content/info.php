@@ -35,7 +35,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                                 :</b> <?php echo $qpkg_conf['RoonServer']['Version']; ?><br>
                             <b><?php echo "ffmpeg"; ?>
                                 :</b>
-            <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php echo localize($usedFfmpeg); ?>
+            <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php if ( $customFfmpeg ) { echo localize(MODAL_FFMPEG_USER_SUPPLIED_VERSION); } else { echo localize(MODAL_FFMPEG_SYSTEM_DEFAULT); } ?>
             </button></span>
         </span>
                         </p>

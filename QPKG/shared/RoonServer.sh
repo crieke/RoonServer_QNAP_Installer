@@ -97,11 +97,16 @@ start_RoonServer () {
   if [ "${ROON_DATABASE_DIR}" != "" ] && [ -d "${ROON_DATABASE_DIR}" ]; then
   
   ## Check if user provided own ffmpeg version
-    if [ -d "${ROON_FFMPEG_PROVIDEFOLDER}"  ] && [ -f "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" ]; then
-      cp "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" "${QPKG_ROOT}/bin/"
-      chmod 755 "${QPKG_ROOT}/bin/ffmpeg"
-      ## rm temporary FFMPEG Provide folder      
-      rm -R  "${ROON_FFMPEG_PROVIDEFOLDER}"
+    if [ -d "${ROON_FFMPEG_PROVIDEFOLDER}"  ]; then
+      if [ -f "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" ]; then
+        cp "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" "${QPKG_ROOT}/bin/"
+        chmod 755 "${QPKG_ROOT}/bin/ffmpeg"
+        ## rm temporary FFMPEG Provide folder      
+        rm -R  "${ROON_FFMPEG_PROVIDEFOLDER}"
+        echolog "Copied user provided ffmpeg binary."
+      else
+        echolog "Could not find custom ffmpeg in folder at db dir."
+      fi
     fi
       export PATH="${QPKG_ROOT}/bin:$PATH"
 
@@ -205,7 +210,7 @@ case "$1" in
         kill ${PID} >> $ROON_LOG_FILE
         rm "${ROON_PIDFILE}"
         rm -rf "${ROON_TMP_DIR}"/*
-        if [[ $2 != "keepwebalive" || isRestart ]]; then
+        if [[ $2 != "keepwebalive" ]]; then
            rm -rf "${QPKG_ROOT}/web/tmp"/*
            rm  "${WEB_PATH}${WEBUI}"
         fi

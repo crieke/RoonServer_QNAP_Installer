@@ -180,15 +180,9 @@ if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
 fi
 
 pkg_pre_install(){
-    ### keep installed ffmpeg and move to extract directory
-    if [ -f ${SYS_QPKG_DIR}/bin/ffmpeg ]; then
-        echo "ffmpeg kept!" >> /share/Public/test.txt
-    fi
-
     ### keep current RoonServer binaries and prevent redownload
     if [ -d ${SYS_QPKG_DIR}/RoonServer ]; then
         isUpgrade=true
-        echo "RoonServer kept!" >> /share/Public/test.txt
     else
         isUpgrade=false
     fi

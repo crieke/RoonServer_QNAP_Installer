@@ -59,9 +59,31 @@ if ($strVarAction == 'dbPathIsSet') {
 }
 
 if ($strVarAction == 'provideffmpeg') {
-    $ffmpegfoldername="PROVIDE_FFMPEG_HERE";
+    $ffmpegfoldername="ffmpeg_For_RoonServer";
     if (!file_exists('/share' . $dblocation . '/' . $ffmpegfoldername)) {
         mkdir('/share' . $dblocation . '/' . $ffmpegfoldername, 0777, true);
+    }
+}
+
+if ($strVarAction == 'checkFfmpeg') {
+    $ffmpegfoldername="ffmpeg_For_RoonServer";
+    header('Content-Type: application/json');
+    $ffmpegoutput = is_file('/share' . $dblocation . '/' . $ffmpegfoldername .'/ffmpeg');
+    if ($ffmpegoutput !== false ) {
+        echo json_encode(array(
+            'success' => true
+        ));    
+    } else {
+        echo json_encode(array(
+            'success' => false
+        ));
+    }
+}
+
+if ($strVarAction == 'removeffmpeg') {
+    $ffmpegfile=APPINSTALLPATH . '/bin/ffmpeg';
+    if (file_exists($ffmpegfile)) {
+        unlink($ffmpegfile);
     }
 }
 
@@ -80,11 +102,6 @@ if ($strVarAction == 'redownload') {
 if ($strVarAction == 'downloadlogs') {
     $output = downloadLogs($strSessionID, $dblocation);
     return $output;
-}
-
-if ($strVarAction == 'startRoonServer') {
-    $startScript = '/sbin/qpkg_service restart RoonServer';
-    shell_exec($startScript);
 }
 
 if ($strVarAction == 'restartRoonServer') {

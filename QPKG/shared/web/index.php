@@ -388,81 +388,138 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     function db_save_button() {
         if (!dbexist) {
             save_location();
-            selectStorageSuccess();
+            btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';
+            SuccessAni('#modal-body', btn_LocationSaved);
             dbexist = true;
         }
         else if (newdbpath != currentPath) {
-            $('#modal-content').html('<div class="modal-header">\n' +
-                '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_HEADLINE")); ?></h4>\n' +
-                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +
-                '</div>\n' +
-                '<div id="modal-body" class="modal-body">\n' +
+            $('#modal-content').html('<div class="modal-header">' +
+                '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_HEADLINE")); ?></h4>' +
+                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+                '</div>' +
+                '<div id="modal-body" class="modal-body">' +
                 '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_TEXT")); ?>' +
-                '<a id="restartRoonServer" href="#" onclick="saveAndRestart()">\n' +
-                '<div class="fa-4x text-center" style="text-align: center;">\n' +
+                '<a id="saveDBrestartRoonServer" href="#" onclick="saveAndRestart()">' +
+                '<div class="fa-4x text-center" style="text-align: center;">' +
 
-                '<span class="fa-layers fa-fw">\n' +
-                '<i class="fas fa-circle"></i>\n' +
-                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>\n' +
-                '</span>\n' +
-                '</div>\n' +
-                '<div class="text-center">\n' +
-                '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_ROONSERVER")); ?>\n' +
-                '</div>\n' +
-                '</a>\n' +
-                '</div>\n');
+                '<span class="fa-layers fa-fw">' +
+                '<i class="fas fa-circle"></i>' +
+                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' +
+                '</span>' +
+                '</div>' +
+                '<div class="text-center">' +
+                '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_ROONSERVER")); ?>' +
+                '</div>' +
+                '</a>' +
+                '</div>');
         }
         else {
-            $('#modal-content').html('<div class="modal-header">\n' +
-                '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH")); ?></h4>\n' +
-                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\n' +
-                '</div>\n' +
-                '<div id="modal-body" class="modal-body">\n' +
+            $('#modal-content').html('<div class="modal-header">' +
+                '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH")); ?></h4>' +
+                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+                '</div>' +
+                '<div id="modal-body" class="modal-body">' +
                 '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH_TEXT")); ?>' +
-                '<a id="restartRoonServer" href="#" data-dismiss="modal">\n' +
-                '<div class="fa-4x text-center" style="text-align: center;">\n' +
-                '<span class="fa-layers fa-fw">\n' +
-                '<i class="fas fa-exclamation-circle faa-shake animated"></i>\n' +
-                '</span>\n' +
-                '</div>\n' +
-                '<div class="text-center">\n' +
-                '<?php echo str_replace("'", "\'", localize("BTN_CLOSE")); ?>\n' +
-                '</div>\n' +
-                '</a>\n' +
-                '</div>\n');
+                '<a id="restartRoonServer" href="#" data-dismiss="modal">' +
+                '<div class="fa-4x text-center" style="text-align: center;">' +
+                '<span class="fa-layers fa-fw">' +
+                '<i class="fas fa-exclamation-circle faa-shake animated"></i>' +
+                '</span>' +
+                '</div>' +
+                '<div class="text-center">' +
+                '<?php echo str_replace("'", "\'", localize("BTN_CLOSE")); ?>' +
+                '</div>' +
+                '</a>' +
+                '</div>');
         }
     }
     
     
-        function ffmpeg_folder_info(clientos) {
+    function ffmpeg_folder_info(clientos) {
+        $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_4")) ?><br><br>' +
+        '<b><?php echo localize('COMMON_PATH'); ?>:</b><?php echo str_replace("/", " / ", $dblocation ); ?> / ffmpeg_For_RoonServer<br><br>' + 
+        '<img width="300" height="112" style="text-align: center; display:block; margin: auto;" src="img/dropffmpeg_'+ clientos +'.png" \> <br>' +
+        '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_5")) ?><br><br>' +
+        '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_6")) ?><br>' + 
+        '<a id="restartRoonServer" href="#" onclick="checkFFmpegAndrestart()">' +
+                '<div class="fa-4x text-center" style="text-align: center;">' +
+                '<span class="fa-layers fa-fw">' +
+                '<i class="fas fa-circle"></i>' +
+                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' +
+                '</span>' +
+                '</div>' +
+                '<div class="text-center">' +
+                '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_BUTTON_USE_FFMPEG_BTN")); ?>' +
+                '</div>' +
+                '</a>');
+    }
+
+    function ffmpeg_removed_info() {
             
-            $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_4")) ?><br><br>' +
-            '<img width="300" height="112" style="text-align: center; display:block; margin: auto;" src="img/dropffmpeg_'+ clientos +'.png" \> <br>' +
-            '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_5")) ?><br><br>' +
-            '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_6")) ?>');
-        }
+        $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_REMOVE_DESCRIPTION_1")) ?><br><br>' +
+        '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_REMOVE_DESCRIPTION_2")) ?><br><br>' +
+        '<a id="restartRoonServer" href="#" onclick="RemoveFfmpegAndRestartRoonServer()">' +
+                '<div class="fa-4x text-center" style="text-align: center;">' +
+
+                '<span class="fa-layers fa-fw">' +
+                '<i class="fas fa-circle"></i>' +
+                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' +
+                '</span>' +
+                '</div>' +
+                '<div class="text-center">' +
+                '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_REMOVE_FFMPEG_BTN")); ?>' +
+                '</div>' +
+                '</a>');
+    }
     
+    
+    
+    function RemoveFfmpegAndRestartRoonServer() {
+            var action = 'removeffmpeg';
+            var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action;
+            $.ajax({
+                type: 'POST',
+                url: strUrl,
+                success: function(data) {
+                    restartRoonServer();
+                    SuccessAni('#modal-body', '<?php echo localize("MODAL_FFMPEG_FFMPEG_REMOVE_CHECK"); ?>')
+                }
+            });
+        }
+
     function selectStorageSuccess() {
 
         btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';
         SuccessAni('#modal-body', btn_LocationSaved);
-
-        $.ajax({
-            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=startRoonServer'
-        });
     }
 
     function saveAndRestart() {
         save_location();
         restartRoonServer();
+        btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';
+        SuccessAni('#modal-body', btn_LocationSaved);
+
     }
 
     function restartRoonServer() {
         $.ajax({
             url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
         });
-        selectStorageSuccess();
+    }
 
+    function checkFFmpegAndrestart() {
+        $.ajax({
+            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=checkFfmpeg',
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    restartRoonServer();
+                    SuccessAni('#modal-body', '<?php echo localize("MODAL_FFMPEG_FFMPEG_CHECK_SUCCESS") ?>');
+                } else {
+                    alert('ffmpeg file not found.');
+                }
+            }
+        });
     }
 
     function restartRoonServerAndRefresh() {

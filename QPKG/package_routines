@@ -189,7 +189,7 @@ pkg_pre_install(){
 }
 
 pkg_install(){
-    if  !$isUpgrade; then
+    if  [ "$isUpgrade" = false ]; then
         if $ONLINEINSTALL; then
             "${CMD_WGET}" "${ROON_PKG_URL}"
             R=$?

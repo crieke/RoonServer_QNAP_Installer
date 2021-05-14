@@ -23,6 +23,7 @@ ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $2}' | tail -1`
 ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $5}' | tail -1`
+ROON_FFMPEG_PROVIDEFOLDER="${ROON_DATABASE_DIR}/ffmpeg_For_RoonServer"
 BLUE_UDEV_ENABLE=`grep -c bluetooth /lib/udev/rules.d/*.rules 2>/dev/null`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
@@ -94,10 +95,34 @@ info ()
 
 start_RoonServer () {
   if [ "${ROON_DATABASE_DIR}" != "" ] && [ -d "${ROON_DATABASE_DIR}" ]; then
-      export ROON_DATAROOT="$ROON_DATABASE_DIR"
-      if $BundledLibPath; then
-         export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+  
+  ## Check if user provided own ffmpeg version
+    if [ -d "${ROON_FFMPEG_PROVIDEFOLDER}"  ]; then
+      if [ -f "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" ]; then
+        cp "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" "${QPKG_ROOT}/bin/"
+        chmod 755 "${QPKG_ROOT}/bin/ffmpeg"
+        ## rm temporary FFMPEG Provide folder      
+        rm -R  "${ROON_FFMPEG_PROVIDEFOLDER}"
+        echolog "Copied user provided ffmpeg binary."
+      else
+        echolog "Could not find custom ffmpeg in folder at db dir."
       fi
+    fi
+      export PATH="${QPKG_ROOT}/bin:$PATH"
+
+      echo "" | tee -a $ROON_LOG_FILE
+      echo "############### Used FFMPEG Version ##############" | tee -a $ROON_LOG_FILE
+      echo -e $(ffmpeg -version) | tee -a $ROON_LOG_FILE
+      echo "##################################################" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a $ROON_LOG_FILE
+
+            
+      export ROON_DATAROOT="$ROON_DATABASE_DIR"
+
+      if $BundledLibPath; then
+        export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+      fi
+
       export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export ALSA_CONFIG_PATH
       export TMP="${ROON_TMP_DIR}"
@@ -196,6 +221,7 @@ case "$1" in
     ;;
 
   restart)
+    isRestart=true
     $0 stop
     $0 start
     ;;

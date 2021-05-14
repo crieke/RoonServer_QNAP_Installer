@@ -59,10 +59,15 @@ if ($strVarAction == 'dbPathIsSet') {
 }
 
 if ($strVarAction == 'provideffmpeg') {
+    header('Content-Type: application/json');
     $ffmpegfoldername="ffmpeg_For_RoonServer";
     if (!file_exists('/share' . $dblocation . '/' . $ffmpegfoldername)) {
         mkdir('/share' . $dblocation . '/' . $ffmpegfoldername, 0777, true);
     }
+    echo json_encode(array(
+        'success' => true,
+        'dblocation' => $dblocation
+    ));
 }
 
 if ($strVarAction == 'checkFfmpeg') {
@@ -108,3 +113,4 @@ if ($strVarAction == 'restartRoonServer') {
     $startScript = '/sbin/qpkg_service restart RoonServer';
     shell_exec($startScript);
 }
+

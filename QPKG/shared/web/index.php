@@ -391,6 +391,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';
             SuccessAni('#modal-body', btn_LocationSaved);
             dbexist = true;
+            restartRoonServerAndRefresh();
         }
         else if (newdbpath != currentPath) {
             $('#modal-content').html('<div class="modal-header">' +
@@ -435,9 +436,9 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     }
     
     
-    function ffmpeg_folder_info(clientos) {
+    function ffmpeg_folder_info(clientos, dblocation) {
         $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_4")) ?><br><br>' +
-        '<b><?php echo localize('COMMON_PATH'); ?>:</b><?php echo str_replace("/", " / ", $dblocation ); ?> / ffmpeg_For_RoonServer<br><br>' + 
+        '<span style=display:inline;><b><?php echo localize('COMMON_PATH'); ?>:</b> ' + dblocation.replace('/', ' / <span style="color: #F8D785;"><i class="fas fa-folder"></i></span> ') + ' / <span style="color: #F8D785;"><i class="fas fa-folder"></i></span> ffmpeg_For_RoonServer</span><br><br>' + 
         '<img width="300" height="112" style="text-align: center; display:block; margin: auto;" src="img/dropffmpeg_'+ clientos +'.png" \> <br>' +
         '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_5")) ?><br><br>' +
         '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_6")) ?><br>' + 

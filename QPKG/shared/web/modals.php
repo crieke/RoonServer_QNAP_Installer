@@ -156,10 +156,10 @@ if(isset($_POST["submit"])) {
             var is_OSX = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
             if (is_OSX) { clientos = "apple" } else { clientos = "pc"} 
             $.ajax({
-                type: 'POST',
+                dataType: 'json',
                 url: strUrl,
-                success: function(data) {
-                    ffmpeg_folder_info(clientos);
+                success: function (response) {
+                    ffmpeg_folder_info(clientos, response.dblocation);
                 }
             });
         });
@@ -169,3 +169,4 @@ if(isset($_POST["submit"])) {
         });
     });
 </script>
+

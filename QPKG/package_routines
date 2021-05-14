@@ -179,31 +179,39 @@ if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
     fi
 fi
 
-#pkg_pre_install(){
-#}
+pkg_pre_install(){
+    ### keep current RoonServer binaries and prevent redownload
+    if [ -d ${SYS_QPKG_DIR}/RoonServer ]; then
+        isUpgrade=true
+    else
+        isUpgrade=false
+    fi
+}
 
 pkg_install(){
-    if $ONLINEINSTALL; then
-        "${CMD_WGET}" "${ROON_PKG_URL}"
+    if  !$isUpgrade; then
+        if $ONLINEINSTALL; then
+            "${CMD_WGET}" "${ROON_PKG_URL}"
+            R=$?
+            if [ $R -ne 0 ]; then
+                err_log "Could not download binary archive from Roon Labs website. Please check your internet connection."
+            fi
+        fi
+        
+        "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
         R=$?
         if [ $R -ne 0 ]; then
-            err_log "Could not download binary archive from Roon Labs website. Please check your internet connection."
+            err_log "Error while decompressing the .tar.bz2 archive."
         fi
-    fi
     
-    "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
-    R=$?
-    if [ $R -ne 0 ]; then
-        err_log "Error while decompressing the .tar.bz2 archive."
+        ## Removing downloaded file after extract
+    
+        "${CMD_RM}" -f "${ROON_ARCHIVE}"
     fi
-
-    ## Removing downloaded file after extract
-
-    "${CMD_RM}" -f "${ROON_ARCHIVE}"
-
     ## Creating required folders and setting permissions
 
     "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/tmp
+    "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/bin
     "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/id
     "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
 }

@@ -25,7 +25,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                         <p class="card-text">
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_STATUS"); ?>
                                 :</b> <?php if (isRunning(APPINSTALLPATH . '/RoonServer.pid')) {
-                                echo '<span style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
+                                echo '<span data-toggle="tooltip" title="' . localize("OVERVIEW_ROONSERVER_PANEL_PID") .': ' . isRunning(APPINSTALLPATH . '/RoonServer.pid', "getpid") . '" style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
                             } else {
                                 echo '<span style="color: red;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_STOPPED") . '</span>';
                             } ?><br>
@@ -33,9 +33,11 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                                 :</b> <?php echo $RoonVersion[1]; ?><br>
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_QPKG_VERSION"); ?>
                                 :</b> <?php echo $qpkg_conf['RoonServer']['Version']; ?><br>
-                            <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_PID"); ?>
-                                :</b> <?php echo isRunning(APPINSTALLPATH . '/RoonServer.pid', "getpid"); ?><br>
-                            <br>
+                            <b><?php echo "ffmpeg"; ?>
+                                :</b>
+            <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php if ( $customFfmpeg ) { echo localize(MODAL_FFMPEG_USER_SUPPLIED_VERSION); } else { echo localize(MODAL_FFMPEG_SYSTEM_DEFAULT); } ?>
+            </button></span>
+        </span>
                         </p>
                         <p>
                         <h5><?php echo localize("OVERVIEW_ROONSERVER_PANEL_SUBHEAD_DATABASE"); ?></h5>

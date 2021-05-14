@@ -61,11 +61,10 @@ ${QPKG_ROOT}/RoonServer.sh stop keepwebalive > /dev/null 2>&1
     fi
     echo "Deleting downloaded .tar.bz2 file..."
     rm -f "${QPKG_ROOT}"/tmp/"${ROON_ARCHIVE}"
-    ${QPKG_ROOT}/RoonServer.sh start > /dev/null 2>&1
     if [ $R -ne 0 ]; then
         echo "Could not download installation archive from Roon Labs website. Please check your internet connection."
     fi
-    ${QPKG_ROOT}/RoonServer.sh start > /dev/null 2>&1
+    /sbin/qpkg_service start RoonServer  > /dev/null 2>&1
 }
 
 case "$1" in

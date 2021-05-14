@@ -56,6 +56,15 @@ if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
 
 
 $RoonVersion = file(rtrim(APPINSTALLPATH) . "/RoonServer/VERSION");
+$WHICH_FFMPEG = trim(shell_exec('PATH='.APPINSTALLPATH.'/bin:$PATH && which ffmpeg'));
+if (strpos($WHICH_FFMPEG, APPINSTALLPATH) !== false) {
+    $customFfmpeg = true;
+}
+else {
+        $customFfmpeg = false;
+}
+$ffmpegVersion=trim(shell_exec('PATH='.APPINSTALLPATH.'/bin:$PATH && ffmpeg -version | sed -n "s/ffmpeg version \([^ ]*\).*/\1/p;"'));
+
 $alsafull = file_get_contents('/proc/asound/cards');
 $alsaraw = fopen("/proc/asound/cards", 'r');
 $alsatext = fread($alsaraw, 25000);

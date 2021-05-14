@@ -85,9 +85,13 @@ function set_db_path($folder)
     if (is_dir("/share".$folder )) {
         shell_exec('setcfg RoonServer DB_Path "/share' . $folder . '" -f /etc/config/qpkg.conf');
         shell_exec(APPINSTALLPATH . '/Roonserver.sh start');
+        echo '<script>';
+        echo 'var currentPath = ' . $folder;
+        echo '</script>';
     } else {
         die();
     }
+}
 
 function getTreeAt($folder, $strSessionID)
 {

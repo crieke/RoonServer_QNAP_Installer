@@ -82,7 +82,12 @@ function removeFirstChildDir($path)
 
 function set_db_path($folder)
 {
-    if (is_dir("/share".$folder )) {
+   if(strpos($folder, '..') !== false)
+   { 
+       die(); 
+   }
+   
+   if ( is_dir("/share".$folder) ) {
         shell_exec('setcfg RoonServer DB_Path "/share' . $folder . '" -f /etc/config/qpkg.conf');
         shell_exec(APPINSTALLPATH . '/Roonserver.sh start');
         echo '<script>';
@@ -283,3 +288,4 @@ return sprintf('%1.2f' , $bytes / pow($base,$class)) . ' ' . $si_prefix[$class];
 
 
 ?>
+

@@ -1,8 +1,15 @@
 <?php
-if (!isset($_COOKIE['NAS_USER']) || empty($_COOKIE['NAS_USER'])) {
-    die("not logged in! ;)");
-}
-
+if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
+    $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://127.0.0.1:$_SERVER[SERVER_PORT]/cgi-bin/authLogin.cgi?sid=".$_COOKIE['NAS_SID'];
+    $xml = simplexml_load_file($url);
+    if ((bool)(int)$xml->authPassed[0] && (string)$xml->username[0] == $_COOKIE['NAS_USER']) 
+    {} else {
+        die("No valid Session!");
+    }
+ } else {
+    die("Not logged in!");
+ }
+ 
 $ContributorsManual = array(
     array(
         'login' => 'RoonLabs',

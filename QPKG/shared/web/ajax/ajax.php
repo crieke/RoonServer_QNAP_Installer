@@ -93,7 +93,7 @@ if ($strVarAction == 'removeffmpeg') {
 }
 
 if ($strVarAction == 'updateformfield') {
-    set_db_path($strVarTree);
+    set_db_path(escapeshellarg($strVarTree));
     flush();
     exit();
 }

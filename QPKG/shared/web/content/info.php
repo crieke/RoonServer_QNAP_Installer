@@ -8,13 +8,11 @@ if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://127.0.0.1:$_SERVER[SERVER_PORT]/cgi-bin/authLogin.cgi?sid=".$_COOKIE['NAS_SID'];
     $xml = simplexml_load_file($url);
     unset($context);
-    if ( (false === $xml) || !array_key_exists('authPassed', $xml) || !array_key_exists('username', $xml))
-    {
+    if ( (false === $xml) || !array_key_exists('authPassed', $xml) || !array_key_exists('username', $xml) || !array_key_exists('isAdmin', $xml)) {
         die('Could not verify session id.');
     }
-    if ( !(bool)(int)$xml->authPassed[0] || (string)$xml->username[0] !== $_COOKIE['NAS_USER'])
-    {
-        die('No authentic session id!');
+    if ( !(bool)(int)$xml->authPassed[0] || !(bool)(int)$xml->isAdmin[0] || (string)$xml->username[0] !== $_COOKIE['NAS_USER']) {
+        die('No authentic session id of an admin user!');
     }
 } else { 
     die('Not logged in!');

@@ -1,7 +1,13 @@
 <?php
 if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
+   $context = stream_context_create(array('ssl'=>array(
+      'verify_peer' => false, 
+      "verify_peer_name"=>false
+   )));
+   libxml_set_streams_context($context);
    $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://127.0.0.1:$_SERVER[SERVER_PORT]/cgi-bin/authLogin.cgi?sid=".$_COOKIE['NAS_SID'];
    $xml = simplexml_load_file($url);
+   unset($context);
    if ( (false === $xml) || !array_key_exists('authPassed', $xml) || !array_key_exists('username', $xml))
    {
       die('Could not verify session id.');

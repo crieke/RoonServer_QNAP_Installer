@@ -1,18 +1,24 @@
 <?php
 if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
-       $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://127.0.0.1:$_SERVER[SERVER_PORT]/cgi-bin/authLogin.cgi?sid=".$_COOKIE['NAS_SID'];
-       $xml = simplexml_load_file($url);
-       if ( (false === $xml) || !array_key_exists('authPassed', $xml) || !array_key_exists('username', $xml))
-       {
-          die('Could not verify session id.');
-       }
-       if ( !(bool)(int)$xml->authPassed[0] || (string)$xml->username[0] !== $_COOKIE['NAS_USER'])
-       {
-          die('No authentic session id!');
-       }
-    } else { 
-       die('Not logged in!');
+    $context = stream_context_create(array('ssl'=>array(
+        'verify_peer' => false, 
+        "verify_peer_name"=>false
+    )));
+    libxml_set_streams_context($context);
+    $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://127.0.0.1:$_SERVER[SERVER_PORT]/cgi-bin/authLogin.cgi?sid=".$_COOKIE['NAS_SID'];
+    $xml = simplexml_load_file($url);
+    unset($context);
+    if ( (false === $xml) || !array_key_exists('authPassed', $xml) || !array_key_exists('username', $xml))
+    {
+        die('Could not verify session id.');
     }
+    if ( !(bool)(int)$xml->authPassed[0] || (string)$xml->username[0] !== $_COOKIE['NAS_USER'])
+    {
+        die('No authentic session id!');
+    }
+} else { 
+    die('Not logged in!');
+}
 
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__include.php");
 include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");

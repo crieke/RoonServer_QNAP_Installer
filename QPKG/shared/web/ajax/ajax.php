@@ -108,7 +108,7 @@ if ($strVarAction == 'removeffmpeg') {
 }
 
 if ($strVarAction == 'updateformfield') {
-    set_db_path(escapeshellarg($strVarTree));
+    set_db_path(escapeshellarg('/share' . $strVarTree));
     flush();
     exit();
 }

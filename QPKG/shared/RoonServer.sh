@@ -164,7 +164,6 @@ start_RoonServer () {
       /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
       /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
   else
-      rm "${ROON_PIDFILE}"
       /sbin/write_log "[RoonServer] A storage location for RoonServer's database has not been set. Please create it in the web user interface in ordner to start RoonServer." 4
   fi
 

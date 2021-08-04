@@ -97,21 +97,18 @@ function removeFirstChildDir($path)
 
 function set_db_path($folder)
 {
-   if(strpos($folder, '..') !== false)
-   { 
+   if(strpos($folder, '/..') !== false)
+   {
        die(); 
    }
-   
-   if ( is_dir("/share".$folder) ) {
-        shell_exec('setcfg RoonServer DB_Path "/share' . $folder . '" -f /etc/config/qpkg.conf');
+   if ( is_dir(str_replace("'", "", $folder)) ) {
+        shell_exec('setcfg RoonServer DB_Path ' . $folder . ' -f /etc/config/qpkg.conf');
         shell_exec(APPINSTALLPATH . '/Roonserver.sh start');
-        echo '<script>';
-        echo 'var currentPath = ' . $folder;
-        echo '</script>';
+        unset($folder);
     } else {
         die();
     }
-}
+ }
 
 function getTreeAt($folder, $strSessionID)
 {

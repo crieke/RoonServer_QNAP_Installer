@@ -114,7 +114,7 @@ start_RoonServer () {
 
 
       LD_LIBRARY_PATH=/lib64:/lib:${ROON_LIB_DIR}:${LD_LIBRARY_PATH}
-      if [[ $MAJOR_QTS_VER -ge 43 ]]; then
+      if [ $MAJOR_QTS_VER -lt 43 ]; then
         LD_LIBRARY_PATH=${ROON_QTS42_LIB_DIR}:${LD_LIBRARY_PATH}
       fi
 

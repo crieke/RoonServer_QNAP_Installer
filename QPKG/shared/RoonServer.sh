@@ -17,6 +17,7 @@ QNAP_SERIAL=`get_hwsn`
 MTU=`ifconfig | grep eth[0-9] -A1 | grep MTU | grep MTU | cut -d ":" -f 2 | awk '{print $1}' | xargs | sed "s/ ---- /\n---- /g"`
 ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
+ROON_QTS42_LIB_DIR="${QPKG_ROOT}/lib64_ForQTS4.2"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_ID_DIR="${QPKG_ROOT}/id"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
@@ -60,13 +61,6 @@ if [ $ROON_DATABASE_DIR != "" ]; then
     ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
 fi
 
-
-if [[ $MAJOR_QTS_VER -ge 43 ]]; then
-   BundledLibPath=false;
-else
-   BundledLibPath=true;
-fi
-
 if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
@@ -89,7 +83,6 @@ info ()
    echolog "Installed QTS Apps" "${QTS_INSTALLED_APPS}"
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
-   echolog "Loading additional 64-bit libs" "${BundledLibPath}"
    echolog "Bluetooth udev enabled" ${BLUE_UDEV_ENABLE}
 }
 
@@ -119,10 +112,13 @@ start_RoonServer () {
             
       export ROON_DATAROOT="$ROON_DATABASE_DIR"
 
-      if $BundledLibPath; then
-        export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+      LD_LIBRARY_PATH=/lib64:/lib:${ROON_LIB_DIR}:${LD_LIBRARY_PATH}
+      if [[ $MAJOR_QTS_VER -ge 43 ]]; then
+        LD_LIBRARY_PATH=${ROON_QTS42_LIB_DIR}:${LD_LIBRARY_PATH}
       fi
 
+      export LD_LIBRARY_PATH
       export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export ALSA_CONFIG_PATH
       export TMP="${ROON_TMP_DIR}"
@@ -153,18 +149,6 @@ start_RoonServer () {
       echo "##################################################" | tee -a $ROON_LOG_FILE
       echo "" | tee -a $ROON_LOG_FILE
       echo "" | tee -a $ROON_LOG_FILE
-
-      /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
-      /sbin/write_log "[RoonServer] ROON_DATABASE_DIR = ${ROON_DATABASE_DIR}" 4
-      if $BundledLibPath; then
-         /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. Additional library folder = ${ROON_LIB_DIR}" 4
-      else
-         /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. No additional libraries required." 4
-      fi
-      /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
-      /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
-  else
-      /sbin/write_log "[RoonServer] A storage location for RoonServer's database has not been set. Please create it in the web user interface in ordner to start RoonServer." 4
   fi
 
 }

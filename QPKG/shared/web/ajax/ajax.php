@@ -73,40 +73,6 @@ if ($strVarAction == 'dbPathIsSet') {
     return true;
 }
 
-if ($strVarAction == 'provideffmpeg') {
-    header('Content-Type: application/json');
-    $ffmpegfoldername="ffmpeg_For_RoonServer";
-    if (!file_exists('/share' . $dblocation . '/' . $ffmpegfoldername)) {
-        mkdir('/share' . $dblocation . '/' . $ffmpegfoldername, 0777, true);
-    }
-    echo json_encode(array(
-        'success' => true,
-        'dblocation' => $dblocation
-    ));
-}
-
-if ($strVarAction == 'checkFfmpeg') {
-    $ffmpegfoldername="ffmpeg_For_RoonServer";
-    header('Content-Type: application/json');
-    $ffmpegoutput = is_file('/share' . $dblocation . '/' . $ffmpegfoldername .'/ffmpeg');
-    if ($ffmpegoutput !== false ) {
-        echo json_encode(array(
-            'success' => true
-        ));    
-    } else {
-        echo json_encode(array(
-            'success' => false
-        ));
-    }
-}
-
-if ($strVarAction == 'removeffmpeg') {
-    $ffmpegfile=APPINSTALLPATH . '/bin/ffmpeg';
-    if (file_exists($ffmpegfile)) {
-        unlink($ffmpegfile);
-    }
-}
-
 if ($strVarAction == 'updateformfield') {
     set_db_path(escapeshellarg('/share' . $strVarTree));
     flush();
@@ -128,4 +94,3 @@ if ($strVarAction == 'restartRoonServer') {
     $startScript = '/sbin/qpkg_service restart RoonServer';
     shell_exec($startScript);
 }
-

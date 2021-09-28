@@ -78,24 +78,6 @@ if ($section == "reinstall") {
             '<button type="button" class="btn btn-outline-secondary btn-close" data-dismiss="modal">' . localize("BTN_CLOSE") . '</button>');
 }
 if ($section == "ffmpeg") {
-    if ($customFfmpeg == true) {
-        $removeFfmpeg='<a class="removeffmpeg" href="#">' .
-                        '<div class="col-md-6" style="float: right; margin: 0 auto;">' .
-                            '<div class="fa-4x text-center" style="text-align: center;">' .
-                                '<span class="fa-layers fa-fw">' .
-                                    '<i class="fas fa-trash-alt"></i>' .
-                                '</span>' .
-                            '</div>' .
-                            '<div class="text-center">' .
-                                localize("MODAL_FFMPEG_REMOVE") .
-                            '</div>' .
-                        '</div>' .
-                      '</a>';
-        } 
-    else {
-        $removeFfmpeg='';
-    }
-            
     echo nl2br(
             '<div class="modal-header">' .
             '<h4 id="modal-title" class="modal-title"><img style="align: center; width: 30px; height: auto; margin-right: 20px;" src="img/file_ffmpeg.svg">' . localize("MODAL_FFMPEG_HEADLINE") . '</h4>' .
@@ -105,21 +87,6 @@ if ($section == "ffmpeg") {
             localize("MODAL_FFMPEG_DESCRIPTION_1") . '<br>' .
             localize("MODAL_FFMPEG_DESCRIPTION_2") .'<br><br>' .
             localize("MODAL_FFMPEG_DESCRIPTION_3") . '</b><br>' .
-            '<div id="row">' .
-                '<a class="provideffmpeg" href="#">' .
-                    '<div class="col-md-6" style="float: left; margin: 0 auto;">' . 
-                        '<div class="fa-4x text-center" style="text-align: center;">' .
-                            '<span class="fa-layers fa-fw">' .
-                                '<i class="fas fa-folder"></i>' .
-                                '<i class="fa-inverse fas fa-plus-square" data-fa-transform="shrink-10 down-1"></i>' .
-                            '</span>' .
-                        '</div>' .
-                        '<div class="text-center">' .
-                            localize("MODAL_FFMPEG_CREATE_FOLDER") .
-                        '</div>' .
-                    '</div>' .
-                '</a>' . $removeFfmpeg .
-            '</div>' .
         '</div>' .
         '<div class="modal-footer">' .
             '<button type="button" class="btn btn-outline-secondary btn-close" data-dismiss="modal">' . localize("BTN_CLOSE") . '</button>');
@@ -140,33 +107,4 @@ if ($section == "setStorage") {
 if ($section == "about") {
     include("content/about.php");
 }
-
-if(isset($_POST["submit"])) { 
-    if (!file_exists('/share/RoonServer-Database/FFMPEG_IMPORT_FOR_ROON_SERVER')) {
-        mkdir('/share/RoonServer-Database/FFMPEG_IMPORT_FOR_ROON_SERVER', 0777, true);
-    } 
-}
 ?>
-
-<script type="text/javascript">
-    $(document).ready(function(){
-        $(".provideffmpeg").click(function(){
-            var action = 'provideffmpeg';
-            var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action;
-            var is_OSX = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
-            if (is_OSX) { clientos = "apple" } else { clientos = "pc"} 
-            $.ajax({
-                dataType: 'json',
-                url: strUrl,
-                success: function (response) {
-                    ffmpeg_folder_info(clientos, response.dblocation);
-                }
-            });
-        });
-        
-        $(".removeffmpeg").click(function(){
-            ffmpeg_removed_info();
-        });
-    });
-</script>
-

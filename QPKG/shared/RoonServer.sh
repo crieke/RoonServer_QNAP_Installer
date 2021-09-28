@@ -75,6 +75,14 @@ info ()
    echolog "MTU" "${MTU}"
 }
 
+RoonOnNAS_folderCheck ()
+{
+  if [ -d "${ROON_DATABASE_DIR}" ]; then
+    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS"
+    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS/bin" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS/bin" 
+  fi
+}
+
 start_RoonServer () {
   if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
   
@@ -110,10 +118,10 @@ start_RoonServer () {
       # Checking for additional start arguments.
       if [[ -f ${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
           ROON_ARGS=`cat "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
+          echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
       else
           ROON_ARGS=""
       fi
-      echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
 
       ## Start RoonServer
       setcfg ${QPKG_NAME} MULTIMEDIA_DISABLE_ON_START ${MULTIMEDIA_DISABLE} -f "${CONF}"
@@ -142,6 +150,7 @@ start_daemon ()
 case "$1" in
   start)
     ENABLED=$(/sbin/getcfg $QPKG_NAME Enable -u -d FALSE -f $CONF)
+    RoonOnNAS_folderCheck
     if [ "$ENABLED" != "TRUE" ]; then
         echolog "$QPKG_NAME is disabled."
         exit 1

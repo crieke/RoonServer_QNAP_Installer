@@ -222,4 +222,18 @@ pkg_post_install(){
     
     "${CMD_SETCFG}" "${QPKG_NAME}" BINARIES_URL "${ROON_PKG_URL}" -f "${SYS_QPKG_CONFIG_FILE}"
     "${CMD_SETCFG}" "${QPKG_NAME}" Force_Visible 1 -f "${SYS_QPKG_CONFIG_FILE}"
+    
+    
+    # Restructuring Database folder
+    ROON_DB_PATH=$(${CMD_GETCFG} ${QPKG_NAME} DB_Path -f ${SYS_QPKG_CONFIG_FILE})
+
+    if [ -d  "${ROON_DB_PATH}" ] && [ -d  "${ROON_DB_PATH}/RoonServer" ] && [ -d  "${ROON_DB_PATH}/RAATServer" ] && [ ! -d "${ROON_DB_PATH}/RoonOnNAS" ]; then
+        ${CMD_MKDIR} "${ROON_DB_PATH}/RoonOnNAS"
+        ${CMD_MKDIR} "${ROON_DB_PATH}/RoonOnNAS/bin"
+        ${CMD_MV} "${ROON_DB_PATH}/RoonServer" "${ROON_DB_PATH}/RoonOnNAS/"
+        ${CMD_MV} "${ROON_DB_PATH}/RAATServer" "${ROON_DB_PATH}/RoonOnNAS/"
+       [ -d "${ROON_DB_PATH}/RoonGoer" ] && ${CMD_MV} "${ROON_DB_PATH}/RoonGoer" "${ROON_DB_PATH}/RoonOnNAS/"    
+       [ -f "${SYS_QPKG_DIR}/bin/ffmpeg" ] && ${CMD_MV} "${SYS_QPKG_DIR}/bin/ffmpeg" "${ROON_DB_PATH}/RoonOnNAS/bin/"    
+    fi
+     
 }

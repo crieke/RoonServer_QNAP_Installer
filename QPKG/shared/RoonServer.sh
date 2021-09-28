@@ -22,13 +22,13 @@ ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_ID_DIR="${QPKG_ROOT}/id"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
-ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $2}' | tail -1`
-ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $5}' | tail -1`
-ROON_FFMPEG_PROVIDEFOLDER="${ROON_DATABASE_DIR}/ffmpeg_For_RoonServer"
+ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATAROOT}" | awk '{print $2}' | tail -1`
+ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATAROOT}" | awk '{print $5}' | tail -1`
+ROON_DATAROOT="${QPKG_NAME}/RoonOnNAS"
+ROON_FFMPEG="${ROON_DATAROOT}/bin"
 BLUE_UDEV_ENABLE=`grep -c bluetooth /lib/udev/rules.d/*.rules 2>/dev/null`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
-ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
-ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROONSERVER_QNAP_LOG.txt"
+ROON_LOG_FILE="${ROON_DATAROOT}/ROONSERVER_QNAP_LOG.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
 
 ST_COLOR="\033[38;5;34m"
@@ -57,10 +57,6 @@ if [ x$BLUE_UDEV_ENABLE = x0 ]; then
     [ ! -x /etc/init.d/bluetooth.sh ] || /etc/init.d/bluetooth.sh start >> ${ROON_LOG_FILE}
 fi
 
-if [ $ROON_DATABASE_DIR != "" ]; then
-    ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
-fi
-
 if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
@@ -68,7 +64,7 @@ fi
 info ()
 {
    ## Echoing System Info
-   echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR} - [`[ -d \"$ROON_DATABASE_DIR\" ] && echo \"available\" || echo \"not available\"`]"
+   echolog "ROON_DATABASE_DIR" "${ROON_DATAROOT} - [`[ -d \"${ROON_DATAROOT}\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
    echolog "ROON_ID_DIR" "$ROON_ID_DIR - [`[ -d \"$ROON_ID_DIR\" ] && echo \"available\" || echo \"not available\"`]"  
    echolog "Free Inodes" "${ROON_DATABASE_DIR_FREE_INODES}"
@@ -87,21 +83,10 @@ info ()
 }
 
 start_RoonServer () {
-  if [ "${ROON_DATABASE_DIR}" != "" ] && [ -d "${ROON_DATABASE_DIR}" ]; then
+  if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
   
   ## Check if user provided own ffmpeg version
-    if [ -d "${ROON_FFMPEG_PROVIDEFOLDER}"  ]; then
-      if [ -f "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" ]; then
-        cp "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" "${QPKG_ROOT}/bin/"
-        chmod 755 "${QPKG_ROOT}/bin/ffmpeg"
-        ## rm temporary FFMPEG Provide folder      
-        rm -R  "${ROON_FFMPEG_PROVIDEFOLDER}"
-        echolog "Copied user provided ffmpeg binary."
-      else
-        echolog "Could not find custom ffmpeg in folder at db dir."
-      fi
-    fi
-      export PATH="${QPKG_ROOT}/bin:$PATH"
+      export PATH="${ROON_DATAROOT}/bin:$PATH"
 
       echo "" | tee -a $ROON_LOG_FILE
       echo "############### Used FFMPEG Version ##############" | tee -a $ROON_LOG_FILE
@@ -110,7 +95,7 @@ start_RoonServer () {
       echo "" | tee -a $ROON_LOG_FILE
 
             
-      export ROON_DATAROOT="$ROON_DATABASE_DIR"
+      export ROON_DATAROOT
 
 
       LD_LIBRARY_PATH=/lib64:/lib:${ROON_LIB_DIR}:${LD_LIBRARY_PATH}
@@ -119,8 +104,8 @@ start_RoonServer () {
       fi
 
       export LD_LIBRARY_PATH
-      export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export ALSA_CONFIG_PATH
+      export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export TMP="${ROON_TMP_DIR}"
       export ROON_ID_DIR
       
@@ -130,8 +115,8 @@ start_RoonServer () {
 
 
       # Checking for additional start arguments.
-      if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
-          ROON_ARGS=`cat "$ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
+      if [[ -f ${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
+          ROON_ARGS=`cat "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
       else
           ROON_ARGS=""
       fi

@@ -24,9 +24,8 @@ ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATAROOT}" | awk '{print $2}' | tail -1`
 ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATAROOT}" | awk '{print $5}' | tail -1`
-ROON_DATAROOT="${QPKG_NAME}/RoonOnNAS"
+ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
 ROON_FFMPEG="${ROON_DATAROOT}/bin"
-BLUE_UDEV_ENABLE=`grep -c bluetooth /lib/udev/rules.d/*.rules 2>/dev/null`
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${ROON_DATAROOT}/ROONSERVER_QNAP_LOG.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
@@ -52,11 +51,6 @@ echolog () {
     fi
 }
 
-# Check if ALSA (part of the bluetooth package) is installed and running
-if [ x$BLUE_UDEV_ENABLE = x0 ]; then
-    [ ! -x /etc/init.d/bluetooth.sh ] || /etc/init.d/bluetooth.sh start >> ${ROON_LOG_FILE}
-fi
-
 if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
 fi
@@ -79,7 +73,6 @@ info ()
    echolog "Installed QTS Apps" "${QTS_INSTALLED_APPS}"
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
-   echolog "Bluetooth udev enabled" ${BLUE_UDEV_ENABLE}
 }
 
 start_RoonServer () {

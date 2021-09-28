@@ -132,7 +132,7 @@ function getTreeAt($folder, $strSessionID)
 
                   switch ($arrTemp['text']) {
                      case "RoonOnNAS":
-                        if (file_exists('/share' . $arrTemp['id'] . 'RoonServer/Logs') && is_dir('/share' . $arrTemp['id'] . 'RoonServer/Logs')) {
+                        if (file_exists('/share' . $arrTemp['id'] . '/RoonServer/Logs') && is_dir('/share' . $arrTemp['id'] . '/RoonServer/Logs')) {
                            $arrTemp['iconCls'] = 'fas fa-file-audio';
                            $arrTemp['id'] = dirname($arrTemp['id']);
                            $browseable = false;

@@ -220,7 +220,7 @@ pkg_post_install(){
     # Restructuring Database folder
     ROON_DB_PATH=$("${CMD_GETCFG}" "${QPKG_NAME}" DB_Path -f "${SYS_QPKG_CONFIG_FILE}")
     
-    if [ x$ROON_DB_PATH != "x" ]; then
+    if [[ x$ROON_DB_PATH != "x" ]]; then
         if [ -d "${ROON_DB_PATH}" ] && [ -d "${ROON_DB_PATH}/RoonServer" ] && [ -d "${ROON_DB_PATH}/RAATServer" ] && [ ! -d "${ROON_DB_PATH}/RoonOnNAS" ]; then
             "${CMD_MKDIR}" -m 777 "${ROON_DB_PATH}/RoonOnNAS"
             "${CMD_MKDIR}" -m 777 "${ROON_DB_PATH}/RoonOnNAS/bin"

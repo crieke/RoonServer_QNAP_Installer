@@ -27,7 +27,7 @@ ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATAROOT}" | awk '{print $5}' | 
 ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
 ROON_FFMPEG="${ROON_DATAROOT}/bin"
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
-ROON_LOG_FILE="${ROON_DATAROOT}/ROONSERVER_QNAP_LOG.txt"
+ROON_LOG_FILE="${ROON_DATAROOT}/RoonOnNAS.log.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
 
 ST_COLOR="\033[38;5;34m"

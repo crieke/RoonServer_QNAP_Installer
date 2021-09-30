@@ -41,11 +41,11 @@ echolog () {
         PARAMETER1=$1
         PARAMETER2=$2
         echo -e "${ST_COLOR}${TIMESTAMP}${REG_COLOR} --- ${HL_COLOR}${PARAMETER1}:${REG_COLOR} ${PARAMETER2}"
-        echo "${TIMESTAMP} --- ${PARAMETER1}: ${PARAMETER2}" >> $ROON_LOG_FILE
+        echo "${TIMESTAMP} --- ${PARAMETER1}: ${PARAMETER2}" >> "$ROON_LOG_FILE"
     elif [[ $# == 1 ]]; then
         PARAMETER1=$1
         echo -e "${ST_COLOR}${TIMESTAMP}${REG_COLOR} --- ${PARAMETER1}"
-        echo "${TIMESTAMP} --- ${PARAMETER1}" >> $ROON_LOG_FILE
+        echo "${TIMESTAMP} --- ${PARAMETER1}" >> "$ROON_LOG_FILE"
     else
         echo -e "The echolog function requires 1 or 2 parameters."
     fi
@@ -89,11 +89,11 @@ start_RoonServer () {
   ## Check if user provided own ffmpeg version
       export PATH="${ROON_DATAROOT}/bin:$PATH"
 
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "############### Used FFMPEG Version ##############" | tee -a $ROON_LOG_FILE
-      echo -e $(ffmpeg -version) | tee -a $ROON_LOG_FILE
-      echo "##################################################" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "############### Used FFMPEG Version ##############" | tee -a "$ROON_LOG_FILE"
+      echo -e $(ffmpeg -version) | tee -a "$ROON_LOG_FILE"
+      echo "##################################################" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
 
             
       export ROON_DATAROOT
@@ -116,7 +116,7 @@ start_RoonServer () {
 
 
       # Checking for additional start arguments.
-      if [[ -f ${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
+      if [[ -f "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" ]]; then
           ROON_ARGS=`cat "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
           echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
       else
@@ -125,16 +125,16 @@ start_RoonServer () {
 
       ## Start RoonServer
       setcfg ${QPKG_NAME} MULTIMEDIA_DISABLE_ON_START ${MULTIMEDIA_DISABLE} -f "${CONF}"
-      ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
+      ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> "$ROON_LOG_FILE"  2>&1 &
       echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
 
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "########## Installed RoonServer Version ##########" | tee -a $ROON_LOG_FILE
-      echo "${ROON_VERSION}" | tee -a $ROON_LOG_FILE
-      echo "##################################################" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "########## Installed RoonServer Version ##########" | tee -a "$ROON_LOG_FILE"
+      echo "${ROON_VERSION}" | tee -a "$ROON_LOG_FILE"
+      echo "##################################################" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
   fi
 
 }
@@ -160,14 +160,14 @@ case "$1" in
         if kill -s 0 $PID; then
             echolog "${QPKG_NAME} is already running with PID: $PID"
         else
-            echo "" > $ROON_LOG_FILE
+            echo "" > "$ROON_LOG_FILE"
             echolog "INFO: Roon Server has previously not been stopped properly."
             /sbin/write_log "[${QPKG_NAME}] Roon Server has previously not been stopped properly." 2
             echolog "Starting ${QPKG_NAME} ..."
             start_daemon
         fi
     else
-        echo "" > $ROON_LOG_FILE
+        echo "" > "$ROON_LOG_FILE"
         echolog "Starting ${QPKG_NAME} ..."
         start_daemon
     fi
@@ -177,7 +177,7 @@ case "$1" in
     if [ -f "$ROON_PIDFILE" ]; then
         echolog "Stopping RoonServer..."
         echolog "Roon PID to be killed" "$PID"
-        kill ${PID} >> $ROON_LOG_FILE
+        kill ${PID} >> "$ROON_LOG_FILE"
         rm "${ROON_PIDFILE}"
         rm -rf "${ROON_TMP_DIR}"/*
         if [[ $2 != "keepwebalive" ]]; then

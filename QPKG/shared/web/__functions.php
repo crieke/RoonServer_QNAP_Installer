@@ -256,7 +256,7 @@ function acardsNice()
 function downloadLogs($strSessionID, $dblocation)
 {
     $dbLength = strlen($dblocation);
-    $folders = array($dblocation . '/RoonServer/Logs', $dblocation . '/RAATServer/Logs', $dblocation . '/ROONSERVER_QNAP_LOG.txt');
+    $folders = array($dblocation . 'RoonOnNAS/RoonServer/Logs', $dblocation . 'RoonOnNAS/RAATServer/Logs', $dblocation . 'RoonOnNAS/ROONSERVER_QNAP_LOG.txt');
 
     $urlSnippet = "";
     $count = 0;

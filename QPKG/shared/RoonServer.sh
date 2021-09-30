@@ -22,10 +22,10 @@ ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_ID_DIR="${QPKG_ROOT}/id"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
+ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATAROOT}" | awk '{print $2}' | tail -1`
 ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATAROOT}" | awk '{print $5}' | tail -1`
-ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
-ROON_FFMPEG="${ROON_DATAROOT}/bin"
+ROON_FFMPEG_DIR="${ROON_DATAROOT}/bin"
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${ROON_DATAROOT}/RoonOnNAS.log.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
@@ -86,8 +86,10 @@ RoonOnNAS_folderCheck ()
 start_RoonServer () {
   if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
   
-  ## Check if user provided own ffmpeg version
-      export PATH="${ROON_DATAROOT}/bin:$PATH"
+      ## Fix missing executable permission for ffmpeg
+      [ -f "${ROON_FFMPEG_DIR}/ffmpeg" ] && [ ! -x "${ROON_FFMPEG_DIR}/ffmpeg" ] && chmod 755 "${ROON_FFMPEG_DIR}/ffmpeg"
+        
+      export PATH="${ROON_FFMPEG_DIR}/bin:$PATH"
 
       echo "" | tee -a "$ROON_LOG_FILE"
       echo "############### Used FFMPEG Version ##############" | tee -a "$ROON_LOG_FILE"

@@ -89,7 +89,7 @@ start_RoonServer () {
       ## Fix missing executable permission for ffmpeg
       [ -f "${ROON_FFMPEG_DIR}/ffmpeg" ] && [ ! -x "${ROON_FFMPEG_DIR}/ffmpeg" ] && chmod 755 "${ROON_FFMPEG_DIR}/ffmpeg"
         
-      export PATH="${ROON_FFMPEG_DIR}/bin:$PATH"
+      export PATH="${ROON_FFMPEG_DIR}:$PATH"
 
       echo "" | tee -a "$ROON_LOG_FILE"
       echo "############### Used FFMPEG Version ##############" | tee -a "$ROON_LOG_FILE"

@@ -72,7 +72,7 @@ if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
 
 
 $RoonVersion = file(rtrim(APPINSTALLPATH) . "/RoonServer/VERSION");
-$WHICH_FFMPEG = trim(shell_exec('PATH=/share/'.$dblocation .'/RoonOnNAS/bin:$PATH && which ffmpeg'));
+$WHICH_FFMPEG = trim(shell_exec('PATH="/share/'.$dblocation .'/RoonOnNAS/bin:$PATH" && which ffmpeg'));
 if (strpos($WHICH_FFMPEG, $dblocation) !== false) {
     $customFfmpeg = true;
 }

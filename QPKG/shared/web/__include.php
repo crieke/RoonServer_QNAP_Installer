@@ -79,7 +79,7 @@ if (strpos($WHICH_FFMPEG, $dblocation) !== false) {
 else {
         $customFfmpeg = false;
 }
-$ffmpegVersion=trim(shell_exec('PATH=/share/'.$dblocation.'/RoonOnNAS/bin:$PATH && ffmpeg -version | sed -n "s/ffmpeg version \([^ ]*\).*/\1/p;"'));
+$ffmpegVersion=trim(shell_exec('PATH="/share/'.$dblocation.'/RoonOnNAS/bin:$PATH" && ffmpeg -version | sed -n "s/ffmpeg version \([^ ]*\).*/\1/p;"'));
 
 $alsafull = file_get_contents('/proc/asound/cards');
 $alsaraw = fopen("/proc/asound/cards", 'r');

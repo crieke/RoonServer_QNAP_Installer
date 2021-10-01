@@ -127,42 +127,24 @@ function getTreeAt($folder, $strSessionID)
                 substr($arrTemp['text'], 0, 2) != ".."
             ) {
 
-                $arrTemp['iconCls'] = 'far fa-folder';
-                $browseable = true;
+               $arrTemp['iconCls'] = 'far fa-folder';
+               $browseable = true;
 
-                switch ($arrTemp['text']) {
-                    case "RoonServer":
-                        if (file_exists('/share' . $arrTemp['id'] . '/Logs') && is_dir('/share' . $arrTemp['id'] . '/Logs')) {
-                            $arrTemp['iconCls'] = 'fas fa-file-audio';
-                            $arrTemp['id'] = dirname($arrTemp['id']);
-                            $browseable = false;
-
+                  switch ($arrTemp['text']) {
+                     case "RoonOnNAS":
+                        if (file_exists('/share' . $arrTemp['id'] . '/RoonServer/Logs') && is_dir('/share' . $arrTemp['id'] . '/RoonServer/Logs')) {
+                           $arrTemp['iconCls'] = 'fas fa-file-audio';
+                           $arrTemp['id'] = dirname($arrTemp['id']);
+                           $browseable = false;
                         }
-                        break;
-                    case "RAATServer":
-                        if (file_exists('/share' . $arrTemp['id'] . '/Logs') && is_dir('/share' . $arrTemp['id'] . '/Logs')) {
-                            $arrTemp['iconCls'] = 'fas fa-file-audio';
-                            $arrTemp['id'] = dirname($arrTemp['id']);
-                            $browseable = false;
-
-                        }
-                        break;
-                    case "RoonGoer":
-                        if (file_exists('/share' . $arrTemp['id'] . '/Database/Registry') && is_dir('/share' . $arrTemp['id'] . '/Database/Registry')) {
-                            $arrTemp['iconCls'] = 'fas fa-file-audio';
-                            $arrTemp['id'] = dirname($arrTemp['id']);
-                            $browseable = false;
-                        }
-
-                        break;
-                }
-
-                $arrShareTreeData[] = array(
-                    'text' => $arrTemp['text'],
-                    'path' => $arrTemp['id'],
-                    'anychildren' => $browseable,
-                    'faCssClass' => $arrTemp['iconCls']
-                );
+                     break;
+                  }
+               $arrShareTreeData[] = array(
+                  'text' => $arrTemp['text'],
+                  'path' => $arrTemp['id'],
+                  'anychildren' => $browseable,
+                  'faCssClass' => $arrTemp['iconCls']
+               );
             }
         }
         return ($arrShareTreeData);
@@ -274,7 +256,7 @@ function acardsNice()
 function downloadLogs($strSessionID, $dblocation)
 {
     $dbLength = strlen($dblocation);
-    $folders = array($dblocation . '/RoonServer/Logs', $dblocation . '/RAATServer/Logs', $dblocation . '/ROONSERVER_QNAP_LOG.txt');
+    $folders = array($dblocation . '/RoonOnNAS/RoonServer/Logs', $dblocation . '/RoonOnNAS/RAATServer/Logs', $dblocation . '/RoonOnNAS/RoonOnNAS.log.txt');
 
     $urlSnippet = "";
     $count = 0;

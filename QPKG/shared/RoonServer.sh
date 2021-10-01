@@ -17,17 +17,17 @@ QNAP_SERIAL=`get_hwsn`
 MTU=`ifconfig | grep eth[0-9] -A1 | grep MTU | grep MTU | cut -d ":" -f 2 | awk '{print $1}' | xargs | sed "s/ ---- /\n---- /g"`
 ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
 ROON_LIB_DIR="${QPKG_ROOT}/lib64"
+ROON_QTS42_LIB_DIR="${QPKG_ROOT}/lib64_ForQTS4.2"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_ID_DIR="${QPKG_ROOT}/id"
 ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
-ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $2}' | tail -1`
-ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATABASE_DIR}" | awk '{print $5}' | tail -1`
-ROON_FFMPEG_PROVIDEFOLDER="${ROON_DATABASE_DIR}/ffmpeg_For_RoonServer"
-BLUE_UDEV_ENABLE=`grep -c bluetooth /lib/udev/rules.d/*.rules 2>/dev/null`
+ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
+ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATAROOT}" | awk '{print $2}' | tail -1`
+ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATAROOT}" | awk '{print $5}' | tail -1`
+ROON_FFMPEG_DIR="${ROON_DATAROOT}/bin"
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
-ROON_LOG_FILE="${QPKG_ROOT}/RoonServer.log"
-ROON_DEBUG_EXTERNAL_LOG="${ROON_DATABASE_DIR}/ROONSERVER_QNAP_LOG.txt"
+ROON_LOG_FILE="${ROON_DATAROOT}/RoonOnNAS.log.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
 
 ST_COLOR="\033[38;5;34m"
@@ -41,31 +41,15 @@ echolog () {
         PARAMETER1=$1
         PARAMETER2=$2
         echo -e "${ST_COLOR}${TIMESTAMP}${REG_COLOR} --- ${HL_COLOR}${PARAMETER1}:${REG_COLOR} ${PARAMETER2}"
-        echo "${TIMESTAMP} --- ${PARAMETER1}: ${PARAMETER2}" >> $ROON_LOG_FILE
+        echo "${TIMESTAMP} --- ${PARAMETER1}: ${PARAMETER2}" >> "$ROON_LOG_FILE"
     elif [[ $# == 1 ]]; then
         PARAMETER1=$1
         echo -e "${ST_COLOR}${TIMESTAMP}${REG_COLOR} --- ${PARAMETER1}"
-        echo "${TIMESTAMP} --- ${PARAMETER1}" >> $ROON_LOG_FILE
+        echo "${TIMESTAMP} --- ${PARAMETER1}" >> "$ROON_LOG_FILE"
     else
         echo -e "The echolog function requires 1 or 2 parameters."
     fi
 }
-
-# Check if ALSA (part of the bluetooth package) is installed and running
-if [ x$BLUE_UDEV_ENABLE = x0 ]; then
-    [ ! -x /etc/init.d/bluetooth.sh ] || /etc/init.d/bluetooth.sh start >> ${ROON_LOG_FILE}
-fi
-
-if [ $ROON_DATABASE_DIR != "" ]; then
-    ROON_LOG_FILE=$ROON_DEBUG_EXTERNAL_LOG
-fi
-
-
-if [[ $MAJOR_QTS_VER -ge 43 ]]; then
-   BundledLibPath=false;
-else
-   BundledLibPath=true;
-fi
 
 if [ -f $ROON_PIDFILE ]; then
     PID=`cat "${ROON_PIDFILE}"`
@@ -74,7 +58,7 @@ fi
 info ()
 {
    ## Echoing System Info
-   echolog "ROON_DATABASE_DIR" "${ROON_DATABASE_DIR} - [`[ -d \"$ROON_DATABASE_DIR\" ] && echo \"available\" || echo \"not available\"`]"
+   echolog "ROON_DATABASE_DIR" "${ROON_DATAROOT} - [`[ -d \"${ROON_DATAROOT}\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
    echolog "ROON_ID_DIR" "$ROON_ID_DIR - [`[ -d \"$ROON_ID_DIR\" ] && echo \"available\" || echo \"not available\"`]"  
    echolog "Free Inodes" "${ROON_DATABASE_DIR_FREE_INODES}"
@@ -89,42 +73,42 @@ info ()
    echolog "Installed QTS Apps" "${QTS_INSTALLED_APPS}"
    echolog "Hostname" "${HOSTNAME}"
    echolog "MTU" "${MTU}"
-   echolog "Loading additional 64-bit libs" "${BundledLibPath}"
-   echolog "Bluetooth udev enabled" ${BLUE_UDEV_ENABLE}
+}
+
+RoonOnNAS_folderCheck ()
+{
+  if [ -d "${ROON_DATABASE_DIR}" ]; then
+    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS"
+    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS/bin" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS/bin" 
+  fi
 }
 
 start_RoonServer () {
-  if [ "${ROON_DATABASE_DIR}" != "" ] && [ -d "${ROON_DATABASE_DIR}" ]; then
+  if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
   
-  ## Check if user provided own ffmpeg version
-    if [ -d "${ROON_FFMPEG_PROVIDEFOLDER}"  ]; then
-      if [ -f "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" ]; then
-        cp "${ROON_FFMPEG_PROVIDEFOLDER}/ffmpeg" "${QPKG_ROOT}/bin/"
-        chmod 755 "${QPKG_ROOT}/bin/ffmpeg"
-        ## rm temporary FFMPEG Provide folder      
-        rm -R  "${ROON_FFMPEG_PROVIDEFOLDER}"
-        echolog "Copied user provided ffmpeg binary."
-      else
-        echolog "Could not find custom ffmpeg in folder at db dir."
-      fi
-    fi
-      export PATH="${QPKG_ROOT}/bin:$PATH"
+      ## Fix missing executable permission for ffmpeg
+      [ -f "${ROON_FFMPEG_DIR}/ffmpeg" ] && [ ! -x "${ROON_FFMPEG_DIR}/ffmpeg" ] && chmod 755 "${ROON_FFMPEG_DIR}/ffmpeg"
+        
+      export PATH="${ROON_FFMPEG_DIR}:$PATH"
 
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "############### Used FFMPEG Version ##############" | tee -a $ROON_LOG_FILE
-      echo -e $(ffmpeg -version) | tee -a $ROON_LOG_FILE
-      echo "##################################################" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "############### Used FFMPEG Version ##############" | tee -a "$ROON_LOG_FILE"
+      echo -e $(ffmpeg -version) | tee -a "$ROON_LOG_FILE"
+      echo "##################################################" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
 
             
-      export ROON_DATAROOT="$ROON_DATABASE_DIR"
+      export ROON_DATAROOT
 
-      if $BundledLibPath; then
-        export LD_LIBRARY_PATH="${ROON_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+      LD_LIBRARY_PATH=/lib64:/lib:${ROON_LIB_DIR}:${LD_LIBRARY_PATH}
+      if [ $MAJOR_QTS_VER -lt 43 ]; then
+        LD_LIBRARY_PATH=${ROON_QTS42_LIB_DIR}:${LD_LIBRARY_PATH}
       fi
 
-      export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
+      export LD_LIBRARY_PATH
       export ALSA_CONFIG_PATH
+      export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export TMP="${ROON_TMP_DIR}"
       export ROON_ID_DIR
       
@@ -134,37 +118,25 @@ start_RoonServer () {
 
 
       # Checking for additional start arguments.
-      if [[ -f $ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt ]]; then
-          ROON_ARGS=`cat "$ROON_DATABASE_DIR/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
+      if [[ -f "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" ]]; then
+          ROON_ARGS=`cat "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
+          echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
       else
           ROON_ARGS=""
       fi
-      echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
 
       ## Start RoonServer
       setcfg ${QPKG_NAME} MULTIMEDIA_DISABLE_ON_START ${MULTIMEDIA_DISABLE} -f "${CONF}"
-      ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> $ROON_LOG_FILE  2>&1 &
+      ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> "$ROON_LOG_FILE"  2>&1 &
       echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
 
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "########## Installed RoonServer Version ##########" | tee -a $ROON_LOG_FILE
-      echo "${ROON_VERSION}" | tee -a $ROON_LOG_FILE
-      echo "##################################################" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
-      echo "" | tee -a $ROON_LOG_FILE
-
-      /sbin/write_log "[RoonServer] ROON_UPDATE_TMP_DIR = ${ROON_TMP_DIR}" 4
-      /sbin/write_log "[RoonServer] ROON_DATABASE_DIR = ${ROON_DATABASE_DIR}" 4
-      if $BundledLibPath; then
-         /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. Additional library folder = ${ROON_LIB_DIR}" 4
-      else
-         /sbin/write_log "[RoonServer] QTS Version = ${QTS_VER}. No additional libraries required." 4
-      fi
-      /sbin/write_log "[RoonServer] PID = `cat ${ROON_PIDFILE}`" 4
-      /sbin/write_log "[RoonServer] Additional Arguments = ${ROON_ARGS}" 4
-  else
-      /sbin/write_log "[RoonServer] A storage location for RoonServer's database has not been set. Please create it in the web user interface in ordner to start RoonServer." 4
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "########## Installed RoonServer Version ##########" | tee -a "$ROON_LOG_FILE"
+      echo "${ROON_VERSION}" | tee -a "$ROON_LOG_FILE"
+      echo "##################################################" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
+      echo "" | tee -a "$ROON_LOG_FILE"
   fi
 
 }
@@ -180,6 +152,7 @@ start_daemon ()
 case "$1" in
   start)
     ENABLED=$(/sbin/getcfg $QPKG_NAME Enable -u -d FALSE -f $CONF)
+    RoonOnNAS_folderCheck
     if [ "$ENABLED" != "TRUE" ]; then
         echolog "$QPKG_NAME is disabled."
         exit 1
@@ -189,14 +162,14 @@ case "$1" in
         if kill -s 0 $PID; then
             echolog "${QPKG_NAME} is already running with PID: $PID"
         else
-            echo "" > $ROON_LOG_FILE
+            echo "" > "$ROON_LOG_FILE"
             echolog "INFO: Roon Server has previously not been stopped properly."
             /sbin/write_log "[${QPKG_NAME}] Roon Server has previously not been stopped properly." 2
             echolog "Starting ${QPKG_NAME} ..."
             start_daemon
         fi
     else
-        echo "" > $ROON_LOG_FILE
+        echo "" > "$ROON_LOG_FILE"
         echolog "Starting ${QPKG_NAME} ..."
         start_daemon
     fi
@@ -206,7 +179,7 @@ case "$1" in
     if [ -f "$ROON_PIDFILE" ]; then
         echolog "Stopping RoonServer..."
         echolog "Roon PID to be killed" "$PID"
-        kill ${PID} >> $ROON_LOG_FILE
+        kill ${PID} >> "$ROON_LOG_FILE"
         rm "${ROON_PIDFILE}"
         rm -rf "${ROON_TMP_DIR}"/*
         if [[ $2 != "keepwebalive" ]]; then

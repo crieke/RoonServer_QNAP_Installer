@@ -435,59 +435,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         }
     }
     
-    
-    function ffmpeg_folder_info(clientos, dblocation) {
-        $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_4")) ?><br><br>' +
-        '<span style=display:inline;><b><?php echo localize('COMMON_PATH'); ?>:</b> ' + dblocation.replace('/', ' / <span style="color: #F8D785;"><i class="fas fa-folder"></i></span> ') + ' / <span style="color: #F8D785;"><i class="fas fa-folder"></i></span> ffmpeg_For_RoonServer</span><br><br>' + 
-        '<img width="300" height="112" style="text-align: center; display:block; margin: auto;" src="img/dropffmpeg_'+ clientos +'.png" \> <br>' +
-        '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_5")) ?><br><br>' +
-        '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_DESCRIPTION_6")) ?><br>' + 
-        '<a id="restartRoonServer" href="#" onclick="checkFFmpegAndrestart()">' +
-                '<div class="fa-4x text-center" style="text-align: center;">' +
-                '<span class="fa-layers fa-fw">' +
-                '<i class="fas fa-circle"></i>' +
-                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' +
-                '</span>' +
-                '</div>' +
-                '<div class="text-center">' +
-                '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_BUTTON_USE_FFMPEG_BTN")); ?>' +
-                '</div>' +
-                '</a>');
-    }
-
-    function ffmpeg_removed_info() {
-            
-        $('#modal-body').html('<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_REMOVE_DESCRIPTION_1")) ?><br><br>' +
-        '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_REMOVE_DESCRIPTION_2")) ?><br><br>' +
-        '<a id="restartRoonServer" href="#" onclick="RemoveFfmpegAndRestartRoonServer()">' +
-                '<div class="fa-4x text-center" style="text-align: center;">' +
-
-                '<span class="fa-layers fa-fw">' +
-                '<i class="fas fa-circle"></i>' +
-                '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' +
-                '</span>' +
-                '</div>' +
-                '<div class="text-center">' +
-                '<?php echo str_replace("'", "\'", localize("MODAL_FFMPEG_REMOVE_FFMPEG_BTN")); ?>' +
-                '</div>' +
-                '</a>');
-    }
-    
-    
-    
-    function RemoveFfmpegAndRestartRoonServer() {
-            var action = 'removeffmpeg';
-            var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=' + action;
-            $.ajax({
-                type: 'POST',
-                url: strUrl,
-                success: function(data) {
-                    restartRoonServer();
-                    SuccessAni('#modal-body', '<?php echo localize("MODAL_FFMPEG_FFMPEG_REMOVE_CHECK"); ?>')
-                }
-            });
-        }
-
     function selectStorageSuccess() {
 
         btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';
@@ -505,21 +452,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     function restartRoonServer() {
         $.ajax({
             url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=restartRoonServer'
-        });
-    }
-
-    function checkFFmpegAndrestart() {
-        $.ajax({
-            url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=checkFfmpeg',
-            dataType: 'json',
-            success: function (response) {
-                if (response.success) {
-                    restartRoonServer();
-                    SuccessAni('#modal-body', '<?php echo localize("MODAL_FFMPEG_FFMPEG_CHECK_SUCCESS") ?>');
-                } else {
-                    alert('ffmpeg file not found.');
-                }
-            }
         });
     }
 

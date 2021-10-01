@@ -228,7 +228,8 @@ pkg_post_install(){
             "${CMD_MV}" "${ROON_DB_PATH}/RAATServer" "${ROON_DB_PATH}/RoonOnNAS/"
             [ -d "${ROON_DB_PATH}/RoonGoer" ] && "${CMD_MV}" "${ROON_DB_PATH}/RoonGoer" "${ROON_DB_PATH}/RoonOnNAS/"
             "${CMD_MKDIR}" -m 777 "${DB_Path}/RoonOnNAS/bin"
-            [ -f "${SYS_QPKG_DIR}/bin/ffmpeg" ] && ${CMD_MV} "${SYS_QPKG_DIR}/bin/ffmpeg" "${ROON_DB_PATH}/RoonOnNAS/bin/"
+            # Move ffmpeg if it has been provided previously and make sure it is executable. Then remove previous bin directory
+            [ -f "${SYS_QPKG_DIR}/bin/ffmpeg" ] && ${CMD_MV} "${SYS_QPKG_DIR}/bin/ffmpeg" "${ROON_DB_PATH}/RoonOnNAS/bin/" && "${CMD_CHMOD}" 755 "${ROON_DB_PATH}/RoonOnNAS/bin/ffmpeg" && ${CMD_RMDIR} "${SYS_QPKG_DIR}/bin"
         fi
     fi
     

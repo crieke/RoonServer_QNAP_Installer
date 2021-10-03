@@ -65,10 +65,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             echo localize("DEBUG_SID") . ': ' . $_COOKIE['NAS_SID'] . '<br>';
             echo localize("DEBUG_QPKG_ROOT") . ': ' . APPINSTALLPATH . "<br>";
             echo localize("DEBUG_LANGUAGE") . ': ' . $_COOKIE['nas_lang'] . "<br>";
-            if (file_exists(APPINSTALLPATH . '/RoonServer.pid')) {
-                $RoonServerPID = file_get_contents(QPKGINSTALLPATH . '/RoonServer.pid');
-                echo "RoonServer PID: " . $RoonServerPID . '<br>';
-            }
+            echo "RoonServer PID: " . isRunning('getpid') . '<br>';
             echo localize("DEBUG_QPKG_DOCROOT") . ': ' . NASHOST . '<br>';
             echo "HomeFeature disabled: " . $multimediaDisabled . '<br>';
         }
@@ -434,7 +431,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 '</div>');
         }
     }
-    
+
     function selectStorageSuccess() {
 
         btn_LocationSaved = '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_BTN_LOCATION_SAVED")); ?>';

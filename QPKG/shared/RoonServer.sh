@@ -20,7 +20,6 @@ ROON_LIB_DIR="${QPKG_ROOT}/lib64"
 ROON_QTS42_LIB_DIR="${QPKG_ROOT}/lib64_ForQTS4.2"
 ROON_TMP_DIR="${QPKG_ROOT}/tmp"
 ROON_ID_DIR="${QPKG_ROOT}/id"
-ROON_PIDFILE="${QPKG_ROOT}/RoonServer.pid"
 ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
 ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATAROOT}" | awk '{print $2}' | tail -1`
@@ -29,6 +28,7 @@ ROON_FFMPEG_DIR="${ROON_DATAROOT}/bin"
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${ROON_DATAROOT}/RoonOnNAS.log.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
+PID=$(ps aux | grep "${QPKG_ROOT}/RoonServer/start.sh" | grep -v grep | awk '{print $1}')
 
 ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"
@@ -51,16 +51,12 @@ echolog () {
     fi
 }
 
-if [ -f $ROON_PIDFILE ]; then
-    PID=`cat "${ROON_PIDFILE}"`
-fi
-
 info ()
 {
    ## Echoing System Info
    echolog "ROON_DATABASE_DIR" "${ROON_DATAROOT} - [`[ -d \"${ROON_DATAROOT}\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
-   echolog "ROON_ID_DIR" "$ROON_ID_DIR - [`[ -d \"$ROON_ID_DIR\" ] && echo \"available\" || echo \"not available\"`]"  
+   echolog "ROON_ID_DIR" "$ROON_ID_DIR - [`[ -d \"$ROON_ID_DIR\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "Free Inodes" "${ROON_DATABASE_DIR_FREE_INODES}"
    echolog "ROON_DIR" "${QPKG_ROOT}"
    echolog "Model" "${MODEL}"
@@ -79,16 +75,16 @@ RoonOnNAS_folderCheck ()
 {
   if [ -d "${ROON_DATABASE_DIR}" ]; then
     [ -d "${ROON_DATABASE_DIR}/RoonOnNAS" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS"
-    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS/bin" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS/bin" 
+    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS/bin" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS/bin"
   fi
 }
 
 start_RoonServer () {
   if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
-  
+
       ## Fix missing executable permission for ffmpeg
       [ -f "${ROON_FFMPEG_DIR}/ffmpeg" ] && [ ! -x "${ROON_FFMPEG_DIR}/ffmpeg" ] && chmod 755 "${ROON_FFMPEG_DIR}/ffmpeg"
-        
+
       export PATH="${ROON_FFMPEG_DIR}:$PATH"
 
       echo "" | tee -a "$ROON_LOG_FILE"
@@ -97,7 +93,7 @@ start_RoonServer () {
       echo "##################################################" | tee -a "$ROON_LOG_FILE"
       echo "" | tee -a "$ROON_LOG_FILE"
 
-            
+
       export ROON_DATAROOT
 
 
@@ -111,7 +107,7 @@ start_RoonServer () {
       export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export TMP="${ROON_TMP_DIR}"
       export ROON_ID_DIR
-      
+
       ## Creating required directories, if they do not exist
       [ -d "$ROON_ID_DIR" ] || mkdir "$ROON_ID_DIR"
       [ -d "$ROON_TMP_DIR" ] || mkdir "$ROON_TMP_DIR"
@@ -127,8 +123,9 @@ start_RoonServer () {
 
       ## Start RoonServer
       setcfg ${QPKG_NAME} MULTIMEDIA_DISABLE_ON_START ${MULTIMEDIA_DISABLE} -f "${CONF}"
-      ( ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" & echo $! >&3 ) 3>"${ROON_PIDFILE}"  | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> "$ROON_LOG_FILE"  2>&1 &
-      echolog "RoonServer PID" "`cat ${ROON_PIDFILE}`"
+      ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> "$ROON_LOG_FILE"  2>&1 &
+      PID=$(ps aux | grep "${QPKG_ROOT}/RoonServer/start.sh" | grep -v grep | awk '{print $1}')
+      echolog "RoonServer PID" "${PID}"
 
       echo "" | tee -a "$ROON_LOG_FILE"
       echo "" | tee -a "$ROON_LOG_FILE"
@@ -157,17 +154,8 @@ case "$1" in
         echolog "$QPKG_NAME is disabled."
         exit 1
     fi
-
-    if [ -f "$ROON_PIDFILE" ]; then
-        if kill -s 0 $PID; then
-            echolog "${QPKG_NAME} is already running with PID: $PID"
-        else
-            echo "" > "$ROON_LOG_FILE"
-            echolog "INFO: Roon Server has previously not been stopped properly."
-            /sbin/write_log "[${QPKG_NAME}] Roon Server has previously not been stopped properly." 2
-            echolog "Starting ${QPKG_NAME} ..."
-            start_daemon
-        fi
+    if kill -s 0 $PID; then
+        echolog "${QPKG_NAME} is already running with PID: $PID"
     else
         echo "" > "$ROON_LOG_FILE"
         echolog "Starting ${QPKG_NAME} ..."
@@ -176,11 +164,10 @@ case "$1" in
     ;;
 
   stop)
-    if [ -f "$ROON_PIDFILE" ]; then
+    if kill -s 0 $PID; then
         echolog "Stopping RoonServer..."
         echolog "Roon PID to be killed" "$PID"
         kill ${PID} >> "$ROON_LOG_FILE"
-        rm "${ROON_PIDFILE}"
         rm -rf "${ROON_TMP_DIR}"/*
         if [[ $2 != "keepwebalive" ]]; then
            rm -rf "${QPKG_ROOT}/web/tmp"/*

@@ -1,7 +1,7 @@
 <?php
 if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     $context = stream_context_create(array('ssl'=>array(
-        'verify_peer' => false, 
+        'verify_peer' => false,
         "verify_peer_name"=>false
     )));
     libxml_set_streams_context($context);
@@ -14,7 +14,7 @@ if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     if ( !(bool)(int)$xml->authPassed[0] || !(bool)(int)$xml->isAdmin[0] || (string)$xml->username[0] !== $_COOKIE['NAS_USER']) {
         die('No authentic session id of an admin user!');
     }
-} else { 
+} else {
     die('Not logged in!');
 }
 
@@ -39,8 +39,8 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                         <h5 class="card-title">Roon Server</h5>
                         <p class="card-text">
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_STATUS"); ?>
-                                :</b> <?php if (isRunning(APPINSTALLPATH . '/RoonServer.pid')) {
-                                echo '<span data-toggle="tooltip" title="' . localize("OVERVIEW_ROONSERVER_PANEL_PID") .': ' . isRunning(APPINSTALLPATH . '/RoonServer.pid', "getpid") . '" style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
+                                :</b> <?php if (isRunning()) {
+                                echo '<span data-toggle="tooltip" title="' . localize("OVERVIEW_ROONSERVER_PANEL_PID") .': ' . isRunning("getpid") . '" style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
                             } else {
                                 echo '<span style="color: red;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_STOPPED") . '</span>';
                             } ?><br>

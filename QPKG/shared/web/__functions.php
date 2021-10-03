@@ -1,7 +1,7 @@
 <?php
 if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     $context = stream_context_create(array('ssl'=>array(
-        'verify_peer' => false, 
+        'verify_peer' => false,
         "verify_peer_name"=>false
     )));
     libxml_set_streams_context($context);
@@ -14,7 +14,7 @@ if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     if ( !(bool)(int)$xml->authPassed[0] || !(bool)(int)$xml->isAdmin[0] || (string)$xml->username[0] !== $_COOKIE['NAS_USER']) {
         die('No authentic session id of an admin user!');
     }
-} else { 
+} else {
     die('Not logged in!');
 }
 
@@ -99,7 +99,7 @@ function set_db_path($folder)
 {
    if(strpos($folder, '/..') !== false)
    {
-       die(); 
+       die();
    }
    if ( is_dir(str_replace("'", "", $folder)) ) {
         shell_exec('setcfg RoonServer DB_Path ' . $folder . ' -f /etc/config/qpkg.conf');
@@ -190,12 +190,14 @@ function localize($phrase)
     }
 }
 
-function isRunning($pidfile, $option = null)
+function isRunning($option = null)
 {
-    if (file_exists($pidfile)) {
-        $pidfilecontent = file($pidfile, FILE_IGNORE_NEW_LINES);
-        if (is_dir('/proc/' . $pidfilecontent[0])) {
-            $pid = $pidfilecontent[0];
+   $getPIDcmd =  'ps aux | grep "' . APPINSTALLPATH . '/RoonServer/start.sh" | grep -v grep | awk \'{print $1}\'';
+   $RoonServerPID = exec($getPIDcmd);
+
+    if ($RoonServerPID > 0) {
+        if (is_dir('/proc/' . $RoonServerPID)) {
+            $pid = $RoonServerPID;
             $running = true;
         } else {
             $pid = "";

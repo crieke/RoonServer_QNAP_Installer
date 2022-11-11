@@ -105,7 +105,7 @@
 ######################################################################
 
 QPKG_NAME="RoonServer"
-ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
+ROON_PKG_URL="https://download.roonlabs.net/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
 ROON_OFFLINE_ARCHIVE="$SYS_PUBLIC_PATH/$ROON_ARCHIVE"
 
@@ -191,10 +191,10 @@ pkg_pre_install(){
 pkg_install(){
     if  $newInstall; then
         if $ONLINEINSTALL; then
-            "${CMD_WGET}" "${ROON_PKG_URL}"
+            DL_STATUS="$(${CMD_WGET} ${ROON_PKG_URL} -NSO ${ROON_ARCHIVE} 2>&1 | grep 'HTTP/' | awk '{print $2}')"
             R=$?
-            if [ $R -ne 0 ]; then
-                err_log "Could not download binary archive from Roon Labs website. Please check your internet connection."
+            if [ $R -ne 0 ] && [ $DL_STATUS -ne 200 ]; then
+                err_log "Could not download binary archive from Roon Labs website. Please check your internet connection. (Status-Code: $DL_STATUS)"
             fi
         fi
         

@@ -3,9 +3,9 @@
 CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
-ROON_PKG_URL="http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2"
-ROON_DATABASE_DIR=`/sbin/getcfg "${QPKG_NAME}" DB_Path -f ${CONF}`
+ROON_PKG_URL="https://download.roonlabs.net/builds/RoonServer_linuxx64.tar.bz2"
 ROON_ARCHIVE="${ROON_PKG_URL##*/}"
+ROON_DATABASE_DIR=`/sbin/getcfg "${QPKG_NAME}" DB_Path -f ${CONF}`
 lockfile="${QPKG_ROOT}/.helperscript.lock"
 CONFIRMATION="NO"
 
@@ -49,10 +49,12 @@ installRoon() {
     ## Download installation archive
 ${QPKG_ROOT}/RoonServer.sh stop keepwebalive > /dev/null 2>&1
     echo "tmp storage: ${QPKG_ROOT}/tmp/"
-    echo "Downloading file at ${ROON_PKG_URL}..."
-    wget -q -P "${QPKG_ROOT}/tmp/" "${ROON_PKG_URL}"
+    echo "Downloading file: ${ROON_PKG_URL}..."
+    wget -NS -P "${QPKG_ROOT}/tmp/" "${ROON_PKG_URL}"
+    DL_STATUS="$(wget -NSP "${QPKG_ROOT}/tmp/" "${ROON_PKG_URL}" 2>&1 | grep 'HTTP/' | awk '{print $2}')"
     R=$?
-    if [ $R -eq 0 ]; then
+    echo "Download Status: $DL_STATUS"
+    if [ $DL_STATUS -eq 200 ]; then
         echo "Removing previous RoonServer..."
         rm -R "${QPKG_ROOT}/RoonServer"
         echo "Extracting .tar.bz2 file..."
@@ -61,7 +63,7 @@ ${QPKG_ROOT}/RoonServer.sh stop keepwebalive > /dev/null 2>&1
     fi
     echo "Deleting downloaded .tar.bz2 file..."
     rm -f "${QPKG_ROOT}"/tmp/"${ROON_ARCHIVE}"
-    if [ $R -ne 0 ]; then
+    if [ $DL_STATUS -ne 200 ]; then
         echo "Could not download installation archive from Roon Labs website. Please check your internet connection."
     fi
     /sbin/qpkg_service start RoonServer  > /dev/null 2>&1

@@ -106,6 +106,7 @@ start_RoonServer () {
       export ALSA_CONFIG_PATH
       export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
       export TMP="${ROON_TMP_DIR}"
+      export TMPDIR="${ROON_TMP_DIR}"
       export ROON_ID_DIR
 
       ## Creating required directories, if they do not exist

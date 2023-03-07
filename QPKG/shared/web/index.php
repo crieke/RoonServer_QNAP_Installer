@@ -19,7 +19,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     <link rel="manifest" href="icons/site.webmanifest">
-    <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#2b5797">
+    <link rel="mask-icon" href="icons/safari-pinned-tab.svg">
     <meta name="msapplication-TileColor" content="#2b5797">
     <meta name="theme-color" content="#ffffff">
 
@@ -31,15 +31,15 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     <script src="assets/js/popper.min.js"></script>
 
     <!-- bootstrap asset -->
-    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <script src="assets/bootstrap/js/bootstrap.js"></script>
 
     <!-- gijgo asset -->
-    <script src="assets/gijgo/js/gijgo.min.js" type="text/javascript"></script>
-    <link href="assets/gijgo/css/gijgo.css" rel="stylesheet" type="text/css"/>
+    <script src="assets/gijgo/js/gijgo.min.js"></script>
+    <link href="assets/gijgo/css/gijgo.css" rel="stylesheet" type="text/css">
 
     <!-- fontawesome asset -->
-    <script src="assets/fontawesome/js/fontawesome-all.min.js" type="text/javascript"></script>
+    <script src="assets/fontawesome/js/fontawesome-all.min.js"></script>
     <link rel="stylesheet" href="assets/fontawesome/css/fa-svg-with-js.css">
     <link rel="stylesheet" href="assets/fontawesome-animated/font-awesome-animation.min.css">
 
@@ -74,7 +74,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     ?>
     <nav id="navigation" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
         <a class="navbar-brand" href="index.php">
-            <img src="img/roonIcon.svg" style="height: 40px;"/>
+            <img src="img/roonIcon.svg" alt="Roon Icon" style="height: 40px;">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
                 aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -127,7 +127,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <script>

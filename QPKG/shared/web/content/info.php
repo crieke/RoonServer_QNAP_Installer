@@ -33,8 +33,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                     <div class="card-body">
                         <span class="fa-stack fa-2x">
                             <i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>
-                            <img src="img/roonIcon.svg" style="height: 35px;" ,
-                                 class="fa-stack-1x fa-inverse"/>
+                            <img src="img/roonIcon.svg" alt="Roon Icon" style="height: 35px;" class="fa-stack-1x fa-inverse">
                         </span>
                         <h5 class="card-title">Roon Server</h5>
                         <p class="card-text">
@@ -50,22 +49,21 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                                 :</b> <?php echo $qpkg_conf['RoonServer']['Version']; ?><br>
                             <b><?php echo "ffmpeg"; ?>
                                 :</b>
-            <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php if ( $customFfmpeg ) { echo localize(MODAL_FFMPEG_USER_SUPPLIED_VERSION); } else { echo localize(MODAL_FFMPEG_SYSTEM_DEFAULT); } ?>
-            </button></span>
-        </span>
+                                <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php echo $customFfmpeg ? localize('MODAL_FFMPEG_USER_SUPPLIED_VERSION') : localize('MODAL_FFMPEG_SYSTEM_DEFAULT'); ?></button></span>
                         </p>
+                            <h5><?php echo localize("OVERVIEW_ROONSERVER_PANEL_SUBHEAD_DATABASE"); ?></h5>
                         <p>
-                        <h5><?php echo localize("OVERVIEW_ROONSERVER_PANEL_SUBHEAD_DATABASE"); ?></h5>
-                        <span data-toggle="tooltip" title="<?php echo $dblocation; ?>"><b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_LOCATION"); ?>: </b><?php echo $dblocation; ?></span>
-                        <br>
-                        <div class="progress" style="height: 20px;">
-                            <div class="progress-bar" role="progressbar" style="width: <?php echo $db_perc ?>%;"
-                                 aria-valuenow="<?php echo(100 - $db_perc) ?>" aria-valuemin="0"
-                                 aria-valuemax="100"></div>
-                        </div><?php echo $db_perc . '% ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_OF") . ' ' . displayStorage($db_vol_cap) . ' ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_USED") . '.'; ?>
+                            <span data-toggle="tooltip" title="<?php echo $dblocation; ?>">
+                                <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_LOCATION"); ?>: </b><?php echo $dblocation; ?>
+                            </span>
+                            <br>
                         </p>
-
-
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar" style="width: <?php echo $db_perc ?>%;" aria-valuenow="<?php echo(100 - $db_perc) ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p>
+                            <?php echo $db_perc . '% ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_OF") . ' ' . displayStorage($db_vol_cap) . ' ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_USED") . '.'; ?>
+                        </p>
                         <span id="log" class="getModal">
                             <a href="#"
                                class="btn btn-light btn-icon float-left"
@@ -117,20 +115,18 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                                 echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE");
                             }
                             ?></h5>
-                        <p class="card-text">
                             <?php
 
                             if (!$multimediaDisabled) {
                                 if (!$multimedia_disabled_on_start) {
                                     echo '<ul class="list-group">' .
                                         acardsNice() .
-                                        '</ul>' .
-                                        '</p>' .
+                                        '</ul><br>' .
                                         '<span id="alsa" class="getModal">' .
-                                        '<a href="#"' .
-                                        'class="btn btn-primary"' .
-                                        'data-toggle="tooltip"' .
-                                        'data-html="true"' .
+                                        '<a href="#" ' .
+                                        'class="btn btn-primary" ' .
+                                        'data-toggle="tooltip" ' .
+                                        'data-html="true" ' .
                                         'title="' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP") . '">' .
                                         '<i class="fas fa-eye"></i> ' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES") .
                                         '</a>' .
@@ -138,12 +134,12 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                                 } else {
                                     echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION2");
                                     echo '<div id="restartRoonServerAudioPanel">'.
-                                            '<a id="restartRoonServer" href="#" onclick="restartRoonServerAndRefresh()">' .
-                                                '<div class="fa-4x text-center" style="text-align: center;">' .
+                                            '<a id="restartRoonServer" href="#" onclick="restartRoonServerAndRefresh()"></p>' .
+                                                '<div class="fa-4x text-center" style="text-align: center;"><p>' .
                                                     '<span class="fa-layers fa-fw">' .
                                                         '<i class="fas fa-circle"></i>' .
                                                         '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' .
-                                                    '</span>' .
+                                                    '</span></p>' .
                                                 '</div>' .
                                                 '<div class="text-center">' .
                                                     str_replace("'", "\'", localize("MODAL_SETUP_RESTART_ROONSERVER")) .
@@ -154,7 +150,6 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                             } else {
                                 echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1");
                             } ?>
-                        </p>
                     </div>
                 </div>
             </div>

@@ -18,12 +18,10 @@ if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     die('Not logged in!');
 }
 ?>
-<div id="contentblock" class="container">
     <div class="roon-template">
         <span class="fa-stack fa-8x">
             <i class="fa fa-circle fa-stack-1x" style="color: #222222;"></i>
-            <img src="img/roonIcon.svg" style="height: 70px;" ,
-                 class="fa-stack-2x fa-inverse"/>
+            <img src="img/roonIcon.svg" alt="Roon Icon" style="height: 70px;" class="fa-stack-2x fa-inverse">
         </span>
 
         <h1><?php echo localize("SETUP_HEADLINE"); ?></h1>
@@ -31,7 +29,6 @@ if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
         <button type="button" id="setStorage" class="getModal btn btn-primary"><?php echo localize("SETUP_BTN_CONFIGURE"); ?>
         </button>
     </div>
-</div>
 
 <script>
     var dbexist = <?php if (isset($dblocation)) {

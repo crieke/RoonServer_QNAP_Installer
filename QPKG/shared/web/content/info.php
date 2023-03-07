@@ -52,12 +52,9 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                                 <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php echo $customFfmpeg ? localize('MODAL_FFMPEG_USER_SUPPLIED_VERSION') : localize('MODAL_FFMPEG_SYSTEM_DEFAULT'); ?></button></span>
                         </p>
                             <h5><?php echo localize("OVERVIEW_ROONSERVER_PANEL_SUBHEAD_DATABASE"); ?></h5>
-                        <p>
                             <span data-toggle="tooltip" title="<?php echo $dblocation; ?>">
                                 <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_LOCATION"); ?>: </b><?php echo $dblocation; ?>
                             </span>
-                            <br>
-                        </p>
                             <div class="progress" style="height: 20px;">
                                 <div class="progress-bar" role="progressbar" style="width: <?php echo $db_perc ?>%;" aria-valuenow="<?php echo(100 - $db_perc) ?>" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>

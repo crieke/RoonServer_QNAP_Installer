@@ -28,7 +28,7 @@ ROON_FFMPEG_DIR="${ROON_DATAROOT}/bin"
 ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${ROON_DATAROOT}/RoonOnNAS.log.txt"
 QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
-PID=$(ps aux | grep "${QPKG_ROOT}/RoonServer/start.sh" | grep -v grep | awk '{print $1}')
+PID=$(/bin/ps aux | grep "${QPKG_ROOT}/RoonServer/start.sh" | grep -v grep | awk '{print $1}')
 
 ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"

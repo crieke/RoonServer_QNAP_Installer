@@ -54,6 +54,9 @@ $roon_qpkg_conf = $qpkg_conf['RoonServer'];
 define("NASHOST", $NASHOST);
 define("NASLOCALHOST", $NASLOCALHOST);
 define("APPINSTALLPATH", $qpkg_conf['RoonServer']['Install_Path']);
+define("CS_INSTALLPATH", $qpkg_conf['container-station']['Install_Path']);
+
+$RoonVersion = file(rtrim(APPINSTALLPATH) . "/RoonServer/VERSION");
 
 # Getting free space of database directory
 if (array_key_exists('DB_Path', $roon_qpkg_conf)) {
@@ -63,37 +66,15 @@ if (array_key_exists('DB_Path', $roon_qpkg_conf)) {
     $dblocation = implode('/', $originalpath);
 }
 
-if (array_key_exists('MULTIMEDIA_DISABLE_ON_START', $roon_qpkg_conf)) {
-    $multimedia_disabled_on_start = $qpkg_conf['RoonServer']['MULTIMEDIA_DISABLE_ON_START'];
-} else {
-    $multimedia_disabled_on_start = "";
-
-}
-
-
-$RoonVersion = file(rtrim(APPINSTALLPATH) . "/RoonServer/VERSION");
-$WHICH_FFMPEG = trim(shell_exec('PATH="/share/'.$dblocation .'/RoonOnNAS/bin:$PATH" && which ffmpeg'));
-if (strpos($WHICH_FFMPEG, $dblocation) !== false) {
-    $customFfmpeg = true;
-}
-else {
-        $customFfmpeg = false;
-}
-$ffmpegVersion=trim(shell_exec('PATH="/share/'.$dblocation.'/RoonOnNAS/bin:$PATH" && ffmpeg -version | sed -n "s/ffmpeg version \([^ ]*\).*/\1/p;"'));
-
-$alsafull = file_get_contents('/proc/asound/cards');
-$alsaraw = fopen("/proc/asound/cards", 'r');
-$alsatext = fread($alsaraw, 25000);
-
-preg_match_all("/\[[^\]]*\]/", $alsafull, $alsa);
-
 if (isset($qpkg_conf_db)) {
     $db_vol_cap = disk_total_space($qpkg_conf_db);
     $db_free_space = disk_free_space($qpkg_conf_db);
     $db_perc = round(100 - (($db_free_space / $db_vol_cap) * 100));
 }
-$application_conf = parse_ini_file('/var/.application.conf', 1, INI_SCANNER_RAW);
-$multimediaDisabled = $application_conf['DISABLE']['HomeFeature'];
-unset($application_conf);
+
+if (array_key_exists('options', $roon_qpkg_conf)) {
+    $qpkg_conf_options = $roon_qpkg_conf['options'];
+}
+
 ?>
 

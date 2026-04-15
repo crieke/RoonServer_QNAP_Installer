@@ -105,24 +105,20 @@
 ######################################################################
 
 QPKG_NAME="RoonServer"
-ROON_PKG_URL="https://download.roonlabs.net/builds/RoonServer_linuxx64.tar.bz2"
-ROON_ARCHIVE="${ROON_PKG_URL##*/}"
-ROON_OFFLINE_ARCHIVE="$SYS_PUBLIC_PATH/$ROON_ARCHIVE"
 
 #PKG_PRE_REMOVE="{
 #}"
 #
 #PKG_MAIN_REMOVE="{
 #}"
-#
+
 PKG_POST_REMOVE="{
-
     ## Remove symlink of web interface, if it still exist
-
     RoonSymlink="/home/httpd/cgi-bin/qpkg/RoonServer"
     if [ -L $RoonSymlink ]; then
         "${CMD_RM}" "${RoonSymlink}"
     fi
+    
 }"
 #
 ######################################################################
@@ -131,29 +127,6 @@ PKG_POST_REMOVE="{
 ######################################################################
 pkg_init(){
 
-    # Roon Server in v2017-10-03 had not option to select the database location. So the path was not stored in the config file.
-    # Instead v2017-10-03 used pre-defined shared folder(/share/RoonServer). This checks if this folder exists and stores it in the config file. 
-    # So the user does not need to specify it manually, when upgrading from v2017-10-03.
-
-    PREVERSION=$(${CMD_GETCFG} ${QPKG_NAME} Version -f ${SYS_QPKG_CONFIG_FILE})
-    if [ "$PREVERSION" == "2017-10-03" ]; then
-        if [ -d "/share/RoonServer/RoonServer" ] && [ -d "/share/RoonServer/RAATServer" ]; then
-        ${CMD_LOG_TOOL} -t 0 -a "[${QPKG_NAME}] Storage location of previously installed Roon Server database has been set automatically."
-        ${CMD_SETCFG} ${QPKG_NAME} DB_Path "/share/RoonServer" -f ${SYS_QPKG_CONFIG_FILE}
-
-        fi
-    fi
-
-    ## Check if archive has been supplied on the public shared folder for offline installation. 
-    ## This was added, as some users had issues to download the required RoonServer binaries.
-
-    if [ -f "$ROON_OFFLINE_ARCHIVE" ]; then
-        ONLINEINSTALL=false
-        ROON_ARCHIVE="$ROON_OFFLINE_ARCHIVE"
-        log "[${QPKG_NAME}] Performing offline installation with binary archive from Public share."
-    else
-        ONLINEINSTALL=true
-    fi
 }
 #
 ######################################################################
@@ -167,76 +140,25 @@ pkg_init(){
 # Define any package specific operations that shall be performed when
 # the package is installed.
 ######################################################################
+#
+#pkg_pre_install(){
+#}
 
-## Check for a different install URL in case of ALPHA or NIGHLTY installs
-## If the user is a ALPHA or NIGHTLY tester, he can specify the URL for the installation here.
-## It is checked, wether the URL starts with "http" and and ends with the same basename as the official url. 
-
-if [ -f /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt ]; then
-    CUSTOM_INSTALL_URL=`"${CMD_CAT}" /share/RoonServer/ROON_DEBUG_INSTALL_URL.txt`
-    if [ ${CUSTOM_INSTALL_URL:0:4} == "http" ]  && [ $(basename ${CUSTOM_INSTALL_URL}) == $(basename ${ROON_PKG_URL}) ]; then
-        ROON_PKG_URL="${CUSTOM_INSTALL_URL}"
-    fi
-fi
-
-pkg_pre_install(){
-    ### keep current RoonServer binaries and prevent redownload
-    if [ -d ${SYS_QPKG_DIR}/RoonServer ]; then
-        newInstall=false
-    else
-        newInstall=true
-    fi
-}
-
-pkg_install(){
-    if  $newInstall; then
-        if $ONLINEINSTALL; then
-            DL_STATUS="$(${CMD_WGET} ${ROON_PKG_URL} -NSO ${ROON_ARCHIVE} 2>&1 | grep 'HTTP/' | awk '{print $2}')"
-            R=$?
-            if [ $R -ne 0 ] && [ $DL_STATUS -ne 200 ]; then
-                err_log "Could not download binary archive from Roon Labs website. Please check your internet connection. (Status-Code: $DL_STATUS)"
-            fi
-        fi
-        
-        "${CMD_TAR}" xjf "${ROON_ARCHIVE}" -C "${SYS_QPKG_DIR}"
-        R=$?
-        if [ $R -ne 0 ]; then
-            err_log "Error while decompressing the .tar.bz2 archive."
-        fi
-    
-        ## Removing downloaded file after extract
-    
-        "${CMD_RM}" -f "${ROON_ARCHIVE}"
-    fi
+pkg_install(){    
     ## Creating required folders and setting permissions
-
-    "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/tmp
     "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}"/id
-    "${CMD_CHMOD}" -R 777 "${SYS_QPKG_DIR}"/web/tmp
+    
+    CS_DIR=`$CMD_GETCFG "container-station" Install_Path -f "${SYS_QPKG_CONFIG_FILE}"`
+    
+    # Pull Roon Server docker image, so the first qpkg launch will take less time.
+    $CS_DIR/bin/system-docker pull 'ghcr.io/roonlabs/roonserver:latest'
+
 }
 
 pkg_post_install(){
-    
-    # Restructuring Database folder
-    ROON_DB_PATH=$("${CMD_GETCFG}" "${QPKG_NAME}" DB_Path -f "${SYS_QPKG_CONFIG_FILE}")
-    
-    if [[ x$ROON_DB_PATH != "x" ]]; then
-        if [ -d "${ROON_DB_PATH}" ] && [ -d "${ROON_DB_PATH}/RoonServer" ] && [ -d "${ROON_DB_PATH}/RAATServer" ] && [ ! -d "${ROON_DB_PATH}/RoonOnNAS" ]; then
-            "${CMD_MKDIR}" -m 777 "${ROON_DB_PATH}/RoonOnNAS"
-            "${CMD_MKDIR}" -m 777 "${ROON_DB_PATH}/RoonOnNAS/bin"
-            "${CMD_MV}" "${ROON_DB_PATH}/RoonServer" "${ROON_DB_PATH}/RoonOnNAS/"
-            "${CMD_MV}" "${ROON_DB_PATH}/RAATServer" "${ROON_DB_PATH}/RoonOnNAS/"
-            [ -d "${ROON_DB_PATH}/RoonGoer" ] && "${CMD_MV}" "${ROON_DB_PATH}/RoonGoer" "${ROON_DB_PATH}/RoonOnNAS/"
-            "${CMD_MKDIR}" -m 777 "${DB_Path}/RoonOnNAS/bin"
-            # Move ffmpeg if it has been provided previously and make sure it is executable. Then remove previous bin directory
-            [ -f "${SYS_QPKG_DIR}/bin/ffmpeg" ] && ${CMD_MV} "${SYS_QPKG_DIR}/bin/ffmpeg" "${ROON_DB_PATH}/RoonOnNAS/bin/" && "${CMD_CHMOD}" 755 "${ROON_DB_PATH}/RoonOnNAS/bin/ffmpeg" && ${CMD_RMDIR} "${SYS_QPKG_DIR}/bin"
-        fi
-    fi
-    
     # Checking if required directories exist
-    [ -d "${SYS_QPKG_DIR}/tmp" ] || "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}/tmp"
     [ -d "${SYS_QPKG_DIR}/id" ] || "${CMD_MKDIR}" -m 777 "${SYS_QPKG_DIR}/id"
     
-    "${CMD_SETCFG}" "${QPKG_NAME}" BINARIES_URL "${ROON_PKG_URL}" -f "${SYS_QPKG_CONFIG_FILE}"
+    "${CMD_SETCFG}" "${QPKG_NAME}" options "" -f "${SYS_QPKG_CONFIG_FILE}"
     "${CMD_SETCFG}" "${QPKG_NAME}" Force_Visible 1 -f "${SYS_QPKG_CONFIG_FILE}"
 }

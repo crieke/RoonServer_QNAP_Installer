@@ -1,0 +1,12 @@
+services:
+  roonserver:
+    image: ghcr.io/roonlabs/roonserver:latest
+    container_name: ${CONTAINER_NAME}
+    network_mode: host
+    environment:
+      - ROON_CHANNEL=${ROON_CHANNEL:-production}
+      - TZ=${TZ:-UTC}
+    stop_grace_period: 45s
+    restart: unless-stopped
+    logging:
+      driver: local

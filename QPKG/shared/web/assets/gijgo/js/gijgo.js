@@ -1,8 +1,8 @@
 /*
- * Gijgo JavaScript Library v1.9.6
+ * Gijgo JavaScript Library v1.9.14
  * http://gijgo.com/
  *
- * Copyright 2014, 2018 gijgo.com
+ * Copyright 2014, 2022 gijgo.com
  * Released under the MIT license
  */
 var gj = {};
@@ -260,7 +260,8 @@ gj.core = {
             am: 'AM',
             pm: 'PM',
             ok: 'Ok',
-            cancel: 'Cancel'
+            cancel: 'Cancel',
+            titleFormat: 'mmmm yyyy'
         }
     },
 
@@ -303,7 +304,7 @@ gj.core = {
      * </script>
      */
     parseDate: function (value, format, locale) {
-        var i, year = 0, month = 0, date = 0, hour = 0, minute = 0, dateParts, formatParts, result;
+        var i, year = 0, month = 0, date = 1, hour = 0, minute = 0, dateParts, formatParts, result;
 
         if (value && typeof value === 'string') {
             if (/^\d+$/.test(value)) {
@@ -311,8 +312,13 @@ gj.core = {
             } else if (value.indexOf('/Date(') > -1) {
                 result = new Date(parseInt(value.substr(6), 10));
             } else if (value) {
-                dateParts = value.split(/[\s,-\.//\:]+/);
                 formatParts = format.split(/[\s,-\.//\:]+/);
+                // Split only by spaces
+                dateParts = value.split(/[\s]+/);
+                // Split by other chars if the split by spaces doesn't work
+                if (dateParts.length != formatParts.length) {
+                    dateParts = value.split(/[\s,-\.//\:]+/);
+                }
                 for (i = 0; i < formatParts.length; i++) {
                     if (['d', 'dd'].indexOf(formatParts[i]) > -1) {
                         date = parseInt(dateParts[i], 10);
@@ -513,10 +519,14 @@ gj.core = {
 
         if (style.boxSizing === 'border-box') { // border-box include padding and border within the height
             result = parseInt(style.height, 10);
+            if (gj.core.isIE()) {
+                result += parseInt(style.paddingTop || 0, 10) + parseInt(style.paddingBottom || 0, 10);
+                result += parseInt(style.borderTopWidth || 0, 10) + parseInt(style.borderBottomWidth || 0, 10);
+            }
         } else {
             result = parseInt(style.height, 10);
             result += parseInt(style.paddingTop || 0, 10) + parseInt(style.paddingBottom || 0, 10);
-            result += parseInt(style.borderTop || 0, 10) + parseInt(style.borderBottom || 0, 10);
+            result += parseInt(style.borderTopWidth || 0, 10) + parseInt(style.borderBottomWidth || 0, 10);
         }
 
         if (margin) {
@@ -534,7 +544,7 @@ gj.core = {
         } else {
             result = parseInt(style.width, 10);
             result += parseInt(style.paddingLeft || 0, 10) + parseInt(style.paddingRight || 0, 10);
-            result += parseInt(style.borderLeft || 0, 10) + parseInt(style.borderRight || 0, 10);
+            result += parseInt(style.borderLeftWidth || 0, 10) + parseInt(style.borderRightWidth || 0, 10);
         }
 
         if (margin) {
@@ -554,29 +564,205 @@ gj.core = {
         }
     },
 
-    position: function (elem, padding, margin) {
-        var box = elem.getBoundingClientRect(),
-            body = document.body,
-            bodyStyle = window.getComputedStyle(body),
-            docEl = document.documentElement,
-            scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop,
-            scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft,
-            clientTop = docEl.clientTop || body.clientTop || 0,
-            clientLeft = docEl.clientLeft || body.clientLeft || 0,
-            top = Math.round(box.top + scrollTop - clientTop),
-            left = Math.round(box.left + scrollLeft - clientLeft);
+    position: function (el) {
+        var xScroll, yScroll, left = 0, top = 0,
+            height = gj.core.height(el),
+            width = gj.core.width(el);
 
-        if (padding) {
-            top += parseInt(bodyStyle.paddingTop || 0, 10);
-            left += parseInt(bodyStyle.paddingLeft || 0, 10);
-        }
-        if (margin) {
-            top += parseInt(bodyStyle.marginTop || 0, 10);
-            left += parseInt(bodyStyle.marginLeft || 0, 10);
+        while (el) {
+            if (el.tagName == "BODY") {
+                xScroll = el.scrollLeft || document.documentElement.scrollLeft;
+                yScroll = el.scrollTop || document.documentElement.scrollTop;
+                left += el.offsetLeft - xScroll; // + el.clientLeft);
+                top += el.offsetTop - yScroll; // + el.clientTop);
+            } else {
+                left += el.offsetLeft - el.scrollLeft; // + el.clientLeft;
+                top += el.offsetTop - el.scrollTop; // + el.clientTop;
+            }
+
+            el = el.offsetParent;
         }
 
-        return { top: top, left: left, bottom: top + gj.core.height(elem), right: left + gj.core.width(elem) };
+        return { top: top, left: left, bottom: top + height, right: left + width };
+    },
+
+    setCaretAtEnd: function (elem) {
+        var elemLen;
+        if (elem) {
+            elemLen = elem.value.length;
+            if (document.selection) { // For IE Only
+                elem.focus();
+                var oSel = document.selection.createRange();
+                oSel.moveStart('character', -elemLen);
+                oSel.moveStart('character', elemLen);
+                oSel.moveEnd('character', 0);
+                oSel.select();
+            } else if (elem.selectionStart || elem.selectionStart == '0') { // Firefox/Chrome                
+                elem.selectionStart = elemLen;
+                elem.selectionEnd = elemLen;
+                elem.focus();
+            }
+        }
+    },
+    getScrollParent: function (node) {
+        if (node == null) {
+            return null;
+        } else if (node.scrollHeight > node.clientHeight) {
+            return node;
+        } else {
+            return gj.core.getScrollParent(node.parentNode);
+        }
     }
+};
+gj.picker = {
+    messages: {
+        'en-us': {
+        }
+    }
+};
+
+gj.picker.methods = {
+
+    initialize: function ($input, data, methods) {
+        var $calendar, $rightIcon,
+            $picker = methods.createPicker($input, data),
+            $wrapper = $input.parent('div[role="wrapper"]');
+
+        if (data.uiLibrary === 'bootstrap') {
+            $rightIcon = $('<span class="input-group-addon">' + data.icons.rightIcon + '</span>');
+        } else if (data.uiLibrary === 'bootstrap4') {
+            $rightIcon = $('<span class="input-group-append"><button class="btn btn-outline-secondary border-left-0" type="button">' + data.icons.rightIcon + '</button></span>');
+        } else if (data.uiLibrary === 'bootstrap5') {
+            $rightIcon = $('<button class="btn btn-outline-secondary border-left-0" type="button">' + data.icons.rightIcon + '</button>');
+        } else {
+            $rightIcon = $(data.icons.rightIcon);
+        }
+        $rightIcon.attr('role', 'right-icon');
+
+        if ($wrapper.length === 0) {
+            $wrapper = $('<div role="wrapper" />').addClass(data.style.wrapper); // The css class needs to be added before the wrapping, otherwise doesn't work.
+            $input.wrap($wrapper);
+        } else {
+            $wrapper.addClass(data.style.wrapper);
+        }
+        $wrapper = $input.parent('div[role="wrapper"]');
+
+        data.width && $wrapper.css('width', data.width);
+
+        $input.val(data.value).addClass(data.style.input).attr('role', 'input');
+
+        data.fontSize && $input.css('font-size', data.fontSize);
+
+        if (data.uiLibrary === 'bootstrap' || data.uiLibrary === 'bootstrap4' || data.uiLibrary === 'bootstrap5') {
+            if (data.size === 'small') {
+                $wrapper.addClass('input-group-sm');
+                $input.addClass('form-control-sm');
+            } else if (data.size === 'large') {
+                $wrapper.addClass('input-group-lg');
+                $input.addClass('form-control-lg');
+            }
+        } else {
+            if (data.size === 'small') {
+                $wrapper.addClass('small');
+            } else if (data.size === 'large') {
+                $wrapper.addClass('large');
+            }
+        }
+
+        $rightIcon.on('click', function (e) {
+            if ($picker.is(':visible')) {
+                $input.close();
+            } else {
+                $input.open();
+            }
+        });
+        $wrapper.append($rightIcon);
+
+        if (data.footer !== true) {
+            $input.on('blur', function () {
+                $input.timeout = setTimeout(function () {
+                    $input.close();
+                }, 500);
+            });
+            $picker.mousedown(function () {
+                clearTimeout($input.timeout);
+                $input.focus();
+                return false;
+            });
+            $picker.on('click', function () {
+                clearTimeout($input.timeout);
+                $input.focus();
+            });
+        }
+    }
+};
+
+
+gj.picker.widget = function ($element, jsConfig) {
+    var self = this,
+        methods = gj.picker.methods;
+
+    self.destroy = function () {
+        return methods.destroy(this);
+    };
+
+    return $element;
+};
+
+gj.picker.widget.prototype = new gj.widget();
+gj.picker.widget.constructor = gj.picker.widget;
+
+gj.picker.widget.prototype.init = function (jsConfig, type, methods) {
+    gj.widget.prototype.init.call(this, jsConfig, type);
+    this.attr('data-' + type, 'true');
+    gj.picker.methods.initialize(this, this.data(), gj[type].methods);
+    return this;
+};
+
+gj.picker.widget.prototype.open = function (type) {
+    var data = this.data(),
+        $picker = $('body').find('[role="picker"][guid="' + this.attr('data-guid') + '"]');
+
+    $picker.show();
+    $picker.closest('div[role="modal"]').show();
+    if (data.modal) {
+        gj.core.center($picker);
+    } else {
+        gj.core.setChildPosition(this[0], $picker[0]);
+        this.focus();
+    }
+    clearTimeout(this.timeout);
+
+    gj[type].events.open(this);
+
+    return this;
+};
+
+gj.picker.widget.prototype.close = function (type) {
+    var $picker = $('body').find('[role="picker"][guid="' + this.attr('data-guid') + '"]');
+    $picker.hide();
+    $picker.closest('div[role="modal"]').hide();
+    gj[type].events.close(this);
+    return this;
+};
+
+gj.picker.widget.prototype.destroy = function (type) {
+    var data = this.data(),
+        $parent = this.parent(),
+        $picker = $('body').find('[role="picker"][guid="' + this.attr('data-guid') + '"]');
+    if (data) {
+        this.off();
+        if ($picker.parent('[role="modal"]').length > 0) {
+            $picker.unwrap();
+        }
+        $picker.remove();
+        this.removeData();
+        this.removeAttr('data-type').removeAttr('data-guid').removeAttr('data-' + type);
+        this.removeClass();
+        $parent.children('[role="right-icon"]').remove();
+        this.unwrap();
+    }
+    return this;
 };
 /* global window alert jQuery */
 /** 
@@ -723,6 +909,14 @@ gj.dialog.config = {
          *         uiLibrary: 'bootstrap4'
          *     });
          * </script>
+         * @example Long.Text.Bootstrap5 <!-- bootstrap5, draggable, dialog.base -->
+         * <div id="dialog">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus porttitor quam in magna vulputate, vitae laoreet odio ultrices. Phasellus at efficitur magna. Mauris purus dolor, egestas quis leo et, vulputate dictum mauris. Vivamus maximus lectus sollicitudin lorem blandit tempor. Maecenas eget posuere mi. Suspendisse id hendrerit nibh. Morbi eu odio euismod, venenatis ipsum in, egestas nunc. Mauris dignissim metus ac risus porta eleifend. Aliquam tempus libero orci, id placerat odio vehicula eu. Donec tincidunt justo dolor, sit amet tempus turpis varius sit amet. Suspendisse ut ex blandit, hendrerit enim tristique, iaculis ipsum. Vivamus venenatis dolor justo, eget scelerisque lacus dignissim quis. Duis imperdiet ex at aliquet cursus. Proin non ultricies leo. Fusce quam diam, laoreet quis fringilla vitae, viverra id magna. Nam laoreet sem in volutpat rhoncus.</div>
+         * <script>
+         *     $("#dialog").dialog({
+         *         height: 350,
+         *         uiLibrary: 'bootstrap5'
+         *     });
+         * </script>
          */
         height: 'auto',
 
@@ -829,6 +1023,14 @@ gj.dialog.config = {
          *         uiLibrary: 'bootstrap4'
          *     });
          * </script>
+         * @example True.Bootstrap.5 <!-- bootstrap5, draggable, dialog.base -->
+         * <div id="dialog">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</div>
+         * <script>
+         *     $("#dialog").dialog({
+         *         modal: true,
+         *         uiLibrary: 'bootstrap5'
+         *     });
+         * </script>
          * @example False <!-- draggable, dialog.base, bootstrap -->
          * <div id="dialog">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</div>
          * <script>
@@ -883,7 +1085,16 @@ gj.dialog.config = {
          *     $("#dialog").dialog({
          *         scrollable: true,
          *         height: 300,
-         *         uiLibrary: 'bootstrap'
+         *         uiLibrary: 'bootstrap4'
+         *     });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, draggable, dialog.base -->
+         * <div id="dialog">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus porttitor quam in magna vulputate, vitae laoreet odio ultrices. Phasellus at efficitur magna. Mauris purus dolor, egestas quis leo et, vulputate dictum mauris. Vivamus maximus lectus sollicitudin lorem blandit tempor. Maecenas eget posuere mi. Suspendisse id hendrerit nibh. Morbi eu odio euismod, venenatis ipsum in, egestas nunc. Mauris dignissim metus ac risus porta eleifend. Aliquam tempus libero orci, id placerat odio vehicula eu. Donec tincidunt justo dolor, sit amet tempus turpis varius sit amet. Suspendisse ut ex blandit, hendrerit enim tristique, iaculis ipsum. Vivamus venenatis dolor justo, eget scelerisque lacus dignissim quis. Duis imperdiet ex at aliquet cursus. Proin non ultricies leo. Fusce quam diam, laoreet quis fringilla vitae, viverra id magna. Nam laoreet sem in volutpat rhoncus.</div>
+         * <script>
+         *     $("#dialog").dialog({
+         *         scrollable: true,
+         *         height: 300,
+         *         uiLibrary: 'bootstrap5'
          *     });
          * </script>
          * @example Material.Design <!-- draggable, dialog.base -->
@@ -939,6 +1150,19 @@ gj.dialog.config = {
          * <script>
          *     var dialog = $("#dialog").dialog({
          *         uiLibrary: 'bootstrap4'
+         *     });
+         * </script>
+         * @example Bootstrap.5 <!-- draggable, dialog.base, bootstrap5 -->
+         * <div id="dialog">
+         *     <div data-role="body">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</div>
+         *     <div data-role="footer">
+         *         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         *         <button type="button" class="btn btn-primary">Save changes</button>        
+         *     </div>
+         * </div>
+         * <script>
+         *     var dialog = $("#dialog").dialog({
+         *         uiLibrary: 'bootstrap5'
          *     });
          * </script>
          * @example Material.Design <!-- draggable, dialog.base  -->
@@ -1013,6 +1237,18 @@ gj.dialog.config = {
             header: 'modal-header',
             headerTitle: 'modal-title',
             headerCloseButton: 'close',
+            body: 'modal-body',
+            footer: 'gj-dialog-footer modal-footer'
+        }
+    },
+
+    bootstrap5: {
+        style: {
+            modal: 'gj-modal',
+            content: 'modal modal-content gj-dialog-bootstrap5',
+            header: 'modal-header',
+            headerTitle: 'modal-title',
+            headerCloseButton: 'btn-close',
             body: 'modal-body',
             footer: 'gj-dialog-footer modal-footer'
         }
@@ -1411,7 +1647,11 @@ gj.dialog.methods = {
 
         $closeButton = $header.find('[data-role="close"]');
         if ($closeButton.length === 0 && data.closeButtonInHeader) {
-            $closeButton = $('<button type="button" data-role="close" title="' + gj.dialog.messages[data.locale].Close + '"><span>×</span></button>');
+            if (data.uiLibrary === 'bootstrap5') {
+                $closeButton = $('<button type="button" data-role="close" title="' + gj.dialog.messages[data.locale].Close + '" data-bs-dismiss="modal" aria-label="Close"></button>');
+            } else {
+                $closeButton = $('<button type="button" data-role="close" title="' + gj.dialog.messages[data.locale].Close + '"><span>×</span></button>');
+            }
             $closeButton.addClass(data.style.headerCloseButton);
             $header.append($closeButton);
         } else if ($closeButton.length > 0 && data.closeButtonInHeader === false) {
@@ -1928,7 +2168,7 @@ gj.draggable.methods = {
             }
         }
 
-        if (false !== gj.draggable.events.drag($(dragEl), newTop, newLeft, mouseX, mouseY)) {
+        if (false !== gj.draggable.events.drag($(dragEl), newLeft, newTop, mouseX, mouseY)) {
             dragEl.style.top = newTop + 'px';
             dragEl.style.left = newLeft + 'px';
         }
@@ -1938,8 +2178,11 @@ gj.draggable.methods = {
         if ($dragEl.attr('data-draggable') === 'true') {
             gj.documentManager.unsubscribeForEvent('mouseup', $dragEl.data('guid'));
             $dragEl.removeData();
-            $dragEl.removeAttr('data-guid');
-            $dragEl.removeAttr('data-draggable');
+            $dragEl.removeAttr('data-guid').removeAttr('data-type').removeAttr('data-draggable');
+            $dragEl.removeAttr('draggable-x').removeAttr('draggable-y').removeAttr('draggable-dragging');
+            $dragEl[0].style.top = '';
+            $dragEl[0].style.left = '';
+            $dragEl[0].style.position = '';
             $dragEl.off('drag').off('start').off('stop');
             gj.draggable.methods.getHandleElement($dragEl).off('mousedown');
         }
@@ -1963,13 +2206,13 @@ gj.draggable.events = {
      * <script>
      *     $('#element').draggable({
      *         drag: function (e, newPosition, mousePosition) {
-     *             $('body').append('<div>The drag event is fired. New Element Position = { top:' + offset.top + ', left: ' + offset.left + '}.</div>');
+     *             $('body').append('<div>The drag event is fired. New Element Position = { top:' + newPosition.top + ', left: ' + newPosition.left + '}.</div>');
      *         }
      *     });
      * </script>
      */
-    drag: function ($dragEl, newTop, newLeft, mouseX, mouseY) {
-        return $dragEl.triggerHandler('drag', [{ top: newTop, left: newLeft }, { x: mouseX, y: mouseY }]);
+    drag: function ($dragEl, newLeft, newTop, mouseX, mouseY) {
+        return $dragEl.triggerHandler('drag', [{ left: newLeft, top: newTop }, { x: mouseX, y: mouseY }]);
     },
 
     /**
@@ -2599,7 +2842,7 @@ gj.grid.config = {
 
             /** Indicates the type of the column.
              * @alias column.type
-             * @type text|checkbox|icon
+             * @type text|checkbox|icon|date|time|datetime
              * @default 'text'
              * @example Bootstrap.3.Icon <!-- grid, bootstrap -->
              * <table id="grid"></table>
@@ -2664,7 +2907,7 @@ gj.grid.config = {
              *         dataSource: '/Players/Get',
              *         uiLibrary: 'bootstrap4',
              *         columns: [
-             *             { field: 'ID', width: 34 },
+             *             { field: 'ID', width: 46 },
              *             { field: 'Name', title: 'Player' },
              *             { field: 'PlaceOfBirth', title: 'Place of Birth' },
              *             { title: 'Active?', field: 'IsActive', width: 80, type: 'checkbox', align: 'center' }
@@ -4330,7 +4573,7 @@ gj.grid.methods = {
     },
 
     formatText: function (text, column) {
-        if (text && column.type === 'date') {
+        if (text && ['date', 'time', 'datetime'].indexOf(column.type) > -1) {
             text = gj.core.formatDate(gj.core.parseDate(text, column.format), column.format);
         } else {
             text = (typeof (text) === 'undefined' || text === null) ? '' : text.toString();
@@ -6219,6 +6462,26 @@ gj.grid.plugins.inlineEditing.config = {
              *         pager: { limit: 3 }
              *     });
              * </script>
+             * @example DateTime <!-- datetimepicker, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *         { 'ID': 1, 'Date': '05/15/2018', 'Time': '21:12', 'DateTime': '21:12 05/15/2018' },
+             *         { 'ID': 2, 'Date': '05/16/2018', 'Time': '22:12', 'DateTime': '22:12 05/16/2018' },
+             *         { 'ID': 3, 'Date': '05/17/2018', 'Time': '23:12', 'DateTime': '23:12 05/17/2018' }
+             *     ];
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command' },
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Date', type: 'date', format: 'mm/dd/yyyy', editor: true },
+             *             { field: 'Time', type: 'time', format: 'HH:MM', editor: true },
+             *             { field: 'DateTime', type: 'datetime', format: 'HH:MM mm/dd/yyyy', editor: true }
+             *         ]
+             *     });
+             * </script>
              */
             mode: 'click',
                 
@@ -6402,7 +6665,16 @@ gj.grid.plugins.inlineEditing.private = {
                 value = record[column.editField || column.field];
                 $editorField = $editorContainer.find('input, select, textarea').first();
                 if ($editorField.length) {
-                    column.type === 'checkbox' ? $editorField.prop('checked', value) : $editorField.val(value);
+                    switch (column.type) {
+                        case 'checkbox':
+                            $editorField.prop('checked', value);
+                            break;
+                        case 'dropdown':
+                            $editorField = $editorField.dropdown('value', value);
+                            break;
+                        default:
+                            $editorField.val(value);
+                    }
                 } else {
                     if (typeof (column.editor) === 'function') {
                         column.editor($editorContainer, value, record);
@@ -6412,17 +6684,28 @@ gj.grid.plugins.inlineEditing.private = {
                         config.uiLibrary = data.uiLibrary;
                         config.iconsLibrary = data.iconsLibrary;
                         config.fontSize = $grid.css('font-size');
+                        config.showOnFocus = false;
                         if ('checkbox' === column.type && gj.checkbox) {
                             $editorField = $('<input type="checkbox" />').prop('checked', value);
                             $editorContainer.append($editorField);
                             $editorField.checkbox(config);
-                        } else if ('date' === column.type && gj.datepicker) {
+                        } else if (('date' === column.type && gj.datepicker) || ('time' === column.type && gj.timepicker) || ('datetime' === column.type && gj.datetimepicker)) {
                             $editorField = $('<input type="text" width="100%"/>');
                             $editorContainer.append($editorField);
                             if (column.format) {
                                 config.format = column.format;
                             }
-                            $editorField = $editorField.datepicker(config);
+                            switch (column.type) {
+                                case 'date':
+                                    $editorField = $editorField.datepicker(config);
+                                    break;
+                                case 'time':
+                                    $editorField = $editorField.timepicker(config);
+                                    break;
+                                case 'datetime':
+                                    $editorField = $editorField.datetimepicker(config);
+                                    break;
+                            }
                             if ($editorField.value) {
                                 $editorField.value($displayContainer.html());
                             }
@@ -6456,7 +6739,7 @@ gj.grid.plugins.inlineEditing.private = {
                     }
                 }
                 if ($editorField.prop('tagName').toUpperCase() === "INPUT" && $editorField.prop('type').toUpperCase() === 'TEXT') {
-                    gj.grid.plugins.inlineEditing.private.setCaretAtEnd($editorField[0]);
+                    gj.core.setCaretAtEnd($editorField[0]);
                 } else {
                     $editorField.focus();
                 }
@@ -6466,25 +6749,6 @@ gj.grid.plugins.inlineEditing.private = {
                 $cell.find('[role="delete"]').hide();
                 $cell.find('[role="update"]').show();
                 $cell.find('[role="cancel"]').show();
-            }
-        }
-    },
-
-    setCaretAtEnd: function (elem) {
-        var elemLen;
-        if (elem) {
-            elemLen = elem.value.length;
-            if (document.selection) { // For IE Only
-                elem.focus();
-                var oSel = document.selection.createRange();
-                oSel.moveStart('character', -elemLen);
-                oSel.moveStart('character', elemLen);
-                oSel.moveEnd('character', 0);
-                oSel.select();
-            } else if (elem.selectionStart || elem.selectionStart == '0') { // Firefox/Chrome                
-                elem.selectionStart = elemLen;
-                elem.selectionEnd = elemLen;
-                elem.focus();
             }
         }
     },
@@ -8492,8 +8756,8 @@ gj.grid.plugins.export = {
             if (records.length) {
 
                 for (i = 0; i < columns.length; i++) {
-                    if (columns[i].hidden !== true) {
-                        line += '"' + (columns[i].title || columns[i].field) + '",';
+                    if (gj.grid.plugins.export.public.isColumnApplicable(columns[i])) {
+                        line += '"' + (columns[i].title || columns[i].field).replace(/<[^>]+>/g, ' ') + '",';
                     }
                 }
                 str += line.slice(0, line.length - 1) + '\r\n';
@@ -8502,7 +8766,7 @@ gj.grid.plugins.export = {
                     line = '';
 
                     for (j = 0; j < columns.length; j++) {
-                        if (columns[j].hidden !== true) {
+                        if (gj.grid.plugins.export.public.isColumnApplicable(columns[j])) {
                             line += '"' + records[i][columns[j].field] + '",';
                         }
                     }                    
@@ -8552,11 +8816,19 @@ gj.grid.plugins.export = {
         downloadCSV: function (filename, includeAllRecords) {
             var link = document.createElement('a');
             document.body.appendChild(link);
-            link.download = filename || 'griddata.csv';
-            link.href = 'data:text/csv;charset=utf-8,' + escape(this.getCSV(includeAllRecords));
+            link.download = filename || 'griddata.csv'; 
+            if (window.navigator.userAgent.indexOf("Edge") > -1) {
+                link.href = URL.createObjectURL(new Blob([this.getCSV(includeAllRecords)], { type: 'text/csv;charset=utf-8;' }));
+            } else {
+                link.href = 'data:text/csv;charset=utf-8,' + escape(this.getCSV(includeAllRecords));
+            }
             link.click();
             document.body.removeChild(link);
             return this;
+        },
+
+        isColumnApplicable: function (column) {
+            return column.hidden !== true && !column.role;
         }
     },
 
@@ -9496,6 +9768,19 @@ gj.tree.config = {
          *         ]
          *     });
          * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, checkbox, tree -->
+         * <div id="tree"></div>
+         * <script>
+         *     var tree = $('#tree').tree({
+         *         uiLibrary: 'bootstrap5',
+         *         checkboxes: true,
+         *         dataSource: [ { text: 'foo', children: [
+         *                 { text: 'bar', disabled: true, children: [ { text: 'sub-bar' } ] },
+         *                 { text: 'bar2', disabled: false }
+         *             ] }
+         *         ]
+         *     });
+         * </script>
          */
         disabledField: 'disabled',
 
@@ -9582,12 +9867,32 @@ gj.tree.config = {
          *         border: false
          *     });
          * </script>
+         * @example Bootstrap.5.True <!-- bootstrap5, tree -->
+         * <div id="tree"></div>
+         * <script>
+         *     $('#tree').tree({
+         *         dataSource: '/Locations/Get',
+         *         width: 500,
+         *         uiLibrary: 'bootstrap5',
+         *         border: true
+         *     });
+         * </script>
+         * @example Bootstrap.5.False <!-- bootstrap5, tree -->
+         * <div id="tree"></div>
+         * <script>
+         *     $('#tree').tree({
+         *         dataSource: '/Locations/Get',
+         *         width: 500,
+         *         uiLibrary: 'bootstrap5',
+         *         border: false
+         *     });
+         * </script>
          */
         border: false,
 
         /** The name of the UI library that is going to be in use.
          * @additionalinfo The css file for bootstrap should be manually included if you use bootstrap.
-         * @type (materialdesign|bootstrap|bootstrap4)
+         * @type (materialdesign|bootstrap|bootstrap4|bootstrap5)
          * @default materialdesign
          * @example MaterialDesign <!-- tree, checkbox -->
          * <div id="tree"></div>
@@ -9616,6 +9921,16 @@ gj.tree.config = {
          *         dataSource: '/Locations/Get',
          *         width: 500,
          *         uiLibrary: 'bootstrap4',
+         *         checkboxes: true
+         *     });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, tree, checkbox -->
+         * <div id="tree"></div>
+         * <script>
+         *     var tree = $('#tree').tree({
+         *         dataSource: '/Locations/Get',
+         *         width: 500,
+         *         uiLibrary: 'bootstrap5',
          *         checkboxes: true
          *     });
          * </script>
@@ -9648,10 +9963,23 @@ gj.tree.config = {
          *         checkboxes: true
          *     });
          * </script>
+         * @example Bootstrap.5.Font.Awesome <!-- bootstrap5, fontawesome, tree, checkbox -->
+         * <div id="tree"></div>
+         * <script>
+         *     var tree = $('#tree').tree({
+         *         dataSource: '/Locations/Get',
+         *         width: 500,
+         *         uiLibrary: 'bootstrap5',
+         *         iconsLibrary: 'fontawesome',
+         *         checkboxes: true
+         *     });
+         * </script>
          */
         iconsLibrary: 'materialicons',
 
         autoGenId: 1,
+
+        autoGenFieldName: 'autoId_b5497cc5-7ef3-49f5-a7dc-4a932e1aee4a',
 
         indentation: 24,
 
@@ -9717,6 +10045,20 @@ gj.tree.config = {
     bootstrap4: {
         style: {
             wrapper: 'gj-unselectable gj-tree-bootstrap-4',
+            list: 'gj-list gj-list-bootstrap',
+            item: 'list-group-item',
+            active: 'active',
+            border: 'gj-tree-bootstrap-border'
+        },
+        icons: {
+            expand: '<i class="gj-icon plus" />',
+            collapse: '<i class="gj-icon minus" />'
+        }
+    },
+
+    bootstrap5: {
+        style: {
+            wrapper: 'gj-unselectable gj-tree-bootstrap-5',
             list: 'gj-list gj-list-bootstrap',
             item: 'list-group-item',
             active: 'active',
@@ -10026,35 +10368,33 @@ gj.tree.methods = {
     },
 
     render: function ($tree, response) {
+        var data;
         if (response) {
             if (typeof (response) === 'string' && JSON) {
                 response = JSON.parse(response);
             }
-            $tree.data('records', gj.tree.methods.getRecords($tree, response));
+            data = $tree.data();
+            data.records = response;
+            if (!data.primaryKey) {
+                gj.tree.methods.genAutoId(data, data.records);
+            }
             gj.tree.methods.loadData($tree);
         }
         return $tree;
     },
 
-    filter: function ($grid) {
-        return $grid.data().dataSource;
+    filter: function ($tree) {
+        return $tree.data().dataSource;
     },
 
-    getRecords: function ($tree, response) {
-        var i, id, nodeData, result = [],
-            data = $tree.data();
-        for (i = 0; i < response.length; i++) {
-            id = data.primaryKey && response[i][data.primaryKey] ? response[i][data.primaryKey] : data.autoGenId++;
-            nodeData = { id: id, data: response[i] };
-            if (response[i][data.childrenField] && response[i][data.childrenField].length) {
-                nodeData.children = gj.tree.methods.getRecords($tree, response[i][data.childrenField]);
-                delete response[i][data.childrenField];
-            } else {
-                nodeData.children = [];
+    genAutoId: function (data, records) {
+        var i;
+        for (i = 0; i < records.length; i++) {
+            records[i][data.autoGenFieldName] = data.autoGenId++;
+            if (records[i][data.childrenField] && records[i][data.childrenField].length) {
+                gj.tree.methods.genAutoId(data, records[i][data.childrenField]);
             }
-            result.push(nodeData);
         }
-        return result;
     },
 
     loadData: function ($tree) {
@@ -10073,12 +10413,13 @@ gj.tree.methods = {
     appendNode: function ($tree, $parent, nodeData, level, position) {
         var i, $node, $newParent, $span, $img,
             data = $tree.data(),
-            $node = $('<li data-id="' + nodeData.id + '" data-role="node" />').addClass(data.style.item),
+            id = data.primaryKey ? nodeData[data.primaryKey] : nodeData[data.autoGenFieldName];
+            $node = $('<li data-id="' + id + '" data-role="node" />').addClass(data.style.item),
             $wrapper = $('<div data-role="wrapper" />'),
             $expander = $('<span data-role="expander" data-mode="close"></span>').addClass(data.style.expander),
-            $display = $('<span data-role="display">' + nodeData.data[data.textField] + '</span>'),
-            hasChildren = typeof (nodeData.data[data.hasChildrenField]) !== 'undefined' && nodeData.data[data.hasChildrenField].toString().toLowerCase() === 'true',
-            disabled = typeof (nodeData.data[data.disabledField]) !== 'undefined' && nodeData.data[data.disabledField].toString().toLowerCase() === 'true';
+            $display = $('<span data-role="display">' + nodeData[data.textField] + '</span>'),
+            hasChildren = typeof (nodeData[data.hasChildrenField]) !== 'undefined' && nodeData[data.hasChildrenField].toString().toLowerCase() === 'true',
+            disabled = typeof (nodeData[data.disabledField]) !== 'undefined' && nodeData[data.disabledField].toString().toLowerCase() === 'true';
 
         if (data.indentation) {
             $wrapper.append('<span data-role="spacer" style="width: ' + (data.indentation * (level - 1)) + 'px;"></span>');
@@ -10100,33 +10441,35 @@ gj.tree.methods = {
             $parent.append($node);
         }
 
-        if (nodeData.children.length || hasChildren) {
+        if (data.imageCssClassField && nodeData[data.imageCssClassField]) {
+            $span = $('<span data-role="image"><span class="' + nodeData[data.imageCssClassField] + '"></span></span>');
+            $span.insertBefore($display);
+        } else if (data.imageUrlField && nodeData[data.imageUrlField]) {
+            $span = $('<span data-role="image"></span>');
+            $span.insertBefore($display);
+            $img = $('<img src="' + nodeData[data.imageUrlField] + '"></img>');
+            $img.attr('width', $span.width()).attr('height', $span.height());
+            $span.append($img);
+        } else if (data.imageHtmlField && nodeData[data.imageHtmlField]) {
+            $span = $('<span data-role="image">' + nodeData[data.imageHtmlField] + '</span>');
+            $span.insertBefore($display);
+        }
+
+        if ((nodeData[data.childrenField] && nodeData[data.childrenField].length) || hasChildren) {
             $expander.empty().append(data.icons.expand);
             $newParent = $('<ul />').addClass(data.style.list).addClass('gj-hidden');
             $node.append($newParent);
 
-            for (i = 0; i < nodeData.children.length; i++) {
-                gj.tree.methods.appendNode($tree, $newParent, nodeData.children[i], level + 1);
+            if (nodeData[data.childrenField] && nodeData[data.childrenField].length) {
+                for (i = 0; i < nodeData[data.childrenField].length; i++) {
+                    gj.tree.methods.appendNode($tree, $newParent, nodeData[data.childrenField][i], level + 1);
+                }
             }
         } else {
             data.style.leafIcon ? $expander.addClass(data.style.leafIcon) : $expander.html('&nbsp;');
         }
 
-        if (data.imageCssClassField && nodeData.data[data.imageCssClassField]) {
-            $('<span data-role="image"><span class="' + nodeData.data[data.imageCssClassField] + '"></span></span>').insertBefore($display);
-        } else if (data.imageUrlField && nodeData.data[data.imageUrlField]) {
-            $span = $('<span data-role="image"></span>');
-            $span.insertBefore($display);
-            $img = $('<i class="' + nodeData.data[data.imageUrlField] + '" />');
-       //     $img = $('<img src="' + nodeData.data[data.imageUrlField] + '"></img>');
-            $img.attr('width', $span.width()).attr('height', $span.height());
-            $span.append($img);
-        } else if (data.imageHtmlField && nodeData.data[data.imageHtmlField]) {
-            $span = $('<span data-role="image">' + nodeData.data[data.imageHtmlField] + '</span>');
-            $span.insertBefore($display);
-        }
-
-        gj.tree.events.nodeDataBound($tree, $node, nodeData.id, nodeData.data);
+        gj.tree.events.nodeDataBound($tree, $node, nodeData.id, nodeData);
     },
 
     expanderClickHandler: function ($tree) {
@@ -10276,14 +10619,17 @@ gj.tree.methods = {
         return result;
     },
 
-    getById: function ($tree, id, records) {
-        var i, result = undefined;
+    getDataById: function ($tree, id, records) {
+        var i, data = $tree.data(), result = undefined;
         for (i = 0; i < records.length; i++) {
-            if (id == records[i].id) {
+            if (data.primaryKey && records[i][data.primaryKey] == id) {
                 result = records[i];
                 break;
-            } else if (records[i].children && records[i].children.length) {
-                result = gj.tree.methods.getById($tree, id, records[i].children);
+            } else if (records[i][data.autoGenFieldName] == id) {
+                result = records[i];
+                break;
+            } else if (records[i][data.childrenField] && records[i][data.childrenField].length) {
+                result = gj.tree.methods.getDataById($tree, id, records[i][data.childrenField]);
                 if (result) {
                     break;
                 }
@@ -10292,21 +10638,16 @@ gj.tree.methods = {
         return result;
     },
 
-    getDataById: function ($tree, id, records) {
-        var result = gj.tree.methods.getById($tree, id, records);
-        return result ? result.data : result;
-    },
-
     getDataByText: function ($tree, text, records) {
         var i, id,
             result = undefined,
             data = $tree.data();
         for (i = 0; i < records.length; i++) {
-            if (text === records[i].data[data.textField]) {
-                result = records[i].data;
+            if (text === records[i][data.textField]) {
+                result = records[i];
                 break;
-            } else if (records[i].children && records[i].children.length) {
-                result = gj.tree.methods.getDataByText($tree, text, records[i].children);
+            } else if (records[i][data.childrenField] && records[i][data.childrenField].length) {
+                result = gj.tree.methods.getDataByText($tree, text, records[i][data.childrenField]);
                 if (result) {
                     break;
                 }
@@ -10357,41 +10698,32 @@ gj.tree.methods = {
         return $result;
     },
 
-    getAll: function ($tree, records) {
-        var i, $node, id, targetRecord,
-            result = [],
-            childrenField = $tree.data('childrenField');
-
-        for (i = 0; i < records.length; i++) {
-            targetRecord = JSON.parse(JSON.stringify(records[i].data));
-            if (records[i].children.length) {
-                targetRecord[childrenField] = gj.tree.methods.getAll($tree, records[i].children);
-            }
-            result.push(targetRecord);
-        }
-        return result;
-    },
-
-    addNode: function ($tree, data, $parent, position) {
-        var level,
-            newNodeData = gj.tree.methods.getRecords($tree, [data])[0];
+    addNode: function ($tree, nodeData, $parent, position) {
+        var level, record, data = $tree.data();
 
         if (!$parent || !$parent.length) {
             $parent = $tree.children('ul');
-            $tree.data('records').push(newNodeData);
+            $tree.data('records').push(nodeData);
         } else {
             if ($parent[0].tagName.toLowerCase() === 'li') {
                 if ($parent.children('ul').length === 0) {
-                    $parent.find('[data-role="expander"]').empty().append($tree.data().icons.collapse);
-                    $parent.append($('<ul />').addClass($tree.data().style.list));
+                    $parent.find('[data-role="expander"]').empty().append(data.icons.collapse);
+                    $parent.append($('<ul />').addClass(data.style.list));
                 }
                 $parent = $parent.children('ul');
             }
-            gj.tree.methods.getById($tree, $parent.parent().data('id'), $tree.data('records')).children.push(newNodeData);
+            record = $tree.getDataById($parent.parent().data('id'));
+            if (!record[data.childrenField]) {
+                record[data.childrenField] = [];
+            }
+            record[data.childrenField].push(nodeData);
         }
         level = $parent.parentsUntil('[data-type="tree"]', 'ul').length + 1;
+        if (!data.primaryKey) {
+            gj.tree.methods.genAutoId(data, [nodeData]);
+        }
 
-        gj.tree.methods.appendNode($tree, $parent, newNodeData, level, position);
+        gj.tree.methods.appendNode($tree, $parent, nodeData, level, position);
 
         return $tree;
     },
@@ -10403,13 +10735,16 @@ gj.tree.methods = {
     },
 
     removeDataById: function ($tree, id, records) {
-        var i;
+        var i, data = $tree.data();
         for (i = 0; i < records.length; i++) {
-            if (id == records[i].id) {
+            if (data.primaryKey && records[i][data.primaryKey] == id) {
                 records.splice(i, 1);
                 break;
-            } else if (records[i].children && records[i].children.length) {
-                gj.tree.methods.removeDataById($tree, id, records[i].children);
+            } else if (records[i][data.autoGenFieldName] == id) {
+                records.splice(i, 1);
+                break;
+            } else if (records[i][data.childrenField] && records[i][data.childrenField].length) {
+                gj.tree.methods.removeDataById($tree, id, records[i][data.childrenField]);
             }
         }
     },
@@ -10504,6 +10839,23 @@ gj.tree.methods = {
             $tree.removeClass().empty();
         }
         return $tree;
+    },
+
+    pathFinder: function (data, list, id, parents) {
+        var i, result = false;
+
+        for (i = 0; i < list.length; i++) {
+            if (list[i].id == id) {
+                result = true;
+                break;
+            } else if (gj.tree.methods.pathFinder(data, list[i][data.childrenField], id, parents)) {
+                parents.push(list[i].data[data.textField]);
+                result = true;
+                break;
+            }
+        }
+
+        return result;
     }
 }
 /**
@@ -10943,7 +11295,7 @@ gj.tree.widget = function ($element, jsConfig) {
      * </script>
      */
     self.getAll = function () {
-        return methods.getAll(this, this.data('records'));
+        return this.data('records');
     };
 
     /**
@@ -11099,6 +11451,30 @@ gj.tree.widget = function ($element, jsConfig) {
      */
     self.getChildren = function ($node, cascade) {
         return methods.getChildren(this, $node, cascade);
+    };
+
+    /**
+     * Return an array with the names of all parents.
+     * @method
+     * @param {String} id - The id of the target node
+     * @return array
+     * @example sample <!-- tree -->
+     * Location: <div id="location" style="display: inline-block;"></div>
+     * <div id="tree"></div>
+     * <script>
+     *     var tree = $('#tree').tree({
+     *         dataSource: '/Locations/Get',
+     *         select: function (e, node, id) {
+     *             var parents = tree.parents(id);
+     *             $('#location').text(parents.join(' / ') + ' / ' + tree.getDataById(id).text);
+     *         }
+     *     });
+     * </script>
+     */
+    self.parents = function (id) {
+        var parents = [], data = this.data();
+        methods.pathFinder(data, data.records, id, parents);
+        return parents.reverse();
     };
 
     /**
@@ -11372,29 +11748,34 @@ gj.tree.plugins.checkboxes = {
         },
 
         nodeDataBound: function ($tree, $node, id, record) {
-            var data = $tree.data(),
-                $expander = $node.find('> [data-role="wrapper"] > [data-role="expander"]'),
-                $checkbox = $('<input type="checkbox"/>'),
-                $wrapper = $('<span data-role="checkbox"></span>').append($checkbox),
+            var data, $expander, $checkbox, $wrapper, disabled;
+
+            if ($node.find('> [data-role="wrapper"] > [data-role="checkbox"]').length === 0) {
+                data = $tree.data();
+                $expander = $node.find('> [data-role="wrapper"] > [data-role="expander"]');
+                $checkbox = $('<input type="checkbox"/>');
+                $wrapper = $('<span data-role="checkbox"></span>').append($checkbox);
                 disabled = typeof (record[data.disabledField]) !== 'undefined' && record[data.disabledField].toString().toLowerCase() === 'true';
-            $checkbox = $checkbox.checkbox({
-                uiLibrary: data.uiLibrary,
-                iconsLibrary: data.iconsLibrary,
-                change: function (e, state) {
-                    gj.tree.plugins.checkboxes.events.checkboxChange($tree, $node, record, $checkbox.state());
-                }
-            });
-            disabled && $checkbox.prop('disabled', true);
-            record[data.checkedField] && $checkbox.state('checked');
-            $checkbox.on('click', function (e) {
-                var $node = $checkbox.closest('li'),
-                    state = $checkbox.state();
-                if (data.cascadeCheck) {
-                    gj.tree.plugins.checkboxes.private.updateChildrenState($node, state);
-                    gj.tree.plugins.checkboxes.private.updateParentState($node, state);
-                }
-            });
-            $expander.after($wrapper);
+
+                $checkbox = $checkbox.checkbox({
+                    uiLibrary: data.uiLibrary,
+                    iconsLibrary: data.iconsLibrary,
+                    change: function (e, state) {
+                        gj.tree.plugins.checkboxes.events.checkboxChange($tree, $node, record, $checkbox.state());
+                    }
+                });
+                disabled && $checkbox.prop('disabled', true);
+                record[data.checkedField] && $checkbox.state('checked');
+                $checkbox.on('click', function (e) {
+                    var $node = $checkbox.closest('li'),
+                        state = $checkbox.state();
+                    if (data.cascadeCheck) {
+                        gj.tree.plugins.checkboxes.private.updateChildrenState($node, state);
+                        gj.tree.plugins.checkboxes.private.updateParentState($node, state);
+                    }
+                });
+                $expander.after($wrapper);
+            }
         },
 
         updateParentState: function ($node, state) {
@@ -11809,10 +12190,10 @@ gj.tree.plugins.dragAndDrop = {
                 $wrappers = gj.tree.plugins.dragAndDrop.private.getTargetWrappers($tree, $sourceNode),
 	            data = $tree.data();
 	        return function (e, mousePosition) {
-	            var success = false;
+                var success = false, record, $targetNode, $sourceParentNode, parent;
 	            $(this).draggable('destroy').remove();
 	            $displays.each(function () {
-	                var $targetDisplay = $(this), $targetNode, $sourceParentNode, $ul;
+	                var $targetDisplay = $(this), $ul;
 	                if ($targetDisplay.droppable('isOver', mousePosition)) {
 	                    $targetNode = $targetDisplay.closest('li');
 	                    $sourceParentNode = $sourceNode.parent('ul').parent('li');
@@ -11822,7 +12203,18 @@ gj.tree.plugins.dragAndDrop = {
 	                        $targetNode.append($ul);
 	                    }
 	                    if (gj.tree.plugins.dragAndDrop.events.nodeDrop($tree, $sourceNode.data('id'), $targetNode.data('id'), $ul.children('li').length + 1) !== false) {
-	                        $ul.append($sourceNode);
+                            $ul.append($sourceNode);
+
+                            //BEGIN: Change node position inside the backend data
+                            record = $tree.getDataById($sourceNode.data('id'));
+                            gj.tree.methods.removeDataById($tree, $sourceNode.data('id'), data.records);
+                            parent = $tree.getDataById($ul.parent().data('id'));
+                            if (parent[data.childrenField] === undefined) {
+                                parent[data.childrenField] = [];
+                            }
+                            parent[data.childrenField].push(record);
+                            //END
+
 	                        gj.tree.plugins.dragAndDrop.private.refresh($tree, $sourceNode, $targetNode, $sourceParentNode);
 	                    }
 	                    success = true;
@@ -11832,20 +12224,27 @@ gj.tree.plugins.dragAndDrop = {
 	            });
 	            if (!success) {
 	                $wrappers.each(function () {
-	                    var $targetWrapper = $(this), $targetNode, $sourceParentNode, prepend, orderNumber, sourceNodeId;
+	                    var $targetWrapper = $(this), prepend, orderNumber, sourceNodeId;
 	                    if ($targetWrapper.droppable('isOver', mousePosition)) {
 	                        $targetNode = $targetWrapper.closest('li');
 	                        $sourceParentNode = $sourceNode.parent('ul').parent('li');
-	                        prepend = mousePosition.top < ($targetWrapper.position().top + ($targetWrapper.outerHeight() / 2));
+	                        prepend = mousePosition.y < ($targetWrapper.position().top + ($targetWrapper.outerHeight() / 2));
 	                        sourceNodeId = $sourceNode.data('id');
 	                        orderNumber = $targetNode.prevAll('li:not([data-id="' + sourceNodeId + '"])').length + (prepend ? 1 : 2);
-	                        if (gj.tree.plugins.dragAndDrop.events.nodeDrop($tree, sourceNodeId, $targetNode.parent('ul').parent('li').data('id'), orderNumber) !== false) {
+                            if (gj.tree.plugins.dragAndDrop.events.nodeDrop($tree, sourceNodeId, $targetNode.parent('ul').parent('li').data('id'), orderNumber) !== false) {
+                                //BEGIN: Change node position inside the backend data
+                                record = $tree.getDataById($sourceNode.data('id'));
+                                gj.tree.methods.removeDataById($tree, $sourceNode.data('id'), data.records);
+                                $tree.getDataById($targetNode.parent().data('id'))[data.childrenField].splice($targetNode.index() + (prepend ? 0 : 1), 0, record);
+                                //END
+
 	                            if (prepend) {
-	                                $sourceNode.insertBefore($targetNode);
+                                    $sourceNode.insertBefore($targetNode);
 	                            } else {
 	                                $sourceNode.insertAfter($targetNode);
-	                            }
-	                            gj.tree.plugins.dragAndDrop.private.refresh($tree, $sourceNode, $targetNode, $sourceParentNode);
+                                }
+
+                                gj.tree.plugins.dragAndDrop.private.refresh($tree, $sourceNode, $targetNode, $sourceParentNode);
 	                        }
 	                        return false;
 	                    }
@@ -11985,8 +12384,11 @@ gj.tree.plugins.lazyLoading = {
                     response = JSON.parse(response);
                 }
                 if (response && response.length) {
-                    $list = $('<ul />').addClass(data.style.list);
-                    $node.append($list);
+                    $list = $node.children('ul');
+                    if ($list.length === 0) {
+                        $list = $('<ul />').addClass(data.style.list);
+                        $node.append($list);
+                    }
                     for (i = 0; i < response.length; i++) {
                         $tree.addNode(response[i], $list);
                     }
@@ -12086,6 +12488,20 @@ gj.checkbox.config = {
          *         uiLibrary: 'bootstrap4'
          *     });
          * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, checkbox -->
+         * <div class="container-fluid" style="margin-top:10px">
+         *     <input type="checkbox" id="checkbox"/><br/><br/>
+         *     <button onclick="$chkb.state('checked')" class="btn btn-default">Checked</button>
+         *     <button onclick="$chkb.state('unchecked')" class="btn btn-default">Unchecked</button>
+         *     <button onclick="$chkb.state('indeterminate')" class="btn btn-default">Indeterminate</button>
+         *     <button onclick="$chkb.prop('disabled', false)" class="btn btn-default">Enable</button>
+         *     <button onclick="$chkb.prop('disabled', true)" class="btn btn-default">Disable</button>
+         * </div>
+         * <script>
+         *     var $chkb = $('#checkbox').checkbox({
+         *         uiLibrary: 'bootstrap5'
+         *     });
+         * </script>
          */
         uiLibrary: 'materialdesign',
         
@@ -12130,6 +12546,13 @@ gj.checkbox.config = {
     bootstrap4: {
         style: {
             wrapperCssClass: 'gj-checkbox-bootstrap gj-checkbox-bootstrap-4'
+        },
+        iconsLibrary: 'materialicons'
+    },
+
+    bootstrap5: {
+        style: {
+            wrapperCssClass: 'gj-checkbox-bootstrap gj-checkbox-bootstrap-5'
         },
         iconsLibrary: 'materialicons'
     },
@@ -12929,7 +13352,7 @@ gj.dropdown.config = {
         maxHeight: 'auto',
 
         /** Placeholder. This label appear only if the value is not set yet.
-         * @type number
+         * @type string
          * @default undefined
          * @example JS.Config <!-- dropdown -->
          * <select id="dropdown"></select>
@@ -13261,7 +13684,7 @@ gj.dropdown.methods = {
                 var value = this[data.valueField],
                     text = this[data.textField],
                     selected = this[data.selectedField] && this[data.selectedField].toString().toLowerCase() === 'true',
-                    $item, i;
+                    i, $item;
 
                 $item = $('<li value="' + value + '"><div data-role="wrapper"><span data-role="display">' + text + '</span></div></li>');
                 $item.addClass(data.style.item);
@@ -13278,6 +13701,7 @@ gj.dropdown.methods = {
             });
             if (selections.length === 0) {
                 $dropdown.prepend('<option value=""></option>');
+                $dropdown[0].selectedIndex = 0;
                 if (data.placeholder) {
                     $display[0].innerHTML = '<span class="placeholder">' + data.placeholder + '</span>';
                 }
@@ -13305,32 +13729,66 @@ gj.dropdown.methods = {
     open: function ($dropdown, $list) {
         var data = $dropdown.data(),
             $expander = $dropdown.parent().find('[role="expander"]'),
-            $presenter = $dropdown.parent().find('[role="presenter"]');
+            $presenter = $dropdown.parent().find('[role="presenter"]'),
+            scrollParentEl = gj.core.getScrollParent($dropdown[0]);
         $list.css('width', gj.core.width($presenter[0]));
         $list.show();
         gj.dropdown.methods.setListPosition($presenter[0], $list[0], data);
         $expander.html(data.icons.dropup);
+        if (scrollParentEl) {
+            data.parentScrollHandler = function () {
+                gj.dropdown.methods.setListPosition($presenter[0], $list[0], data);
+            };
+            gj.dropdown.methods.addParentsScrollListener(scrollParentEl, data.parentScrollHandler);
+        }
     },
 
     close: function ($dropdown, $list) {
         var data = $dropdown.data(),
-            $expander = $dropdown.parent().find('[role="expander"]');
+            $expander = $dropdown.parent().find('[role="expander"]'),
+            scrollParentEl = gj.core.getScrollParent($dropdown[0]);
         $expander.html(data.icons.dropdown);
+        if (scrollParentEl && data.parentScrollHandler) {
+            gj.dropdown.methods.removeParentsScrollListener(scrollParentEl, data.parentScrollHandler);
+        }
         $list.hide();
+    },
+
+    addParentsScrollListener: function (el, handler) {
+        var scrollParentEl = gj.core.getScrollParent(el.parentNode);
+        el.addEventListener('scroll', handler);
+        if (scrollParentEl) {
+            gj.dropdown.methods.addParentsScrollListener(scrollParentEl, handler);
+        }
+    },
+
+    removeParentsScrollListener: function (el, handler) {
+        var scrollParentEl = gj.core.getScrollParent(el.parentNode);
+        el.removeEventListener('scroll', handler);
+        if (scrollParentEl) {
+            gj.dropdown.methods.removeParentsScrollListener(scrollParentEl, handler);
+        }
     },
 
     select: function ($dropdown, value) {
         var data = $dropdown.data(),
             $list = $('body').children('[role="list"][guid="' + $dropdown.attr('data-guid') + '"]'),
             $item = $list.children('li[value="' + value + '"]'),
+            $display = $dropdown.next('[role="presenter"]').find('[role="display"]'),
             record = gj.dropdown.methods.getRecordByValue($dropdown, value);
+
+        $list.children('li').removeClass(data.style.active);
         if (record) {
-            $list.children('li').removeClass(data.style.active);
             $item.addClass(data.style.active);
             $dropdown[0].value = value;
-            $dropdown.next('[role="presenter"]').find('[role="display"]').html(record[data.textField]);
-            gj.dropdown.events.change($dropdown);
+            $display[0].innerHTML = record[data.textField];
+        } else {
+            if (data.placeholder) {
+                $display[0].innerHTML = '<span class="placeholder">' + data.placeholder + '</span>';
+            }
+            $dropdown[0].value = '';
         }
+        gj.dropdown.events.change($dropdown);
         gj.dropdown.methods.close($dropdown, $list);
         return $dropdown;
     },
@@ -13374,7 +13832,7 @@ gj.dropdown.methods = {
             }
             $dropdown.show();
         }
-        return $tree;
+        return $dropdown;
     }
 };
 
@@ -13616,8 +14074,8 @@ gj.datepicker.config = {
          * <script>
          *     $('#datepicker').datepicker({
          *        format: 'yyyy-mm-dd',
-         *        value: '2017-12-15',
-         *        minDate: '2017-12-12',
+         *        value: '2022-12-15',
+         *        minDate: '2022-12-12',
          *        uiLibrary: 'bootstrap'
          *     });
          * </script>
@@ -13625,9 +14083,18 @@ gj.datepicker.config = {
          * <input id="datepicker" width="234" />
          * <script>
          *     $('#datepicker').datepicker({
-         *        value: '12/15/2017',
-         *        minDate: '12/12/2017',
+         *        value: '12/15/2022',
+         *        minDate: '12/12/2022',
          *        uiLibrary: 'bootstrap4'
+         *     });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, datepicker -->
+         * <input id="datepicker" width="234" />
+         * <script>
+         *     $('#datepicker').datepicker({
+         *        value: '12/15/2022',
+         *        minDate: '12/12/2022',
+         *        uiLibrary: 'bootstrap5'
          *     });
          * </script>
          */
@@ -13673,17 +14140,17 @@ gj.datepicker.config = {
          * @type String
          * @default 'mm/dd/yyyy'
          * @example Sample <!-- datepicker -->
-         * <input id="datepicker" value="2017-25-07" width="312" />
+         * <input id="datepicker" value="2022-25-07" width="312" />
          * <script>
          *     $('#datepicker').datepicker({ format: 'yyyy-dd-mm' });
          * </script>
          * @example Short.Month.Format <!-- datepicker -->
-         * <input id="datepicker" value="10 Oct 2017" width="312" />
+         * <input id="datepicker" value="10 Oct 2022" width="312" />
          * <script>
          *     $('#datepicker').datepicker({ format: 'dd mmm yyyy' });
          * </script>
          * @example Long.Month.Format <!-- datepicker -->
-         * <input id="datepicker" value="10 October 2017" width="312" />
+         * <input id="datepicker" value="10 October 2022" width="312" />
          * <script>
          *     $('#datepicker').datepicker({ format: 'dd mmmm yyyy' });
          * </script>
@@ -13714,6 +14181,16 @@ gj.datepicker.config = {
          * <script>
          *     $('#datepicker').datepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome' });
          * </script>
+         * @example Bootstrap.5.Material.Icons <!-- bootstrap5, datepicker -->
+         * <input id="datepicker" width="234" />
+         * <script>
+         *     $('#datepicker').datepicker({ uiLibrary: 'bootstrap5', iconsLibrary: 'materialicons' });
+         * </script>
+         * @example Bootstrap.5.FontAwesome <!-- fontawesome, bootstrap5, datepicker -->
+         * <input id="datepicker" width="234" />
+         * <script>
+         *     $('#datepicker').datepicker({ uiLibrary: 'bootstrap5', iconsLibrary: 'fontawesome' });
+         * </script>
          */
         uiLibrary: 'materialdesign',
 
@@ -13739,6 +14216,14 @@ gj.datepicker.config = {
          *         iconsLibrary: 'fontawesome'
          *     });
          * </script>
+         * @example Bootstrap.5.Font.Awesome <!-- bootstrap5, fontawesome, datepicker -->
+         * <input id="datepicker" width="234" />
+         * <script>
+         *     $('#datepicker').datepicker({
+         *         uiLibrary: 'bootstrap5',
+         *         iconsLibrary: 'fontawesome'
+         *     });
+         * </script>
          */
         iconsLibrary: 'materialicons',
 
@@ -13749,11 +14234,11 @@ gj.datepicker.config = {
          * <input id="datepicker" width="312" />
          * <script>
          *    $('#datepicker').datepicker({
-         *        value: '01/01/2018'
+         *        value: '01/01/2022'
          *    });
          * </script>
          * @example HTML <!-- datepicker -->
-         * <input id="datepicker" width="312" value="01/01/2018" />
+         * <input id="datepicker" width="312" value="01/01/2022" />
          * <script>
          *     $('#datepicker').datepicker();
          * </script>
@@ -13787,15 +14272,15 @@ gj.datepicker.config = {
          * <input id="datepicker" width="312" />
          * <script>
          *    $('#datepicker').datepicker({
-         *        value: '11/10/2017',
-         *        disableDates: [new Date(2017,10,11), '11/12/2017']
+         *        value: '11/10/2022',
+         *        disableDates: [new Date(2022,10,11), '11/12/2022']
          *    });
          * </script>
          * @example Function <!-- datepicker -->
          * <input id="datepicker" width="312" />
          * <script>
          *    $('#datepicker').datepicker({
-         *        value: '11/11/2017',
+         *        value: '11/11/2022',
          *        disableDates:  function (date) {
          *            var disabled = [10,15,20,25];
          *            if (disabled.indexOf(date.getDate()) == -1 ) {
@@ -13832,14 +14317,19 @@ gj.datepicker.config = {
          *    $('#datepicker').datepicker({ calendarWeeks: true, modal: true, footer: true });
          * </script>
          * @example Bootstrap <!-- datepicker, bootstrap -->
-         * <input id="datepicker" width="220" />
+         * <input id="datepicker" width="250" />
          * <script>
          *    $('#datepicker').datepicker({ calendarWeeks: true, uiLibrary: 'bootstrap' });
          * </script>
          * @example Bootstrap.4 <!-- bootstrap4, datepicker -->
-         * <input id="datepicker" width="234" />
+         * <input id="datepicker" width="267" />
          * <script>
          *    $('#datepicker').datepicker({ calendarWeeks: true, uiLibrary: 'bootstrap4' });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, datepicker -->
+         * <input id="datepicker" width="268" />
+         * <script>
+         *    $('#datepicker').datepicker({ calendarWeeks: true, uiLibrary: 'bootstrap5' });
          * </script>
          */
         calendarWeeks: false,
@@ -13864,6 +14354,15 @@ gj.datepicker.config = {
          * <script>
          *    $('#datepicker').datepicker({
          *        uiLibrary: 'bootstrap4',
+         *        keyboardNavigation: true,
+         *        showOtherMonths: true
+         *    });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, datepicker -->
+         * <input id="datepicker" width="234" />
+         * <script>
+         *    $('#datepicker').datepicker({
+         *        uiLibrary: 'bootstrap5',
          *        keyboardNavigation: true,
          *        showOtherMonths: true
          *    });
@@ -13931,6 +14430,30 @@ gj.datepicker.config = {
          *        format: 'dd/mm/yyyy'
          *    });
          * </script>
+         * @example Japanise <!-- datepicker -->
+         * <input id="datepicker" width="276" />
+         * <script>
+         *    $('#datepicker').datepicker({
+         *        locale: 'ja-jp',
+         *        format: 'dd mmmm yyyy'
+         *    });
+         * </script>
+         * @example Chinise_Simplified <!-- datepicker -->
+         * <input id="datepicker" width="276" />
+         * <script>
+         *    $('#datepicker').datepicker({
+         *        locale: 'zh-cn',
+         *        format: 'dd mmmm yyyy'
+         *    });
+         * </script>
+         * @example Chinise_Traditional <!-- datepicker -->
+         * <input id="datepicker" width="276" />
+         * <script>
+         *    $('#datepicker').datepicker({
+         *        locale: 'zh-tw',
+         *        format: 'dd mmmm yyyy'
+         *    });
+         * </script>
          */
         locale: 'en-us',
 
@@ -13968,6 +14491,16 @@ gj.datepicker.config = {
              *         }
              *     });
              * </script>
+             * @example Bootstrap.5 <!-- bootstrap5, materialicons, datepicker -->
+             * <input id="datepicker" width="234" />
+             * <script>
+             *     $('#datepicker').datepicker({
+             *         uiLibrary: 'bootstrap5',
+             *         icons: {
+             *             rightIcon: '<i class="material-icons">date_range</i>'
+             *         }
+             *     });
+             * </script>
              */
             rightIcon: '<i class="gj-icon">event</i>',
 
@@ -13980,37 +14513,55 @@ gj.datepicker.config = {
         /** The size of the datepicker input.
          * @type 'small'|'default'|'large'
          * @default 'default'
+         * @example Bootstrap.5 <!-- bootstrap5, datepicker -->
+         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="234" value="11/20/2022" /></p>
+         * <script>
+         *     $('#datepicker-small').datepicker({ uiLibrary: 'bootstrap5', size: 'small' });
+         *     $('#datepicker-default').datepicker({ uiLibrary: 'bootstrap5', size: 'default' });
+         *     $('#datepicker-large').datepicker({ uiLibrary: 'bootstrap5', size: 'large' });
+         * </script>
+         * @example Bootstrap.5.Font.Awesome <!-- bootstrap5, fontawesome, datepicker -->
+         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="234" value="11/20/2022" /></p>
+         * <script>
+         *     $('#datepicker-small').datepicker({ uiLibrary: 'bootstrap5', iconsLibrary: 'fontawesome', size: 'small' });
+         *     $('#datepicker-default').datepicker({ uiLibrary: 'bootstrap5', iconsLibrary: 'fontawesome', size: 'default' });
+         *     $('#datepicker-large').datepicker({ uiLibrary: 'bootstrap5', iconsLibrary: 'fontawesome', size: 'large' });
+         * </script>
          * @example Bootstrap.4 <!-- bootstrap4, datepicker -->
-         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="234" value="03/20/2018" /></p>
-         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="234" value="03/20/2018" /></p>
-         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="234" value="03/20/2018" /></p>
+         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="234" value="11/20/2022" /></p>
          * <script>
          *     $('#datepicker-small').datepicker({ uiLibrary: 'bootstrap4', size: 'small' });
          *     $('#datepicker-default').datepicker({ uiLibrary: 'bootstrap4', size: 'default' });
          *     $('#datepicker-large').datepicker({ uiLibrary: 'bootstrap4', size: 'large' });
          * </script>
          * @example Bootstrap.4.Font.Awesome <!-- bootstrap4, fontawesome, datepicker -->
-         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="234" value="03/20/2018" /></p>
-         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="234" value="03/20/2018" /></p>
-         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="234" value="03/20/2018" /></p>
+         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="234" value="11/20/2022" /></p>
+         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="234" value="11/20/2022" /></p>
          * <script>
          *     $('#datepicker-small').datepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome', size: 'small' });
          *     $('#datepicker-default').datepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome', size: 'default' });
          *     $('#datepicker-large').datepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome', size: 'large' });
          * </script>
          * @example Bootstrap.3 <!-- bootstrap, datepicker -->
-         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="220" value="03/20/2018" /></p>
-         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="220" value="03/20/2018" /></p>
-         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="220" value="03/20/2018" /></p>
+         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="220" value="11/20/2022" /></p>
+         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="220" value="11/20/2022" /></p>
+         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="220" value="11/20/2022" /></p>
          * <script>
          *     $('#datepicker-small').datepicker({ uiLibrary: 'bootstrap', size: 'small' });
          *     $('#datepicker-default').datepicker({ uiLibrary: 'bootstrap', size: 'default' });
          *     $('#datepicker-large').datepicker({ uiLibrary: 'bootstrap', size: 'large' });
          * </script>
          * @example Material.Design <!-- datepicker -->
-         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="276" value="03/20/2018" /></p>
-         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="276" value="03/20/2018" /></p>
-         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="276" value="03/20/2018" /></p>
+         * <p><label for="datepicker-small">Small Size:</label> <input id="datepicker-small" width="276" value="11/20/2022" /></p>
+         * <p><label for="datepicker-default">Default Size:</label> <input id="datepicker-default" width="276" value="11/20/2022" /></p>
+         * <p><label for="datepicker-large">Large Size:</label> <input id="datepicker-large" width="276" value="11/20/2022" /></p>
          * <script>
          *     $('#datepicker-small').datepicker({ size: 'small' });
          *     $('#datepicker-default').datepicker({ size: 'default' });
@@ -14036,6 +14587,11 @@ gj.datepicker.config = {
          * <input id="datepicker" width="234" />
          * <script>
          *    $('#datepicker').datepicker({ uiLibrary: 'bootstrap4', modal: true, header: true, footer: true });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, datepicker -->
+         * <input id="datepicker" width="234" />
+         * <script>
+         *    $('#datepicker').datepicker({ uiLibrary: 'bootstrap5', modal: true, header: true, footer: true });
          * </script>
          */
         modal: false,
@@ -14072,6 +14628,38 @@ gj.datepicker.config = {
          */
         footer: false,
 
+        /** If set to true, show datepicker on input focus.
+         * @type Boolean
+         * @default true
+         * @example True <!-- datepicker -->
+         * <input id="datepicker" width="312" />
+         * <script>
+         *    $('#datepicker').datepicker({ showOnFocus: true, showRightIcon: false });
+         * </script>
+         * @example False <!-- datepicker -->
+         * <input id="datepicker" width="312" />
+         * <script>
+         *    $('#datepicker').datepicker({ showOnFocus: false });
+         * </script>
+         */
+        showOnFocus: true,
+
+        /** If set to true, show datepicker icon on the right side of the input.
+         * @type Boolean
+         * @default true
+         * @example False <!-- datepicker -->
+         * <input id="datepicker" width="312" />
+         * <script>
+         *    $('#datepicker').datepicker({ showOnFocus: true, showRightIcon: false });
+         * </script>
+         * @example True <!-- datepicker -->
+         * <input id="datepicker" width="312" />
+         * <script>
+         *    $('#datepicker').datepicker({ showRightIcon: true });
+         * </script>
+         */
+        showRightIcon: true,
+
         style: {
             modal: 'gj-modal',
             wrapper: 'gj-datepicker gj-datepicker-md gj-unselectable',
@@ -14105,6 +14693,17 @@ gj.datepicker.config = {
         showOtherMonths: true
     },
 
+    bootstrap5: {
+        style: {
+            wrapper: 'gj-datepicker gj-datepicker-bootstrap gj-unselectable input-group mb-3',
+            input: 'form-control',
+            calendar: 'gj-picker gj-picker-bootstrap datepicker gj-unselectable',
+            footer: 'modal-footer',
+            button: 'btn btn-outline-secondary'
+        },
+        showOtherMonths: true
+    },
+
     fontawesome: {
         icons: {
             rightIcon: '<i class="fa fa-calendar" aria-hidden="true"></i>',
@@ -14134,15 +14733,6 @@ gj.datepicker.methods = {
         var $calendar, $rightIcon,
             $wrapper = $datepicker.parent('div[role="wrapper"]');
 
-        if (data.uiLibrary === 'bootstrap') {
-            $rightIcon = $('<span class="input-group-addon">' + data.icons.rightIcon + '</span>');
-        } else if (data.uiLibrary === 'bootstrap4') {
-            $rightIcon = $('<span class="input-group-append"><button class="btn btn-outline-secondary border-left-0" type="button">' + data.icons.rightIcon + '</button></span>');
-        } else {
-            $rightIcon = $(data.icons.rightIcon);
-        }
-
-        $rightIcon.attr('role', 'right-icon');
         if ($wrapper.length === 0) {
             $wrapper = $('<div role="wrapper" />').addClass(data.style.wrapper); // The css class needs to be added before the wrapping, otherwise doesn't work.
             $datepicker.wrap($wrapper);
@@ -14157,7 +14747,7 @@ gj.datepicker.methods = {
 
         data.fontSize && $datepicker.css('font-size', data.fontSize);
         
-        if (data.uiLibrary === 'bootstrap' || data.uiLibrary === 'bootstrap4') {
+        if (data.uiLibrary === 'bootstrap' || data.uiLibrary === 'bootstrap4' || data.uiLibrary === 'bootstrap5') {
             if (data.size === 'small') {
                 $wrapper.addClass('input-group-sm');
                 $datepicker.addClass('form-control-sm');
@@ -14173,15 +14763,33 @@ gj.datepicker.methods = {
             }
         }
 
-        $rightIcon.on('click', function (e) {
-            var $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
-            if ($calendar.is(':visible')) {
-                gj.datepicker.methods.close($datepicker);
+        if (data.showRightIcon) {
+            if (data.uiLibrary === 'bootstrap') {
+                $rightIcon = $('<span class="input-group-addon">' + data.icons.rightIcon + '</span>');
+            } else if (data.uiLibrary === 'bootstrap4') {
+                $rightIcon = $('<span class="input-group-append"><button class="btn btn-outline-secondary border-left-0" type="button">' + data.icons.rightIcon + '</button></span>');
+            } else if (data.uiLibrary === 'bootstrap5') {
+                $rightIcon = $('<button class="btn btn-outline-secondary border-left-0" type="button">' + data.icons.rightIcon + '</button>');
             } else {
-                gj.datepicker.methods.open($datepicker, data);
+                $rightIcon = $(data.icons.rightIcon);
             }
-        });
-        $wrapper.append($rightIcon);
+            $rightIcon.attr('role', 'right-icon');
+            $rightIcon.on('click', function (e) {
+                var $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
+                if ($calendar.is(':visible')) {
+                    gj.datepicker.methods.close($datepicker);
+                } else {
+                    gj.datepicker.methods.open($datepicker, data);
+                }
+            });
+            $wrapper.append($rightIcon);
+        }
+
+        if (data.showOnFocus) {
+            $datepicker.on('focus', function () {
+                gj.datepicker.methods.open($datepicker, data);
+            });
+        }
 
         $calendar = gj.datepicker.methods.createCalendar($datepicker, data);
 
@@ -14193,12 +14801,12 @@ gj.datepicker.methods = {
             });
             $calendar.mousedown(function () {
                 clearTimeout($datepicker.timeout);
-                $datepicker.focus();
+                document.activeElement !== $datepicker[0] && $datepicker.focus();
                 return false;
             });
             $calendar.on('click', function () {
                 clearTimeout($datepicker.timeout);
-                $datepicker.focus();
+                document.activeElement !== $datepicker[0] && $datepicker.focus();
             });
         }
 
@@ -14320,7 +14928,8 @@ gj.datepicker.methods = {
         var weekDay, selectedDay, day, month, year, daysInMonth, total, firstDayPosition, i, now, prevMonth, nextMonth, $cell, $day, date,
             $body = $calendar.children('[role="body"]'),
             $table = $('<table/>'),
-            $tbody = $('<tbody/>');
+            $tbody = $('<tbody/>'),
+            period = gj.core.messages[data.locale].titleFormat;
         
         $body.off().empty();
         gj.datepicker.methods.createNavigation($datepicker, $body, $table, data);
@@ -14329,8 +14938,8 @@ gj.datepicker.methods = {
         year = parseInt($calendar.attr('year'), 10);
 
         $calendar.attr('type', 'month');
-        $calendar.find('div[role="period"]').text(gj.core.messages[data.locale].monthNames[month] + ' ' + year);
-
+        period = period.replace('mmmm', gj.core.messages[data.locale].monthNames[month]).replace('yyyy', year);
+        $calendar.find('div[role="period"]').text(period);
         daysInMonth = new Array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
         if (year % 4 == 0 && year != 1900) {
             daysInMonth[1] = 29;
@@ -14607,28 +15216,25 @@ gj.datepicker.methods = {
             var date, month, year, decade, century,
                 $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
 
+            year = parseInt($calendar.attr('year'), 10);
             switch ($calendar.attr('type')) {
                 case 'month':
                     month = parseInt($calendar.attr('month'), 10);
-                    year = parseInt($calendar.attr('year'), 10);
                     date = gj.datepicker.methods.getPrevMonth(month, year);
                     $calendar.attr('month', date.month);
                     $calendar.attr('year', date.year);
                     gj.datepicker.methods.renderMonth($datepicker, $calendar, data);
                     break;
                 case 'year':
-                    year = parseInt($calendar.attr('year'), 10);
                     $calendar.attr('year', year - 1);
                     gj.datepicker.methods.renderYear($datepicker, $calendar, data);
                     break;
                 case 'decade':
-                    year = parseInt($calendar.attr('year'), 10);
                     decade = year - (year % 10);
                     $calendar.attr('year', decade - 10);
                     gj.datepicker.methods.renderDecade($datepicker, $calendar, data);
                     break;
                 case 'century':
-                    year = parseInt($calendar.attr('year'), 10);
                     century = year - (year % 100);
                     $calendar.attr('year', century - 100);
                     gj.datepicker.methods.renderCentury($datepicker, $calendar, data);
@@ -14642,28 +15248,25 @@ gj.datepicker.methods = {
             var date, month, year, decade, century,
                 $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
 
+            year = parseInt($calendar.attr('year'), 10);
             switch ($calendar.attr('type')) {
                 case 'month':
                     month = parseInt($calendar.attr('month'), 10);
-                    year = parseInt($calendar.attr('year'), 10);
                     date = gj.datepicker.methods.getNextMonth(month, year);
                     $calendar.attr('month', date.month);
                     $calendar.attr('year', date.year);
                     gj.datepicker.methods.renderMonth($datepicker, $calendar, data);
                     break;
                 case 'year':
-                    year = parseInt($calendar.attr('year'), 10);
                     $calendar.attr('year', year + 1);
                     gj.datepicker.methods.renderYear($datepicker, $calendar, data);
                     break;
                 case 'decade':
-                    year = parseInt($calendar.attr('year'), 10);
                     decade = year - (year % 10);
                     $calendar.attr('year', decade + 10);
                     gj.datepicker.methods.renderDecade($datepicker, $calendar, data);
                     break;
                 case 'century':
-                    year = parseInt($calendar.attr('year'), 10);
                     century = year - (year % 100);
                     $calendar.attr('year', century + 100);
                     gj.datepicker.methods.renderCentury($datepicker, $calendar, data);
@@ -14751,10 +15354,14 @@ gj.datepicker.methods = {
     },
 
     open: function ($datepicker, data) {
-        var $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
+        var date, $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
 
         if ($datepicker.val()) {
             $datepicker.value($datepicker.val());
+        } else {
+            date = new Date();
+            $calendar.attr("month", date.getMonth());
+            $calendar.attr("year", date.getFullYear());
         }
 
         switch ($calendar.attr('type')) {
@@ -14778,7 +15385,7 @@ gj.datepicker.methods = {
             gj.core.center($calendar);
         } else {
             gj.core.setChildPosition($datepicker[0], $calendar[0]);
-            $datepicker.focus();
+            document.activeElement !== $datepicker[0] && $datepicker.focus();
         }
         clearTimeout($datepicker.timeout);
         gj.datepicker.events.open($datepicker);
@@ -14884,12 +15491,12 @@ gj.datepicker.methods = {
             return $datepicker.val();
         } else {
             date = gj.core.parseDate(value, data.format, data.locale);
-            if (date) {
+            if (date && date.getTime()) {
                 $calendar = $('body').find('[role="calendar"][guid="' + $datepicker.attr('data-guid') + '"]');
                 gj.datepicker.methods.dayClickHandler($datepicker, $calendar, data, date)();
             } else {
                 $datepicker.val('');
-            }            
+            }
             return $datepicker;
         }
     },
@@ -15016,7 +15623,7 @@ gj.datepicker.widget = function ($element, jsConfig) {
      *     var $datepicker = $('#datepicker').datepicker();
      * </script>
      * @example Set <!-- datepicker -->
-     * <button class="gj-button-md" onclick="$datepicker.value('08/01/2017')">Set Value</button>
+     * <button class="gj-button-md" onclick="$datepicker.value('08/01/2022')">Set Value</button>
      * <hr/>
      * <input id="datepicker" width="312" />
      * <script>
@@ -15054,7 +15661,7 @@ gj.datepicker.widget = function ($element, jsConfig) {
      * </script>
      */
     self.open = function () {
-        gj.datepicker.methods.open(this, this.data());
+        return methods.open(this, this.data());
     };
 
     /** Close the calendar.
@@ -15070,7 +15677,7 @@ gj.datepicker.widget = function ($element, jsConfig) {
      * </script>
      */
     self.close = function () {
-        gj.datepicker.methods.close(this);
+        return methods.close(this);
     };
 
     $.extend($element, self);
@@ -15200,7 +15807,7 @@ gj.timepicker.config = {
 
         /** The name of the UI library that is going to be in use.
          * @additionalinfo The css file for bootstrap should be manually included if you use bootstrap.
-         * @type (materialdesign|bootstrap|bootstrap4)
+         * @type (materialdesign|bootstrap|bootstrap4|bootstrap5)
          * @default materialdesign
          * @example MaterialDesign <!-- timepicker -->
          * <input id="timepicker" width="312" />
@@ -15216,6 +15823,11 @@ gj.timepicker.config = {
          * <input id="timepicker" width="276" />
          * <script>
          *     $('#timepicker').timepicker({ uiLibrary: 'bootstrap4' });
+         * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, timepicker -->
+         * <input id="timepicker" width="276" />
+         * <script>
+         *     $('#timepicker').timepicker({ uiLibrary: 'bootstrap5' });
          * </script>
          */
         uiLibrary: 'materialdesign',
@@ -15298,6 +15910,15 @@ gj.timepicker.config = {
         /** The size of the timepicker input.
          * @type 'small'|'default'|'large'
          * @default 'default'
+         * @example Bootstrap.5 <!-- bootstrap5, timepicker -->
+         * <p><label for="timepicker-small">Small Size:</label> <input id="timepicker-small" width="220" value="15:20" /></p>
+         * <p><label for="timepicker-default">Default Size:</label> <input id="timepicker-default" width="220" value="15:20" /></p>
+         * <p><label for="timepicker-large">Large Size:</label> <input id="timepicker-large" width="220" value="15:20" /></p>
+         * <script>
+         *     $('#timepicker-small').timepicker({ uiLibrary: 'bootstrap5', size: 'small' });
+         *     $('#timepicker-default').timepicker({ uiLibrary: 'bootstrap5', size: 'default' });
+         *     $('#timepicker-large').timepicker({ uiLibrary: 'bootstrap5', size: 'large' });
+         * </script>
          * @example Bootstrap.4 <!-- bootstrap4, timepicker -->
          * <p><label for="timepicker-small">Small Size:</label> <input id="timepicker-small" width="220" value="15:20" /></p>
          * <p><label for="timepicker-default">Default Size:</label> <input id="timepicker-default" width="220" value="15:20" /></p>
@@ -15361,80 +15982,27 @@ gj.timepicker.config = {
             footer: 'modal-footer',
             button: 'btn btn-default'
         }
+    },
+
+    bootstrap5: {
+        style: {
+            wrapper: 'gj-timepicker gj-timepicker-bootstrap gj-unselectable input-group',
+            input: 'form-control border',
+            clock: 'gj-picker gj-picker-bootstrap timepicker',
+            footer: 'modal-footer',
+            button: 'btn  btn-outline-secondary'
+        }
     }
 };
 
 gj.timepicker.methods = {
     init: function (jsConfig) {
-        gj.widget.prototype.init.call(this, jsConfig, 'timepicker');
-        this.attr('data-timepicker', 'true');
-        gj.timepicker.methods.initialize(this, this.data());
-        gj.timepicker.methods.createClock(this);
+        gj.picker.widget.prototype.init.call(this, jsConfig, 'timepicker');
         return this;
     },
 
-    initialize: function ($timepicker, data) {
-        var $calendar, $rightIcon, $wrapper = $timepicker.parent('div[role="wrapper"]');
+    initialize: function () {
 
-        if (data.uiLibrary === 'bootstrap') {
-            $rightIcon = $('<span class="input-group-addon">' + data.icons.rightIcon + '</span>');
-        } else if (data.uiLibrary === 'bootstrap4') {
-            $rightIcon = $('<span class="input-group-append"><button class="btn btn-outline-secondary border-left-0 border" type="button">' + data.icons.rightIcon + '</button></span>');
-        } else {
-            $rightIcon = $(data.icons.rightIcon);
-        }
-
-        $rightIcon.attr('role', 'right-icon');
-        if ($wrapper.length === 0) {
-            $wrapper = $('<div role="wrapper" />').addClass(data.style.wrapper); // The css class needs to be added before the wrapping, otherwise doesn't work.
-            $timepicker.wrap($wrapper);
-        } else {
-            $wrapper.addClass(data.style.wrapper);
-        }
-        $wrapper = $timepicker.parent('div[role="wrapper"]');
-
-        data.width && $wrapper.css('width', data.width);
-
-        $timepicker.val(data.value).addClass(data.style.input).attr('role', 'input');
-
-        //data.fontSize && $timepicker.css('font-size', data.fontSize);
-
-        if (data.uiLibrary === 'bootstrap' || data.uiLibrary === 'bootstrap4') {
-            if (data.size === 'small') {
-                $wrapper.addClass('input-group-sm');
-                $timepicker.addClass('form-control-sm');
-            } else if (data.size === 'large') {
-                $wrapper.addClass('input-group-lg');
-                $timepicker.addClass('form-control-lg');
-            }
-        } else {
-            if (data.size === 'small') {
-                $wrapper.addClass('small');
-            } else if (data.size === 'large') {
-                $wrapper.addClass('large');
-            }
-        }
-
-        $rightIcon.on('click', function (e) {
-            var $clock = $('body').find('[role="clock"][guid="' + $timepicker.attr('data-guid') + '"]');
-            if ($clock.is(':visible')) {
-                gj.timepicker.methods.close($timepicker);
-            } else {
-                gj.timepicker.methods.open($timepicker);
-            }
-        });
-
-        if (data.footer === false) {
-            $timepicker.on('blur', function () {
-                $timepicker.timeout = setTimeout(function () {
-                    if (!$timepicker.mouseMove) {
-                        gj.timepicker.methods.close($timepicker);
-                    }
-                }, 500);
-            });
-        }
-
-        $wrapper.append($rightIcon);
     },
 
     initMouse: function ($body, $input, $picker, data) {
@@ -15444,9 +16012,9 @@ gj.timepicker.methods = {
         $body.on('mouseup', gj.timepicker.methods.mouseUpHandler($input, $picker, data));
     },
 
-    createClock: function ($timepicker) {
+    createPicker: function ($timepicker) {
         var date, data = $timepicker.data(),
-            $clock = $('<div role="clock" />').addClass(data.style.clock).attr('guid', $timepicker.attr('data-guid')),
+            $clock = $('<div role="picker" />').addClass(data.style.clock).attr('guid', $timepicker.attr('data-guid')),
             $hour = $('<div role="hour" />'),
             $minute = $('<div role="minute" />'),
             $header = $('<div role="header" />'),
@@ -15761,7 +16329,7 @@ gj.timepicker.methods = {
 
     open: function ($timepicker) {
         var time, hour, data = $timepicker.data(),
-            $clock = $('body').find('[role="clock"][guid="' + $timepicker.attr('data-guid') + '"]');
+            $clock = $('body').find('[role="picker"][guid="' + $timepicker.attr('data-guid') + '"]');
 
         if ($timepicker.value()) {
             time = gj.core.parseDate($timepicker.value(), data.format, data.locale);
@@ -15776,23 +16344,8 @@ gj.timepicker.methods = {
         $clock.attr('minute', time.getMinutes());
 
         gj.timepicker.methods.renderHours($timepicker, $clock, data);
-        $clock.show();
-        $clock.closest('div[role="modal"]').show();
-        if (data.modal) {
-            gj.core.center($clock);
-        } else {
-            gj.core.setChildPosition($timepicker[0], $clock[0]);
-            $timepicker.focus();
-        }
-        gj.timepicker.events.open($timepicker);
-        return $timepicker;
-    },
 
-    close: function ($timepicker) {
-        var $clock = $('body').find('[role="clock"][guid="' + $timepicker.attr('data-guid') + '"]');
-        $clock.hide();
-        $clock.closest('div[role="modal"]').hide();
-        gj.timepicker.events.close($timepicker);
+        gj.picker.widget.prototype.open.call($timepicker, 'timepicker');
         return $timepicker;
     },
 
@@ -15805,25 +16358,6 @@ gj.timepicker.methods = {
             gj.timepicker.events.change($timepicker);
             return $timepicker;
         }
-    },
-
-    destroy: function ($timepicker) {
-        var data = $timepicker.data(),
-            $parent = $timepicker.parent(),
-            $clock = $('body').find('[role="clock"][guid="' + $timepicker.attr('data-guid') + '"]');
-        if (data) {
-            $timepicker.off();
-            if ($clock.parent('[role="modal"]').length > 0) {
-                $clock.unwrap();
-            }
-            $clock.remove();
-            $timepicker.removeData();
-            $timepicker.removeAttr('data-type').removeAttr('data-guid').removeAttr('data-timepicker');
-            $timepicker.removeClass();
-            $parent.children('[role="right-icon"]').remove();
-            $timepicker.unwrap();
-        }
-        return $timepicker;
     }
 };
 
@@ -15853,7 +16387,7 @@ gj.timepicker.events = {
      * @event select
      * @param {object} e - event data
      * @param {string} type - The type of the selection. The options are hour and minute.
-     * @example sample <!-- datepicker -->
+     * @example sample <!-- timepicker -->
      * <input id="timepicker" width="312" />
      * <script>
      *     $('#timepicker').timepicker({
@@ -15950,7 +16484,7 @@ gj.timepicker.widget = function ($element, jsConfig) {
      * </script>
      */
     self.destroy = function () {
-        return methods.destroy(this);
+        return gj.picker.widget.prototype.destroy.call(this, 'timepicker');
     };
 
     /** Open the clock.
@@ -15982,7 +16516,7 @@ gj.timepicker.widget = function ($element, jsConfig) {
      * </script>
      */
     self.close = function () {
-        return gj.timepicker.methods.close(this);
+        return gj.picker.widget.prototype.close.call(this, 'timepicker');
     };
 
     $.extend($element, self);
@@ -15993,7 +16527,7 @@ gj.timepicker.widget = function ($element, jsConfig) {
     return $element;
 };
 
-gj.timepicker.widget.prototype = new gj.widget();
+gj.timepicker.widget.prototype = new gj.picker.widget();
 gj.timepicker.widget.constructor = gj.timepicker.widget;
 
 (function ($) {
@@ -16069,6 +16603,11 @@ gj.datetimepicker.config = {
          * <script>
          *     $('#datetimepicker').datetimepicker({ uiLibrary: 'bootstrap4', modal: true, footer: true });
          * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, datetimepicker -->
+         * <input id="datetimepicker" width="234" />
+         * <script>
+         *     $('#datetimepicker').datetimepicker({ uiLibrary: 'bootstrap5', modal: true, footer: true });
+         * </script>
          */
         uiLibrary: 'materialdesign',
 
@@ -16078,10 +16617,10 @@ gj.datetimepicker.config = {
          * @example Javascript <!-- datetimepicker -->
          * <input id="datetimepicker" width="300" />
          * <script>
-         *    $('#datetimepicker').datetimepicker({ value: '22:10 03/27/2018' });
+         *    $('#datetimepicker').datetimepicker({ value: '22:10 03/27/2023' });
          * </script>
          * @example HTML <!-- datetimepicker -->
-         * <input id="datetimepicker" width="300" value="22:10 03/27/2018" />
+         * <input id="datetimepicker" width="300" value="22:10 03/27/2023" />
          * <script>
          *     $('#datetimepicker').datetimepicker();
          * </script>
@@ -16089,8 +16628,7 @@ gj.datetimepicker.config = {
         value: undefined,
 
         /** Specifies the format, which is used to format the value of the DatePicker displayed in the input.
-         * @additionalinfo 
-         * <b>M</b> - Minutes; no leading zero for single-digit minutes.<br/>
+         * @additionalinfo <b>M</b> - Minutes; no leading zero for single-digit minutes.<br/>
          * <b>MM</b> - Minutes; leading zero for single-digit minutes.<br/>
          * <b>H</b> - The hour, using a 24-hour clock from 0 to 23; no leading zero for single-digit hours.<br/>
          * <b>HH</b> - The hour, using a 24-hour clock from 0 to 23; leading zero for single-digit hours.<br/>
@@ -16111,7 +16649,7 @@ gj.datetimepicker.config = {
          * @type String
          * @default 'HH:MM mm/dd/yyyy'
          * @example Sample <!-- datetimepicker -->
-         * <input id="input" value="05:50 2018-27-03" width="312" />
+         * <input id="input" value="05:50 2023-27-03" width="312" />
          * <script>
          *     $('#input').datetimepicker({ format: 'HH:MM yyyy-dd-mm' });
          * </script>
@@ -16157,6 +16695,11 @@ gj.datetimepicker.config = {
          * <script>
          *    $('#input').datetimepicker({ uiLibrary: 'bootstrap4', modal: true, footer: true });
          * </script>
+         * @example Bootstrap.5 <!-- bootstrap5, datetimepicker -->
+         * <input id="input" width="234" />
+         * <script>
+         *    $('#input').datetimepicker({ uiLibrary: 'bootstrap5', modal: true, footer: true });
+         * </script>
          */
         modal: false,
 
@@ -16179,37 +16722,46 @@ gj.datetimepicker.config = {
         /** The size of the datetimepicker input.
          * @type 'small'|'default'|'large'
          * @default 'default'
+         * @example Bootstrap.5 <!-- bootstrap5, datetimepicker -->
+         * <p><label for="small">Small Size:</label> <input id="small" width="234" value="10:20 03/20/2023" /></p>
+         * <p><label for="default">Default Size:</label> <input id="default" width="234" value="10:20 03/20/2023" /></p>
+         * <p><label for="large">Large Size:</label> <input id="large" width="234" value="10:20 03/20/2023" /></p>
+         * <script>
+         *     $('#small').datetimepicker({ uiLibrary: 'bootstrap5', size: 'small' });
+         *     $('#default').datetimepicker({ uiLibrary: 'bootstrap5', size: 'default' });
+         *     $('#large').datetimepicker({ uiLibrary: 'bootstrap5', size: 'large' });
+         * </script>
          * @example Bootstrap.4 <!-- bootstrap4, datetimepicker -->
-         * <p><label for="small">Small Size:</label> <input id="small" width="234" value="10:20 03/20/2018" /></p>
-         * <p><label for="default">Default Size:</label> <input id="default" width="234" value="10:20 03/20/2018" /></p>
-         * <p><label for="large">Large Size:</label> <input id="large" width="234" value="10:20 03/20/2018" /></p>
+         * <p><label for="small">Small Size:</label> <input id="small" width="234" value="10:20 03/20/2023" /></p>
+         * <p><label for="default">Default Size:</label> <input id="default" width="234" value="10:20 03/20/2023" /></p>
+         * <p><label for="large">Large Size:</label> <input id="large" width="234" value="10:20 03/20/2023" /></p>
          * <script>
          *     $('#small').datetimepicker({ uiLibrary: 'bootstrap4', size: 'small' });
          *     $('#default').datetimepicker({ uiLibrary: 'bootstrap4', size: 'default' });
          *     $('#large').datetimepicker({ uiLibrary: 'bootstrap4', size: 'large' });
          * </script>
          * @example Bootstrap.4.Font.Awesome <!-- bootstrap4, fontawesome, datetimepicker -->
-         * <p><label for="small">Small Size:</label> <input id="small" width="234" value="10:20 03/20/2018" /></p>
-         * <p><label for="default">Default Size:</label> <input id="default" width="234" value="10:20 03/20/2018" /></p>
-         * <p><label for="large">Large Size:</label> <input id="large" width="234" value="10:20 03/20/2018" /></p>
+         * <p><label for="small">Small Size:</label> <input id="small" width="234" value="10:20 03/20/2023" /></p>
+         * <p><label for="default">Default Size:</label> <input id="default" width="234" value="10:20 03/20/2023" /></p>
+         * <p><label for="large">Large Size:</label> <input id="large" width="234" value="10:20 03/20/2023" /></p>
          * <script>
          *     $('#small').datetimepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome', size: 'small' });
          *     $('#default').datetimepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome', size: 'default' });
          *     $('#large').datetimepicker({ uiLibrary: 'bootstrap4', iconsLibrary: 'fontawesome', size: 'large' });
          * </script>
          * @example Bootstrap.3 <!-- bootstrap, datetimepicker -->
-         * <p><label for="small">Small Size:</label> <input id="small" width="220" value="10:20 03/20/2018" /></p>
-         * <p><label for="default">Default Size:</label> <input id="default" width="220" value="10:20 03/20/2018" /></p>
-         * <p><label for="large">Large Size:</label> <input id="large" width="220" value="10:20 03/20/2018" /></p>
+         * <p><label for="small">Small Size:</label> <input id="small" width="220" value="10:20 03/20/2023" /></p>
+         * <p><label for="default">Default Size:</label> <input id="default" width="220" value="10:20 03/20/2023" /></p>
+         * <p><label for="large">Large Size:</label> <input id="large" width="220" value="10:20 03/20/2023" /></p>
          * <script>
          *     $('#small').datetimepicker({ uiLibrary: 'bootstrap', size: 'small' });
          *     $('#default').datetimepicker({ uiLibrary: 'bootstrap', size: 'default' });
          *     $('#large').datetimepicker({ uiLibrary: 'bootstrap', size: 'large' });
          * </script>
          * @example Material.Design <!-- datetimepicker -->
-         * <p><label for="small">Small Size:</label> <input id="small" width="276" value="10:20 03/20/2018" /></p>
-         * <p><label for="default">Default Size:</label> <input id="default" width="276" value="10:20 03/20/2018" /></p>
-         * <p><label for="large">Large Size:</label> <input id="large" width="276" value="10:20 03/20/2018" /></p>
+         * <p><label for="small">Small Size:</label> <input id="small" width="276" value="10:20 03/20/2023" /></p>
+         * <p><label for="default">Default Size:</label> <input id="default" width="276" value="10:20 03/20/2023" /></p>
+         * <p><label for="large">Large Size:</label> <input id="large" width="276" value="10:20 03/20/2023" /></p>
          * <script>
          *     $('#small').datetimepicker({ size: 'small' });
          *     $('#default').datetimepicker({ size: 'default' });
@@ -16256,6 +16808,12 @@ gj.datetimepicker.config = {
     },
 
     bootstrap4: {
+        style: {
+            calendar: 'gj-picker gj-picker-bootstrap datetimepicker gj-unselectable'
+        }
+    },
+
+    bootstrap5: {
         style: {
             calendar: 'gj-picker gj-picker-bootstrap datetimepicker gj-unselectable'
         }
@@ -16421,7 +16979,7 @@ gj.datetimepicker.methods = {
     },
 
     value: function ($datetimepicker, value) {
-        var $calendar, date, data = $datetimepicker.data();
+        var $calendar, date, hour, data = $datetimepicker.data();
         if (typeof (value) === "undefined") {
             return $datetimepicker.val();
         } else {
@@ -16429,6 +16987,14 @@ gj.datetimepicker.methods = {
             if (date) {
                 $calendar = $('body').find('[role="calendar"][guid="' + $datetimepicker.attr('data-guid') + '"]');
                 gj.datepicker.methods.dayClickHandler($datetimepicker, $calendar, data, date)();
+                // Set Time
+                hour = date.getHours();
+                if (data.mode === 'ampm') {
+                    $calendar.attr('mode', hour > 12 ? 'pm' : 'am');
+                }
+                $calendar.attr('hour', hour);
+                $calendar.attr('minute', date.getMinutes());
+                $datetimepicker.val(value);
             } else {
                 $datetimepicker.val('');
             }
@@ -16492,7 +17058,7 @@ gj.datetimepicker.widget = function ($element, jsConfig) {
      * @example Get <!-- datetimepicker -->
      * <button class="gj-button-md" onclick="alert($datetimepicker.value())">Get Value</button>
      * <hr/>
-     * <input id="datetimepicker" width="312" value="17:50 03/27/2018" />
+     * <input id="datetimepicker" width="312" value="17:50 03/27/2023" />
      * <script>
      *     var $datetimepicker = $('#datetimepicker').datetimepicker();
      * </script>
@@ -16506,6 +17072,38 @@ gj.datetimepicker.widget = function ($element, jsConfig) {
      */
     self.value = function (value) {
         return methods.value(this, value);
+    };
+
+    /** Open the calendar.
+     * @method
+     * @return datetimepicker
+     * @example Open.Close <!-- datetimepicker -->
+     * <button class="gj-button-md" onclick="$picker.open()">Open</button>
+     * <button class="gj-button-md" onclick="$picker.close()">Close</button>
+     * <hr/>
+     * <input id="input" width="312" />
+     * <script>
+     *     var $picker = $('#input').datetimepicker();
+     * </script>
+     */
+    self.open = function () {
+        gj.datepicker.methods.open(this, this.data().datepicker);
+    };
+
+    /** Close the calendar.
+     * @method
+     * @return datetimepicker
+     * @example Open.Close <!-- datetimepicker -->
+     * <button class="gj-button-md" onclick="$picker.open()">Open</button>
+     * <button class="gj-button-md" onclick="$picker.close()">Close</button>
+     * <hr/>
+     * <input id="input" width="312" />
+     * <script>
+     *     var $picker = $('#input').datetimepicker();
+     * </script>
+     */
+    self.close = function () {
+        gj.datepicker.methods.close(this);
     };
 
     /** Remove datetimepicker functionality from the element.
@@ -16603,6 +17201,22 @@ gj.slider.config = {
          */
         max: 100,
 
+        /** The width of the slider.
+         * @type number
+         * @default undefined
+         * @example JS.Config <!-- slider -->
+         * <input id="slider" />
+         * <script>
+         *    $('#slider').slider({ width: 400 });
+         * </script>
+         * @example HTML.Config <!-- slider -->
+         * <input id="slider" width="400" />
+         * <script>
+         *    $('#slider').slider();
+         * </script>
+         */
+        width: undefined,
+
         /** The orientation of a Slider: "horizontal" or "vertical".
          * @type (horizontal|vertical)
          * @default horizontal
@@ -16636,8 +17250,10 @@ gj.slider.config = {
          *    });
          * </script>
          * @example Bootstrap.4 <!-- bootstrap4, slider -->
-         * <input id="slider" width="300" />
-         * Value: <span id="value"></span>
+         * <div class="container" />
+         *     <input id="slider" width="300" />
+         *     Value: <span id="value"></span>
+         * </div>
          * <script>
          *    $('#slider').slider({
          *        uiLibrary: 'bootstrap4',
@@ -16761,7 +17377,23 @@ gj.slider.methods = {
         gj.documentManager.subscribeForEvent('mouseup', $slider.data('guid'), gj.slider.methods.createMouseUpHandler($slider, handle, data));
         handle.addEventListener('mousedown', gj.slider.methods.createMouseDownHandler(handle, data));
         gj.documentManager.subscribeForEvent('mousemove', $slider.data('guid'), gj.slider.methods.createMouseMoveHandler($slider, track, handle, progress, data));
-        
+
+        handle.addEventListener('click', function (e) { e.stopPropagation(); });
+        wrapper.addEventListener('click', gj.slider.methods.createClickHandler($slider, track, handle, data));
+    },
+
+    createClickHandler: function ($slider, track, handle, data) {
+        return function (e) {
+            var sliderPos, x, offset, stepSize, newValue;
+            if (handle.getAttribute('drag') !== 'true') {
+                sliderPos = gj.core.position($slider[0].parentElement);
+                x = new gj.widget().mouseX(e) - sliderPos.left;
+                offset = gj.core.width(handle) / 2;
+                stepSize = gj.core.width(track) / (data.max - data.min);
+                newValue = Math.round((x - offset) / stepSize) + data.min;
+                gj.slider.methods.value($slider, data, newValue);
+            }
+        };
     },
 
     createMouseUpHandler: function ($slider, handle, data) {
@@ -16783,7 +17415,7 @@ gj.slider.methods = {
         return function (e) {
             var sliderPos, x, trackWidth, offset, stepSize, valuePos, newValue;
             if (handle.getAttribute('drag') === 'true') {
-                sliderPos = gj.core.position($slider[0], true, true);
+                sliderPos = gj.core.position($slider[0].parentElement);
                 x = new gj.widget().mouseX(e) - sliderPos.left;
 
                 trackWidth = gj.core.width(track);
@@ -16939,6 +17571,285 @@ gj.slider.widget.constructor = gj.slider.widget;
                 return new gj.slider.widget(this, method);
             } else {
                 $widget = new gj.slider.widget(this, null);
+                if ($widget[method]) {
+                    return $widget[method].apply(this, Array.prototype.slice.call(arguments, 1));
+                } else {
+                    throw 'Method ' + method + ' does not exist.';
+                }
+            }
+        }
+    };
+})(jQuery);
+/* global window alert jQuery gj */
+/**
+  * @widget ColorPicker
+  * @plugin Base
+  */
+gj.colorpicker = {
+    plugins: {},
+    messages: {
+        'en-us': {
+        }
+    }
+};
+
+gj.colorpicker.config = {
+    base: {
+
+        /** The name of the UI library that is going to be in use.
+         * @additionalinfo The css file for bootstrap should be manually included if you use bootstrap.
+         * @type (materialdesign|bootstrap|bootstrap4)
+         * @default materialdesign
+         * @example MaterialDesign <!-- colorpicker -->
+         * <input id="colorpicker" width="300" />
+         * <script>
+         *    $('#colorpicker').colorpicker({ uiLibrary: 'materialdesign' });
+         * </script>
+         * @example Bootstrap.3 <!-- bootstrap, colorpicker -->
+         * <input id="colorpicker" width="300" />
+         * <script>
+         *     $('#colorpicker').colorpicker({ uiLibrary: 'bootstrap' });
+         * </script>
+         * @example Bootstrap.4 <!-- bootstrap4, colorpicker -->
+         * <input id="colorpicker" width="300" />
+         * <script>
+         *     $('#colorpicker').colorpicker({ uiLibrary: 'bootstrap4' });
+         * </script>
+         */
+        uiLibrary: 'materialdesign',
+
+        /** The initial colorpicker value.
+         * @type number
+         * @default undefined
+         * @example Javascript <!-- colorpicker -->
+         * <input id="colorpicker" width="300" />
+         * <script>
+         *    $('#colorpicker').colorpicker({ value: '#FF0000' });
+         * </script>
+         * @example HTML <!-- colorpicker -->
+         * <input id="colorpicker" width="300" value="#FF0000" />
+         * <script>
+         *     $('#colorpicker').colorpicker();
+         * </script>
+         */
+        value: undefined,
+
+        icons: {
+            rightIcon: '<i class="gj-icon">event</i>'
+        },
+
+        style: {
+            modal: 'gj-modal',
+            wrapper: 'gj-colorpicker gj-colorpicker-md gj-unselectable',
+            input: 'gj-textbox-md',
+            picker: 'gj-picker gj-picker-md colorpicker gj-unselectable',
+            footer: '',
+            button: 'gj-button-md'
+        }
+    },
+
+    bootstrap: {
+        style: {}
+    },
+
+    bootstrap4: {
+        style: {}
+    }
+};
+
+gj.colorpicker.methods = {
+    init: function (jsConfig) {
+        gj.picker.widget.prototype.init.call(this, jsConfig, 'colorpicker');
+        gj.colorpicker.methods.initialize(this);
+        return this;
+    },
+
+    initialize: function ($colorpicker) {
+    },
+
+    createPicker: function ($input, data) {
+        var $picker = $('<div role="picker" />').addClass(data.style.picker).attr('guid', $input.attr('data-guid'));
+
+        $picker.html('test');
+
+        $picker.hide();
+        $('body').append($picker);
+
+        return $picker;
+    },
+
+    open: function ($input) {
+        if ($input.val()) {
+            $input.value($input.val());
+        }
+        return gj.picker.widget.prototype.open.call($input, 'colorpicker');
+    }
+};
+
+gj.colorpicker.events = {
+    /**
+     * Fires when the colorpicker value changes as a result of selecting a new value with the drag handle, buttons or keyboard.
+     *
+     * @event change
+     * @param {object} e - event data
+     * @example sample <!-- colorpicker -->
+     * <input id="colorpicker" />
+     * <script>
+     *     $('#colorpicker').colorpicker({
+     *         change: function (e) {
+     *             console.log('Change is fired');
+     *         }
+     *     });
+     * </script>
+     */
+    change: function ($colorpicker) {
+        return $colorpicker.triggerHandler('change');
+    },
+
+    /**
+     * Fires as a new color is displayed in the drop-down picker.
+     * @additionalinfo This is not necessarily the "final" value; for example this event triggers when the sliders in the HSV selector are dragged, but then pressing ESC would cancel the selection and the color will revert to the original value.
+     * @event select
+     * @param {object} e - event data
+     * @example sample <!-- colorpicker -->
+     * <input id="colorpicker" />
+     * <script>
+     *     $('#colorpicker').colorpicker({
+     *         select: function (e) {
+     *             console.log('select is fired');
+     *         }
+     *     });
+     * </script>
+     */
+    select: function ($colorpicker) {
+        return $colorpicker.triggerHandler('select');
+    },
+
+    /**
+     * Fires when the picker popup is opening.
+     * @event open
+     * @param {object} e - event data
+     * @example sample <!-- colorpicker -->
+     * <input id="colorpicker" />
+     * <script>
+     *     $('#colorpicker').colorpicker({
+     *         open: function (e) {
+     *             console.log('open is fired');
+     *         }
+     *     });
+     * </script>
+     */
+    open: function ($colorpicker) {
+        return $colorpicker.triggerHandler('open');
+    },
+
+    /**
+     * Fires when the picker popup is closing.
+     * @event close
+     * @param {object} e - event data
+     * @example sample <!-- colorpicker -->
+     * <input id="colorpicker" />
+     * <script>
+     *     $('#colorpicker').colorpicker({
+     *         close: function (e) {
+     *             console.log('close is fired');
+     *         }
+     *     });
+     * </script>
+     */
+    close: function ($colorpicker) {
+        return $colorpicker.triggerHandler('close');
+    }
+};
+
+gj.colorpicker.widget = function ($element, jsConfig) {
+    var self = this,
+        methods = gj.colorpicker.methods;
+
+    /** Gets or sets the value of the colorpicker.
+     * @method
+     * @param {string} value - The value that needs to be selected.
+     * @return string
+     * @example Get <!-- colorpicker -->
+     * <button class="gj-button-md" onclick="alert($colorpicker.value())">Get Value</button>
+     * <hr/>
+     * <input id="colorpicker" />
+     * <script>
+     *     var $colorpicker = $('#colorpicker').colorpicker();
+     * </script>
+     * @example Set <!-- colorpicker -->
+     * <button class="gj-button-md" onclick="$colorpicker.value('#FF0000')">Set Value</button>
+     * <hr/>
+     * <input id="colorpicker" />
+     * <script>
+     *     var $colorpicker = $('#colorpicker').colorpicker();
+     * </script>
+     */
+    self.value = function (value) {
+        return methods.value(this, value);
+    };
+
+    /** Remove colorpicker functionality from the element.
+     * @method
+     * @return jquery element
+     * @example sample <!-- colorpicker -->
+     * <button class="gj-button-md" onclick="colorpicker.destroy()">Destroy</button>
+     * <input id="colorpicker" />
+     * <script>
+     *     var colorpicker = $('#colorpicker').colorpicker();
+     * </script>
+     */
+    self.destroy = function () {
+        return gj.picker.widget.prototype.destroy.call(this, 'colorpicker');
+    };
+
+    /** Opens the popup element with the color selector.
+     * @method
+     * @return jquery element
+     * @example sample <!-- colorpicker -->
+     * <button class="gj-button-md" onclick="colorpicker.open()">Open</button>
+     * <input id="colorpicker" />
+     * <script>
+     *     var colorpicker = $('#colorpicker').colorpicker();
+     * </script>
+     */
+    self.open = function () {
+        return methods.open(this);
+    };
+
+    /** Close the popup element with the color selector.
+     * @method
+     * @return jquery element
+     * @example sample <!-- colorpicker -->
+     * <button class="gj-button-md" onclick="colorpicker.close()">Close</button>
+     * <input id="colorpicker" />
+     * <script>
+     *     var colorpicker = $('#colorpicker').colorpicker();
+     * </script>
+     */
+    self.close = function () {
+        return gj.picker.widget.prototype.close.call(this, 'colorpicker');
+    };
+
+    $.extend($element, self);
+    if ('true' !== $element.attr('data-colorpicker')) {
+        methods.init.call($element, jsConfig);
+    }
+
+    return $element;
+};
+
+gj.colorpicker.widget.prototype = new gj.picker.widget();
+gj.colorpicker.widget.constructor = gj.colorpicker.widget;
+
+(function ($) {
+    $.fn.colorpicker = function (method) {
+        var $widget;
+        if (this && this.length) {
+            if (typeof method === 'object' || !method) {
+                return new gj.colorpicker.widget(this, method);
+            } else {
+                $widget = new gj.colorpicker.widget(this, null);
                 if ($widget[method]) {
                     return $widget[method].apply(this, Array.prototype.slice.call(arguments, 1));
                 } else {

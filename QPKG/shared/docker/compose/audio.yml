@@ -1,0 +1,6 @@
+services:
+  roonserver:
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - audio

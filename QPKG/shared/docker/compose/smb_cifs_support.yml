@@ -1,0 +1,6 @@
+services:
+  roonserver:
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+

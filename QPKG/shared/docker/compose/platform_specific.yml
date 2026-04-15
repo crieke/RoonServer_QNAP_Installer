@@ -1,0 +1,26 @@
+services:
+  roonserver:
+    environment:
+      - "QNAP_MODEL=${QNAP_MODEL:-Docker}"
+      - "QNAP_SERIAL=${QNAP_SERIAL:-NoSerial}"
+      - "QNAP_QTS_VER=${QNAP_QTS_VER:-System}"
+      - "ROON_QNAP_MNT_DIR=/Roon"
+      - "ROON_ID_DIR=/Roon/id"
+    volumes:
+      # mount all disks and shared folders
+      - /share:/share
+  
+      # mount database folder
+      - ${ROON_DATAROOT:-/dev/null}:/Roon/data
+  
+      # mount id from app dir
+      - ${QPKG_ROOT}/id:/Roon/id
+  
+      # mount qnap configfiles
+      - /etc/config/qpkg.conf:/etc/config/qpkg.conf:ro
+      - /etc/os-release:/etc/os-release:ro
+  
+      # fake qnap binaries, that are used to identify host as qnap
+      - ../scripts/getcfg.sh:/sbin/getcfg:ro
+      - ../scripts/getsysinfo.sh:/sbin/getsysinfo:ro
+      - ../scripts/get_hwsn.sh:/sbin/get_hwsn:ro

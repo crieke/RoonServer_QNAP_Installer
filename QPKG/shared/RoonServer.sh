@@ -2,37 +2,50 @@
 CONF=/etc/config/qpkg.conf
 QPKG_NAME="RoonServer"
 QPKG_ROOT=`/sbin/getcfg $QPKG_NAME Install_Path -f ${CONF}`
+
+QCS_NAME="container-station"
+QCS_QPKG_DIR=$(/sbin/getcfg $QCS_NAME Install_Path -f ${CONF})
+DOCKER_CMD="${QCS_QPKG_DIR}/bin/system-docker"
+CONTAINER_NAME=roonserver
+COMPOSE_YML_DIR="${QPKG_ROOT}/docker/compose"
+ROONSERVER_OPTIONS=(`/sbin/getcfg $QPKG_NAME options -f ${CONF}`)
+ROON_CHANNEL="production"
+
 WEB_PATH="/home/httpd"
 WEBUI=$(/sbin/getcfg $QPKG_NAME webUI -f ${CONF});
-QTS_VER=$(/sbin/getcfg system version)
-QTS_BUILD=$(getcfg system 'Build Number')
+
+ROONONNAS_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
+ROON_DATAROOT="${ROONONNAS_DIR}/RoonOnNAS"
+ROON_TMP_DIR="${QPKG_ROOT}/tmp"
+ROON_ID_HOST_DIR="${QPKG_ROOT}/id"
+
+QNAP_QTS_VER=$(/sbin/getcfg system version)
+QNAP_QTS_BUILD=$(/sbin/getcfg system 'Build Number')
 QNAP_MEMTOTAL=`awk '/MemTotal/ {print $2}' /proc/meminfo`
 QNAP_MEMFREE=`awk '/MemFree/ {print $2}' /proc/meminfo`
 QPKG_VERSION=`/sbin/getcfg $QPKG_NAME Version -f ${CONF}`
-MULTIMEDIA_DISABLE=`/sbin/getcfg DISABLE HomeFeature -f /var/.application.conf`
-MAJOR_QTS_VER=`echo "$QTS_VER" | tr -d '.' | cut -c1-2`
+MAJOR_QTS_VER=`echo "$QNAP_QTS_VER" | tr -d '.' | cut -c1-2`
 ARCH=$(uname -m)
-MODEL=`getsysinfo model`
-QNAP_SERIAL=`get_hwsn`
-MTU=`ifconfig | grep eth[0-9] -A1 | grep MTU | grep MTU | cut -d ":" -f 2 | awk '{print $1}' | xargs | sed "s/ ---- /\n---- /g"`
-ROON_VERSION=`cat "${QPKG_ROOT}/RoonServer/VERSION"`
-ROON_LIB_DIR="${QPKG_ROOT}/lib64"
-ROON_QTS42_LIB_DIR="${QPKG_ROOT}/lib64_ForQTS4.2"
-ROON_TMP_DIR="${QPKG_ROOT}/tmp"
-ROON_ID_DIR="${QPKG_ROOT}/id"
-ROON_DATABASE_DIR=`/sbin/getcfg $QPKG_NAME DB_Path -f /etc/config/qpkg.conf`
-ROON_DATAROOT="${ROON_DATABASE_DIR}/RoonOnNAS"
+
+QNAP_MODEL=`/sbin/getsysinfo model`
+QNAP_SERIAL=`/sbin/get_hwsn`
 ROON_DATABASE_DIR_FS=`df -PThi "${ROON_DATAROOT}" | awk '{print $2}' | tail -1`
 ROON_DATABASE_DIR_FREE_INODES=`df -PThi "${ROON_DATAROOT}" | awk '{print $5}' | tail -1`
 ROON_FFMPEG_DIR="${ROON_DATAROOT}/bin"
-ALSA_CONFIG_PATH="${QPKG_ROOT}/etc/alsa/alsa.conf"
 ROON_LOG_FILE="${ROON_DATAROOT}/RoonOnNAS.log.txt"
-QTS_INSTALLED_APPS=`cat /etc/config/qpkg.conf | grep "\[" | sed 's/[][]//g' | tr '\n' ', '`
-PID=$(ps aux | grep "${QPKG_ROOT}/RoonServer/start.sh" | grep -v grep | awk '{print $1}')
+
+echo $(basename "$0") >> ${ROON_LOG_FILE}
+echo $@ >> ${ROON_LOG_FILE}
 
 ST_COLOR="\033[38;5;34m"
 HL_COLOR="\033[38;5;197m"
 REG_COLOR="\033[0m"
+
+#specify options
+for i in "${ROONSERVER_OPTIONS[@]}"
+do
+   declare $i=true
+done
 
 ## Log Function
 echolog () {
@@ -51,141 +64,160 @@ echolog () {
     fi
 }
 
-info ()
-{
+compose_docker_yml_files () {
+  COMPOSE_FILES="\
+  -f ${COMPOSE_YML_DIR}/roonserver.yml \
+  -f ${COMPOSE_YML_DIR}/platform_specific.yml "
+  
+  [ -z ${smb_cifs+x} ] || COMPOSE_FILES="${COMPOSE_FILES} -f $COMPOSE_YML_DIR/smb_cifs_support.yml"
+  ( [ -z ${usb_audio+x} ] && [ -z ${hdmi_audio+x} ] ) || COMPOSE_FILES="${COMPOSE_FILES} -f $COMPOSE_YML_DIR/audio.yml"
+  [ -z ${usb_audio+x} ] || COMPOSE_FILES="${COMPOSE_FILES} -f $COMPOSE_YML_DIR/audio_usb.yml"
+  [ -z ${hdmi_audio+x} ] || COMPOSE_FILES="${COMPOSE_FILES} -f $COMPOSE_YML_DIR/audio_hdmi.yml"
+}
+
+info () {
    ## Echoing System Info
    echolog "ROON_DATABASE_DIR" "${ROON_DATAROOT} - [`[ -d \"${ROON_DATAROOT}\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "ROON_DATABASE_DIR_FS" "${ROON_DATABASE_DIR_FS}"
-   echolog "ROON_ID_DIR" "$ROON_ID_DIR - [`[ -d \"$ROON_ID_DIR\" ] && echo \"available\" || echo \"not available\"`]"
+   echolog "ROON_ID_HOST_DIR" "$ROON_ID_HOST_DIR - [`[ -d \"$ROON_ID_HOST_DIR\" ] && echo \"available\" || echo \"not available\"`]"
    echolog "Free Inodes" "${ROON_DATABASE_DIR_FREE_INODES}"
    echolog "ROON_DIR" "${QPKG_ROOT}"
-   echolog "Model" "${MODEL}"
-   echolog "QNAP Serial" "${QNAP_SERIAL}"
+   echolog "Model" "${QNAP_MODEL}"
    echolog "Architecture" "${ARCH}"
    echolog "Total Memory" "${QNAP_MEMTOTAL}"
    echolog "Available Memory" "${QNAP_MEMFREE}"
-   echolog "QTS Version" "${QTS_VER} - Build: ${QTS_BUILD}"
+   echolog "QTS Version" "${QNAP_QTS_VER} - Build: ${QNAP_QTS_BUILD}"
    echolog "PKG Version" "${QPKG_VERSION}"
-   echolog "Installed QTS Apps" "${QTS_INSTALLED_APPS}"
    echolog "Hostname" "${HOSTNAME}"
-   echolog "MTU" "${MTU}"
+   echolog "Roon-Channel" "${ROON_CHANNEL}"
 }
 
-RoonOnNAS_folderCheck ()
-{
-  if [ -d "${ROON_DATABASE_DIR}" ]; then
-    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS"
-    [ -d "${ROON_DATABASE_DIR}/RoonOnNAS/bin" ] || mkdir "${ROON_DATABASE_DIR}/RoonOnNAS/bin"
+RoonOnNAS_folderCheck () {
+  if [ -d "${ROONONNAS_DIR}" ]; then
+    [ -d "${ROONONNAS_DIR}/RoonOnNAS" ] || mkdir "${ROONONNAS_DIR}/RoonOnNAS"
+    [ -d "${ROONONNAS_DIR}/RoonOnNAS/bin" ] || mkdir "${ROONONNAS_DIR}/RoonOnNAS/bin"
   fi
 }
 
-start_RoonServer () {
-  if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
+getCSStatus () {
+   echo "$(/sbin/getcfg container-station status -f /etc/qpkg_run_status)"
+}  
 
-      ## Fix missing executable permission for ffmpeg
-      [ -f "${ROON_FFMPEG_DIR}/ffmpeg" ] && [ ! -x "${ROON_FFMPEG_DIR}/ffmpeg" ] && chmod 755 "${ROON_FFMPEG_DIR}/ffmpeg"
-
-      export PATH="${ROON_FFMPEG_DIR}:$PATH"
-
-      echo "" | tee -a "$ROON_LOG_FILE"
-      echo "############### Used FFMPEG Version ##############" | tee -a "$ROON_LOG_FILE"
-      echo -e $(ffmpeg -version) | tee -a "$ROON_LOG_FILE"
-      echo "##################################################" | tee -a "$ROON_LOG_FILE"
-      echo "" | tee -a "$ROON_LOG_FILE"
-
-
-      export ROON_DATAROOT
-
-
-      LD_LIBRARY_PATH=/lib64:/lib:${ROON_LIB_DIR}:${LD_LIBRARY_PATH}
-      if [ $MAJOR_QTS_VER -lt 43 ]; then
-        LD_LIBRARY_PATH=${ROON_QTS42_LIB_DIR}:${LD_LIBRARY_PATH}
-      fi
-
-      export LD_LIBRARY_PATH
-      export ALSA_CONFIG_PATH
-      export ROON_INSTALL_TMPDIR="${ROON_TMP_DIR}"
-      export TMP="${ROON_TMP_DIR}"
-      export TMPDIR="${ROON_TMP_DIR}"
-      export ROON_ID_DIR
-
-      ## Creating required directories, if they do not exist
-      [ -d "$ROON_ID_DIR" ] || mkdir "$ROON_ID_DIR"
-      [ -d "$ROON_TMP_DIR" ] || mkdir "$ROON_TMP_DIR"
-
-
-      # Checking for additional start arguments.
-      if [[ -f "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" ]]; then
-          ROON_ARGS=`cat "${ROON_DATAROOT}/ROON_DEBUG_LAUNCH_PARAMETERS.txt" | xargs | sed "s/ ---- /\n---- /g"`
-          echolog "ROON_DEBUG_ARGS" "${ROON_ARGS}"
-      else
-          ROON_ARGS=""
-      fi
-
-      ## Start RoonServer
-      setcfg ${QPKG_NAME} MULTIMEDIA_DISABLE_ON_START ${MULTIMEDIA_DISABLE} -f "${CONF}"
-      ${QPKG_ROOT}/RoonServer/start.sh "${ROON_ARGS}" | while read line; do echo `date +%d.%m.%y-%H:%M:%S` " --- $line"; done >> "$ROON_LOG_FILE"  2>&1 &
-      PID=$(ps aux | grep "${QPKG_ROOT}/RoonServer/start.sh" | grep -v grep | awk '{print $1}')
-      echolog "RoonServer PID" "${PID}"
-
-      echo "" | tee -a "$ROON_LOG_FILE"
-      echo "" | tee -a "$ROON_LOG_FILE"
-      echo "########## Installed RoonServer Version ##########" | tee -a "$ROON_LOG_FILE"
-      echo "${ROON_VERSION}" | tee -a "$ROON_LOG_FILE"
-      echo "##################################################" | tee -a "$ROON_LOG_FILE"
-      echo "" | tee -a "$ROON_LOG_FILE"
-      echo "" | tee -a "$ROON_LOG_FILE"
-  fi
-
+checkCS () {
+  case $(getCSStatus) in
+    0)
+      echolog "Container Station down."
+      exit 1;
+      ;;
+    1)
+      echolog "Container Station is starting..."
+      SECONDS=0
+      until [[  $(getCSStatus) == "2" ]]; do
+        if (( SECONDS > 120 )); then
+          echolog "Giving up..."
+          exit 1
+        fi
+        echolog "($SECONDS) Container Station is not up yet. Waiting..."
+        sleep 5
+      done 
+      ;;
+    2)
+      echolog "Container Station is up."
+      ;;
+  esac
 }
 
-start_daemon ()
-{
-        info
+export_vars () {
+  export ROON_DATAROOT
+  export QPKG_ROOT
+  export QNAP_MODEL
+  export QNAP_SERIAL
+  export QNAP_QTS_VER
+  export CONTAINER_NAME
+  export ROON_CHANNEL
+}
+
+start_webpanel () {
+        [ -f ${ROON_DATAROOT}/earlyaccess.txt ] && ROON_CHANNEL="earlyaccess"
         #Launch the service in the background if RoonServer share exists.
         ln -sfn "${QPKG_ROOT}/web" "${WEB_PATH}${WEBUI}"
-        start_RoonServer
-        }
+}
+
+start_roonserver () {
+  if [ "${ROON_DATAROOT}" != "/RoonOnNAS" ] && [ -d "${ROON_DATAROOT}" ]; then
+      compose_docker_yml_files
+      export_vars
+
+      ## Creating required directories, if they do not exist
+      [ -d "$ROON_ID_HOST_DIR" ] || mkdir "$ROON_ID_HOST_DIR"
+      [ -d "$ROON_TMP_DIR" ] || mkdir "$ROON_TMP_DIR"
+
+      ${DOCKER_CMD} compose ${COMPOSE_FILES} up -d  
+  fi
+}
 
 case "$1" in
   start)
-    ENABLED=$(/sbin/getcfg $QPKG_NAME Enable -u -d FALSE -f $CONF)
-    RoonOnNAS_folderCheck
-    if [ "$ENABLED" != "TRUE" ]; then
-        echolog "$QPKG_NAME is disabled."
-        exit 1
-    fi
-    if kill -s 0 $PID; then
-        echolog "${QPKG_NAME} is already running with PID: $PID"
-    else
-        echo "" > "$ROON_LOG_FILE"
-        echolog "Starting ${QPKG_NAME} ..."
-        start_daemon
-    fi
+    RS_ENABLED=$(/sbin/getcfg $QPKG_NAME Enable -u -d FALSE -f $CONF)
+    CS_ENABLED=$(/sbin/getcfg "container-station" Enable -u -d FALSE -f $CONF)
+
+      if [ "$RS_ENABLED" != "TRUE" ]; then
+          echolog "$QPKG_NAME is disabled."
+          exit 1
+      fi
+      if [ "$CS_ENABLED" != "TRUE" ]; then
+          echolog "Container Station is disabled."
+          exit 1
+      fi
+      
+      CONTAINER_ID=$(${DOCKER_CMD} ps -a -q -f name=$CONTAINER_NAME)
+      if [ ! "$CONTAINER_ID" ]; then     
+          echolog "Starting Roon Server..."
+          info
+          checkCS
+          RoonOnNAS_folderCheck
+          start_webpanel
+          start_roonserver
+      else
+          echolog "${QPKG_NAME} is already running (ID: $CONTAINER_ID)"
+      fi
     ;;
 
   stop)
-    if kill -s 0 $PID; then
-        echolog "Stopping RoonServer..."
-        echolog "Roon PID to be killed" "$PID"
-        kill ${PID} >> "$ROON_LOG_FILE"
-        rm -rf "${ROON_TMP_DIR}"/*
-        if [[ $2 != "keepwebalive" ]]; then
-           rm -rf "${QPKG_ROOT}/web/tmp"/*
-           rm  "${WEB_PATH}${WEBUI}"
-        fi
-        echolog "RoonServer has been stopped."
-    else
+    CS_ENABLED=$(/sbin/getcfg "container-station" Enable -u -d FALSE -f $CONF)
+
+    # Check if CS has not been stopped before Roon Server
+    if [ "$CS_ENABLED" == "TRUE" ]; then
+      # -->  CS is still up.
+      CONTAINER_ID=$(${DOCKER_CMD} ps -a -q -f name=$CONTAINER_NAME)
+      if [ ! "$CONTAINER_ID" ]; then
+        # --> No roonserver conatiner running
         echolog "${QPKG_NAME} is not running."
+      else
+        # --> Stopping roonserver conatiner
+        echolog "Stopping RoonServer..."
+        compose_docker_yml_files
+        export_vars
+        ${DOCKER_CMD} compose ${COMPOSE_FILES} down --remove-orphans
+        
+        if [[ $2 != "keepwebalive" ]]; then
+          [ -d "${WEB_PATH}${WEBUI}" ] && rm  "${WEB_PATH}${WEBUI}"
+        fi
+        
+        echolog "RoonServer has been stopped."
+      fi
+    else
+      # -> CS is disabled:
+      # Edge case: CS has been stopped before RoonServer. We can assume RoonServer docker is down. Only the web-panel needs to be removed
+      [ -d "${WEB_PATH}${WEBUI}" ] && rm  "${WEB_PATH}${WEBUI}"
+      echolog "RoonServer is not running."
     fi
     ;;
 
   restart)
-    isRestart=true
     $0 stop
     $0 start
     ;;
-
   *)
     echo "Usage: $0 {start|stop|restart}"
     exit 1

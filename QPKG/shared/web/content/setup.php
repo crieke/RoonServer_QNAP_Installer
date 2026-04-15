@@ -29,7 +29,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
 <div class="modal-header">
     <h4 id="modal-title" class="modal-title"><?php echo localize("MODAL_SETUP_HEADLINE"); ?></h4>
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
 </div>
 <div id="modal-body" class="modal-body modal-content">
 
@@ -55,7 +55,10 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 hasChildrenField: 'anychildren',
                 iconsLibrary: 'fontawesome',
                 imageCssClassField: 'faCssClass',
-                uiLibrary: 'bootstrap4',
+                uiLibrary: 'bootstrap5',
+                cascadeSelection: false,
+                cascadeCheck: false,
+                selectionType: 'single',
                 icons: {
                     expand: '<i class="fas fa-angle-right" />',
                     collapse: '<i class="fas fa-angle-down" />'
@@ -119,10 +122,11 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                 <div class="input-group">
                     <span class="input-group-btn">
                         <span class="form form-control"
-                              style="background: #F5F5F5; border-radius: 0.25em 0 0 0.25em !important;"
+                              style="background: var(--bs-dark-bg-subtle); border-radius: 0.25em 0 0 0.25em !important;"
                               readonly><?php echo localize("MODAL_SETUP_DB_LOCATION"); ?></span>
                         </span>
-                    <input id="dblocform" type="text" class="form-control" style="background: #ffffff;" value="<?php
+                    <input id="dblocform" type="text" class="form-control" style="background: var(--bs-dark
+); color: var(--bs-dark-text-emphasis)" value="<?php
                     if (isset($dblocation)) {
                         echo $dblocation;
                     } else {
@@ -141,4 +145,4 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?></button>
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?></button>

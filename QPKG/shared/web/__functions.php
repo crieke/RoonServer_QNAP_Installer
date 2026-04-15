@@ -156,6 +156,14 @@ unset($arrData);
 unset($arrTemp);
 unset($arrNodes);
 
+function debug_to_console($data) {
+    $output = $data;
+    if (is_array($output))
+        $output = implode(',', $output);
+
+    echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+}
+
 function localize($phrase)
 {
     /* Static keyword is used to ensure the file is loaded only once */
@@ -192,67 +200,20 @@ function localize($phrase)
 
 function isRunning($option = null)
 {
-   $getPIDcmd =  'ps aux | grep "' . APPINSTALLPATH . '/RoonServer/start.sh" | grep -v grep | awk \'{print $1}\'';
-   $RoonServerPID = exec($getPIDcmd);
-
-    if ($RoonServerPID > 0) {
-        if (is_dir('/proc/' . $RoonServerPID)) {
-            $pid = $RoonServerPID;
-            $running = true;
-        } else {
-            $pid = "";
-            $running = false;
-        }
-    } else {
-        $pid = "";
-        $running = false;
-    }
-    switch ($option) {
-        case 'getpid':
-            return $pid;
-            break;
-        default:
-            return $running;
-    }
+    $getDockerCont =  CS_INSTALLPATH . '/bin/system-docker ps -aqf "name=roonserver"';
+    $containerID = exec($getDockerCont);
+    
+    return $containerID;
+    
 }
 
-function GetAsoundCards()
+function getRoonServerVersion($option = null)
 {
-    $cards = array();
-    $cardsPath = "/proc/asound/cards";
-    $cardsContents = trim(file_get_contents($cardsPath));
-    $splitNewline = explode(PHP_EOL, $cardsContents);
-    foreach ($splitNewline as $line => $key) {
-        if (strpos($key, "]: ")) {
-            $r = parseCardsLine(trim($key));
-            $cards[] = $r;
-        }
-    }
-    return $cards;
-}
+   $getHostFS = CS_INSTALLPATH . '/bin/system-docker inspect '. isRunning() . ' | /usr/local/sbin/jq \'.[0].GraphDriver.Data.MergedDir\'';
+    $HostFS = exec($getHostFS);
+    $RoonVersion = file(trim($HostFS, '"') . "/Roon/app/RoonServer/VERSION");
 
-function parseCardsLine($str)
-{
-    $result = array();
-    $r = explode(" - ", $str);
-    $result["connection"] = substr($r[0], strpos($r[0], ']: ') +3 );
-    preg_match('/\[([\s\S])\w+/', $r[0], $matches, PREG_OFFSET_CAPTURE);
-    $result["name"] = $r[1];
-    return $result;
-}
-
-function acardsNice()
-{
-    $arrSCards = GetAsoundCards();
-    $strOutput = "";
-    foreach ($arrSCards as &$value) {
-        $strSCardName = $value['name'];
-        $strSCardConnection = $value['connection'];
-
-        $strOutput = $strOutput . '<li class="list-group-item justify-content-between"><b>' . $strSCardName . '</b><br>' . $strSCardConnection . '</li>';
-
-    }
-    return $strOutput;
+    return $RoonVersion;
 }
 
 function downloadLogs($strSessionID, $dblocation)
@@ -273,6 +234,7 @@ function downloadLogs($strSessionID, $dblocation)
     echo $url;
     //return $url;
 }
+
 
 function displayStorage($diskspace){
 $bytes = $diskspace;

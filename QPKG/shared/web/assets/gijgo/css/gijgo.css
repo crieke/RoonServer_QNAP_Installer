@@ -178,7 +178,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 2;
+    z-index: 1203;
     display: none;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
@@ -309,8 +309,7 @@ ul.gj-list-md li.disabled>[data-role="wrapper"]>[data-role="display"] {
 }
 
 .gj-list-md-active {
-    /* background: #E8EAF6; */
-    background: rgba(0,0,0,.12);
+    background: #e0e0e0;
     color: #3f51b5;
 }
 
@@ -318,7 +317,7 @@ ul.gj-list-md li.disabled>[data-role="wrapper"]>[data-role="display"] {
 /* Picker */
 .gj-picker {
     position: absolute;
-    z-index: 1202;
+    z-index: 1203;
     background-color: #fff;
 }
 
@@ -673,6 +672,19 @@ ul.gj-list-md li.disabled>[data-role="wrapper"]>[data-role="display"] {
     line-height: 1.5;
 }
 
+/** Bootstrap 5 **/
+.gj-dialog-bootstrap5 {
+    overflow: hidden;
+    z-index: 1202;
+}
+
+.gj-dialog-bootstrap5 [data-role="title"] {
+    display: inline;
+}
+.gj-dialog-bootstrap5 [data-role="close"] {
+    line-height: 1.5;
+}
+
 /** Material Design **/
 .gj-dialog-md {
     background-color: #FFF;
@@ -867,10 +879,14 @@ table.gj-grid-bootstrap tbody tr td div[data-role="display"] {
     padding-top: 2px;
 }
 
+.gj-grid-bootstrap-4 tbody tr.active {
+    background-color: rgba(0,0,0,.075);
+}
+
 /* Material Design Theme */
 .gj-grid-md {
     position: relative;
-    border: 1px solid rgba(0,0,0,.12);
+    border: 1px solid #e0e0e0;
     border-collapse: collapse;
     white-space: nowrap;
     font-size: 13px;
@@ -900,8 +916,8 @@ table.gj-grid-bootstrap tbody tr td div[data-role="display"] {
 .gj-grid-md td {
     position: relative;
     height: 48px;
-    border-top: 1px solid rgba(0,0,0,.12);
-    border-bottom: 1px solid rgba(0,0,0,.12);
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
     padding: 12px 18px;
     box-sizing: border-box;
     text-align: left;
@@ -1109,7 +1125,7 @@ span.gj-grid-column-resizer {
     width: 10px;
     top: -100px;
     height: 300px;
-    z-index: 1202;
+    z-index: 1203;
     cursor: e-resize;
 }
 
@@ -1283,7 +1299,7 @@ span.gj-grid-column-resizer {
     height: 42px;
 }
 .gj-grid-md thead tr[data-role="filter"] th {
-    border-top: 1px solid rgba(0,0,0,.12);
+    border-top: 1px solid #e0e0e0;
 }
 
 div.gj-grid-wrapper div.gj-grid-bootstrap-toolbar {
@@ -1306,9 +1322,9 @@ div.gj-grid-wrapper div.gj-grid-md-toolbar {
     font-family: "Helvetica","Arial",sans-serif;
     background-color: rgb(255, 255, 255);
     
-    border-top: 1px solid rgba(0,0,0,.12);
-    border-left: 1px solid rgba(0,0,0,.12);
-    border-right: 1px solid rgba(0,0,0,.12);
+    border-top: 1px solid #e0e0e0;
+    border-left: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
     border-bottom: 0px;
     border-collapse: collapse;
 
@@ -1327,12 +1343,12 @@ table.gj-grid-md.gj-grid-scrollable {
 }
 
 table.gj-grid-md.gj-grid-scrollable tbody {
-    border-right: 1px solid rgba(0,0,0,.12);
-    border-bottom: 1px solid rgba(0,0,0,.12);
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 table.gj-grid-md.gj-grid-scrollable tfoot {
-    border-bottom: 1px solid rgba(0,0,0,.12);
+    border-bottom: 1px solid #e0e0e0;
 }
 
 /* Bootstrap 3 */
@@ -1420,6 +1436,19 @@ ul.gj-list li [data-role="expander"] {
 }
 
 .gj-tree-bootstrap-4 ul.gj-list-bootstrap li ul.gj-list-bootstrap {
+    width: 100%;
+}
+
+.gj-tree-bootstrap-5 ul.gj-list-bootstrap li.active {
+    color: #fff;
+    background-color: rgb(13, 110, 253);
+}
+
+.gj-tree-bootstrap-5 ul.gj-list-bootstrap li.disabled {
+    color: #868e96;
+}
+
+.gj-tree-bootstrap-5 ul.gj-list-bootstrap li ul.gj-list-bootstrap {
     width: 100%;
 }
 
@@ -1605,6 +1634,20 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     font-size: 16px;
 }
 
+/* Bootstrap 5 */
+.gj-checkbox-bootstrap.gj-checkbox-bootstrap-5 span {
+    line-height: 16px;
+    padding: 0px;
+}
+
+.gj-checkbox-bootstrap-5.gj-checkbox-material-icons input[type="checkbox"]:checked + span:after {
+    font-size: 16px;
+}
+
+.gj-checkbox-bootstrap-5.gj-checkbox-material-icons input[type="checkbox"]:indeterminate + span:after {
+    font-size: 16px;
+}
+
 /* Material Design */
 .gj-checkbox-md {
     min-width: 0;
@@ -1702,6 +1745,9 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
 /* fontawesome */
 .gj-checkbox-fontawesome .fa {
     font-size: 14px;
+}
+.gj-checkbox-bootstrap.gj-checkbox-fontawesome .fa {
+    line-height: 18px;
 }
 
 .gj-checkbox-fontawesome input[type="checkbox"]:checked + span:before {
@@ -1845,7 +1891,7 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     background-color: #f5f5f5;
     color: #000;
     margin: 0px;
-    z-index: 1202;
+    z-index: 1203;
 }
 
 .gj-dropdown-list-md li:hover, .gj-dropdown-list-md li.active {
@@ -1905,7 +1951,7 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     top: 32px;
     left: 0px;
     margin: 0px;
-    z-index: 1202;
+    z-index: 1203;
 }
 .gj-datepicker [role="input"]::-ms-clear {
     display: none;
@@ -1950,7 +1996,6 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
 }
 
 .gj-datepicker-md [role="right-icon"] {
-    cursor: pointer;
     position: absolute;
     right: 0px;
     top: 0px;
@@ -2179,6 +2224,14 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     color: #777;
 }
 
+.gj-picker-bootstrap.datepicker [role="footer"] {
+    padding: 1rem;
+}
+
+.gj-picker-bootstrap.datepicker [role="footer"]> :not(:last-child) {
+    margin-right: .25rem;
+}
+
 /* Bootstrap 3 */
 .gj-datepicker-bootstrap span[role="right-icon"].input-group-addon {
     border-top-left-radius: 0px;
@@ -2237,6 +2290,41 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     font-size: 27px;
     top: 10px;
     left: 10px;
+}
+
+/* Bootstrap 5 */
+.gj-datepicker-bootstrap button[role="right-icon"]  {
+    width: 2.5rem;
+}
+
+.gj-datepicker-bootstrap.input-group-sm button[role="right-icon"] {
+    width: 2rem;
+}
+
+.gj-datepicker-bootstrap.input-group-lg button[role="right-icon"] {
+    width: 3.3rem;
+}
+
+.gj-datepicker-bootstrap button[role="right-icon"] .gj-icon,
+.gj-datepicker-bootstrap button[role="right-icon"] .material-icons {
+    position: absolute;
+    font-size: 21px;
+    top: 0.55rem;
+    left: 0.55rem;
+}
+
+.gj-datepicker-bootstrap.input-group-sm button[role="right-icon"] .gj-icon,
+.gj-datepicker-bootstrap.input-group-sm button[role="right-icon"] .material-icons {
+    font-size: 19px;
+    top: 0.4rem;
+    left: 0.34rem;
+}
+
+.gj-datepicker-bootstrap.input-group-lg button[role="right-icon"] .gj-icon,
+.gj-datepicker-bootstrap.input-group-lg button[role="right-icon"] .material-icons {
+    font-size: 27px;
+    top: 0.72rem;
+    left: 0.7rem;
 }
 .gj-timepicker [role="input"]::-ms-clear {
     display: none;
@@ -2407,6 +2495,15 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     border: 16px solid #888;
 }
 
+.gj-picker-bootstrap.timepicker [role="footer"] {
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.gj-picker-bootstrap.timepicker [role="footer"]> :not(:last-child) {
+    margin-right: .25rem;
+}
+
 /* Bootstrap 3 */
 .gj-timepicker-bootstrap .input-group-addon {
     border-top-left-radius: 0px;
@@ -2452,6 +2549,7 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
 .gj-timepicker-bootstrap [role="right-icon"] button {
     width: 38px;
     position: relative;
+    border: 1px solid #ced4da;
 }
 
 .gj-timepicker-bootstrap.input-group-sm [role="right-icon"] button {
@@ -2466,13 +2564,13 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
 .gj-timepicker-bootstrap [role="right-icon"] button .material-icons {
     position: absolute;
     font-size: 21px;
-    top: 7px;
+    top: 9px;
     left: 9px;
 }
 
 .gj-timepicker-bootstrap.input-group-sm [role="right-icon"] button .gj-icon,
 .gj-timepicker-bootstrap.input-group-sm [role="right-icon"] button .material-icons {
-    top: 4px;
+    top: 6px;
     left: 6px;
     font-size: 19px;
 }
@@ -2480,8 +2578,43 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
 .gj-timepicker-bootstrap.input-group-lg [role="right-icon"] button .gj-icon,
 .gj-timepicker-bootstrap.input-group-lg [role="right-icon"] button .material-icons {
     font-size: 27px;
-    top: 8px;
+    top: 10px;
     left: 10px;
+}
+
+/* Bootstrap 5 */
+.gj-timepicker-bootstrap button[role="right-icon"]  {
+    width: 2.5rem;
+}
+
+.gj-timepicker-bootstrap.input-group-sm button[role="right-icon"] {
+    width: 2rem;
+}
+
+.gj-timepicker-bootstrap.input-group-lg button[role="right-icon"] {
+    width: 3.3rem;
+}
+
+.gj-timepicker-bootstrap button[role="right-icon"] .gj-icon,
+.gj-timepicker-bootstrap button[role="right-icon"] .material-icons {
+    position: absolute;
+    font-size: 21px;
+    top: 0.55rem;
+    left: 0.55rem;
+}
+
+.gj-timepicker-bootstrap.input-group-sm button[role="right-icon"] .gj-icon,
+.gj-timepicker-bootstrap.input-group-sm button[role="right-icon"] .material-icons {
+    font-size: 19px;
+    top: 0.4rem;
+    left: 0.34rem;
+}
+
+.gj-timepicker-bootstrap.input-group-lg button[role="right-icon"] .gj-icon,
+.gj-timepicker-bootstrap.input-group-lg button[role="right-icon"] .material-icons {
+    font-size: 27px;
+    top: 0.72rem;
+    left: 0.7rem;
 }
 .gj-picker.datetimepicker [role="header"] [role="date"] {
     padding-bottom: 5px;
@@ -2547,6 +2680,15 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     font-size: 22px;
 }
 
+.gj-picker-bootstrap.datetimepicker [role="footer"] {
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.gj-picker-bootstrap.datetimepicker [role="footer"]> :not(:last-child) {
+    margin-right: .25rem;
+}
+
 .gj-slider {
     position: relative;
     padding: 8px 6px;
@@ -2558,7 +2700,7 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
 
 .gj-slider [role="progress"] {
     position: absolute;
-    z-index: 1001;
+    z-index: 1203;
 }
 
 .gj-slider [role="handle"] {
@@ -2615,7 +2757,7 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     border: 0px solid transparent;
     border-radius: 50%;
     cursor: pointer;
-    z-index: 1002;
+    z-index: 1204;
 }
 
 /* Bootstrap */
@@ -2644,7 +2786,7 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     border: 0px solid transparent;
     border-radius: 50%;
     cursor: pointer;
-    z-index: 1002;
+    z-index: 1204;
 }
 
 .gj-slider-bootstrap-3 [role="handle"] {
@@ -2661,4 +2803,28 @@ ul.gj-list-md li.disabled > [data-role="wrapper"] > [data-role="expander"] {
     background-image: -o-linear-gradient(top, #007bff 0%, #2e6da4 100%);
     background-image: linear-gradient(to bottom, #007bff 0%, #2e6da4 100%);
     background-repeat: repeat-x;
+}
+
+
+.gj-colorpicker [role="right-icon"] {
+    cursor: pointer;
+}
+
+
+/* Material Design */
+.gj-colorpicker-md {
+    font-family: "Roboto","Helvetica","Arial",sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: .04em;
+    line-height: 1;
+    color: rgba(0,0,0,.87);
+    position: relative;
+}
+
+.gj-colorpicker-md [role="right-icon"] {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    font-size: 24px;
 }

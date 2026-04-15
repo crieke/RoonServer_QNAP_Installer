@@ -1,0 +1,6 @@
+services:
+  roonserver:
+    volumes:
+      - /run/udev:/run/udev:ro
+    devices:
+      - /dev/bus/usb:/dev/bus/usb

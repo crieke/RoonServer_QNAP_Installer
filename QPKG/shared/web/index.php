@@ -4,7 +4,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 ?>
 
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -65,50 +65,64 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
             echo localize("DEBUG_SID") . ': ' . $_COOKIE['NAS_SID'] . '<br>';
             echo localize("DEBUG_QPKG_ROOT") . ': ' . APPINSTALLPATH . "<br>";
             echo localize("DEBUG_LANGUAGE") . ': ' . $_COOKIE['nas_lang'] . "<br>";
-            echo "RoonServer PID: " . isRunning('getpid') . '<br>';
+            echo "Container-ID: " . isRunning() . '<br>';
+            echo "RoonServer Ver: " . getRoonServerVersion()[1] . '<br>';
+            echo "Options: " . $qpkg_conf_options . '<br>';
             echo localize("DEBUG_QPKG_DOCROOT") . ': ' . NASHOST . '<br>';
-            echo "HomeFeature disabled: " . $multimediaDisabled . '<br>';
         }
 
     }
     ?>
-    <nav id="navigation" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <a class="navbar-brand" href="index.php">
-            <img src="img/roonIcon.svg" alt="Roon Icon" style="height: 40px;">
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-                aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+    
+<nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+                <img src="img/roonIcon.svg" alt="Roon Icon" style="height: 40px;">
+            Roon Server</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="index.php"><?php echo localize("NAV_MENU_ROONSERVER"); ?></a>
-                </li>
-            </ul>
-            ';
-
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown pull-right dropdown-menu-right">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown"
-                       aria-haspopup="true" aria-expanded="false"><?php echo localize("NAV_MENU_MORE"); ?></a>
-                    <div class="dropdown-menu pull-right" aria-labelledby="dropdown01">
-                        <a class="dropdown-item" href="https://roonlabs.com/downloads.html" target="_blank">
-                            <?php echo localize("NAV_MENU_DOWNLOADS"); ?></a>
-                        <a class="dropdown-item" href="https://community.roonlabs.com"
-                           target="_blank"><?php echo localize("NAV_MENU_COMMUNITY"); ?></a>
-                        <a class="dropdown-item" href="https://kb.roonlabs.com/Roon_Server_on_NAS"
-                           target="_blank"><?php echo localize("NAV_MENU_ROON_ON_NAS"); ?></a>
-                        <a class="dropdown-item" href="https://roonlabs.com/pricing.html" target="_blank">
-                            <?php echo localize("NAV_MENU_TRY_ROON"); ?></a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a id="about" class="getModal nav-link float-right" href="#"><i class="fas fa-info-circle"></i> <?php echo localize('NAV_MENU_INFO'); ?></a>
-                </li>
-            </ul>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto">
+              <li class="nav-item dropdown pull-right dropdown-menu-right">
+                  <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                     aria-haspopup="true" aria-expanded="false"><?php echo localize("NAV_MENU_MORE"); ?></a>
+                  <div class="dropdown-menu pull-right" aria-labelledby="dropdown01">
+                      <a class="dropdown-item" href="https://roon.app/de/downloads" target="_blank">
+                          <?php echo localize("NAV_MENU_DOWNLOADS"); ?></a>
+                      <a class="dropdown-item" href="https://community.roonlabs.com"
+                         target="_blank"><?php echo localize("NAV_MENU_COMMUNITY"); ?></a>
+                      <a class="dropdown-item" href="https://kb.roonlabs.com/Roon_Server_on_NAS"
+                         target="_blank"><?php echo localize("NAV_MENU_ROON_ON_NAS"); ?></a>
+                      <a class="dropdown-item" href="https://roon.app/de/pricing" target="_blank">
+                          <?php echo localize("NAV_MENU_TRY_ROON"); ?></a>
+                  </div>
+              </li>
+              <li class="nav-item">
+                  <a id="about" class="getModal nav-link float-right" href="#"><i class="fas fa-info-circle"></i> <?php echo localize('NAV_MENU_INFO'); ?></a>
+              </li>
+          </ul>
+          
+          <!--
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item me-auto dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Dropdown
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </li>
+          </ul>-->
+          
         </div>
+      </div>
     </nav>
+    
+    
     <div id="contentblock">
         <?php
         $section = "info";
@@ -352,6 +366,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         setInterval(roonAnimate, 1000);
 
         $.ajax({
+            type: "POST",
             url: '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=redownload',
             success: function () {
                 label_ReinstallDone = '<?php echo str_replace("'", "\'", localize("MODAL_REINSTALL_DONE")); ?>';
@@ -392,7 +407,7 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         else if (newdbpath != currentPath) {
             $('#modal-content').html('<div class="modal-header">' +
                 '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_HEADLINE")); ?></h4>' +
-                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+                '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' +
                 '</div>' +
                 '<div id="modal-body" class="modal-body">' +
                 '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_TEXT")); ?>' +
@@ -413,11 +428,11 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         else {
             $('#modal-content').html('<div class="modal-header">' +
                 '<h4 class="modal-title"><?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH")); ?></h4>' +
-                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+                '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>' +
                 '</div>' +
                 '<div id="modal-body" class="modal-body">' +
                 '<?php echo str_replace("'", "\'", localize("MODAL_SETUP_RESTART_SAME_PATH_TEXT")); ?>' +
-                '<a id="restartRoonServer" href="#" data-dismiss="modal">' +
+                '<a id="restartRoonServer" href="#" data-bs-dismiss="modal">' +
                 '<div class="fa-4x text-center" style="text-align: center;">' +
                 '<span class="fa-layers fa-fw">' +
                 '<i class="fas fa-exclamation-circle faa-shake animated"></i>' +

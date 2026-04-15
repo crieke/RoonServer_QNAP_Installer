@@ -1,0 +1,5 @@
+services:
+  roonserver:
+    devices:
+      - /dev/dri:/dev/dri
+

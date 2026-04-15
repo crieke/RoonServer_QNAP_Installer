@@ -52,7 +52,7 @@ $ContributorsManual = array(
 
 <div class="modal-header">
     <h4 id="modal-title" class="modal-title"><?php echo localize("MODAL_ABOUT_HEADLINE"); ?></h4>
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
 </div>
 <div id="modal-body" class="modal-body modal-content">
 
@@ -90,7 +90,7 @@ $ContributorsManual = array(
         <br><br>
 
 
-        <div id="about-github" style="background-color: #d7d7d7; padding: 20px; text-align: center;">
+        <div id="about-github" style="padding: 20px; text-align: center;">
             <div>
                 <?php echo localize("MODAL_ABOUT_GITHUB"); ?><br>
                 <div style="text-align: center; font-size: 50px;">
@@ -405,4 +405,4 @@ $ContributorsManual = array(
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary"
-                data-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?></button>
+                data-bs-dismiss="modal"><?php echo localize("BTN_CLOSE"); ?></button>

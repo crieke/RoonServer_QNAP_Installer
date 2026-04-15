@@ -18,43 +18,25 @@ if (isset($_COOKIE['NAS_USER']) && isset($_COOKIE['NAS_SID'])) {
     die('Not logged in!');
 }
 
+
 define('DOCROOT', '/home/httpd/cgi-bin/qpkg/RoonServer/');
 include(DOCROOT . "__include.php");
 include(DOCROOT . "__functions.php");
 
-$strNoDir = 'etc';
-
 $strVarAction = filter_var($_GET['a'], FILTER_SANITIZE_STRING);
 $strVarTree = filter_var($_GET['t'], FILTER_SANITIZE_STRING);
 $strModalContent = filter_var($_GET['c'], FILTER_SANITIZE_STRING);
+$strOptionsContent = filter_var($_GET['o'], FILTER_SANITIZE_STRING);
 
-/*
- * funktion prüfen auf etc
- */
-
-
+if ($strVarAction == 'test') {
+    echo "hi!";
+}
 
 if ($strVarAction == 'gettree') {
     $arr = getTreeAt(urlencode($strVarTree), $strSessionID);
     print json_encode($arr);
     flush();
     exit();
-}
-
-if ($strVarAction == 'checkHelperScript') {
-    $running = file_exists(APPINSTALLPATH . '/.helperscript.lock');
-    header('Content-Type: application/json');
-    if ($running) {
-        echo json_encode(array(
-            'success' => true
-        ));
-    } else {
-        echo json_encode(array(
-            'success' => false
-        ));
-    }
-
-    return true;
 }
 
 if ($strVarAction == 'dbPathIsSet') {
@@ -73,16 +55,26 @@ if ($strVarAction == 'dbPathIsSet') {
     return true;
 }
 
+if ($strVarAction == 'setOptions') {
+    $features = explode(';', $strOptionsContent);
+    shell_exec('setcfg RoonServer options "' . implode(' ', $features) . '" -f /etc/config/qpkg.conf');
+    $qpkg_conf = parse_ini_file('/etc/config/qpkg.conf', 1, INI_SCANNER_RAW);
+    $roon_qpkg_options = $qpkg_conf['RoonServer']['options'];
+    header('Content-Type: application/json');
+    //$obj = json_encode(array(
+     //       'success' => true
+    //));
+    echo json_encode(array(
+        'success' => true,
+        'options' => implode(' ', $features)
+    ));
+    return true;
+}
+
 if ($strVarAction == 'updateformfield') {
     set_db_path(escapeshellarg('/share' . $strVarTree));
     flush();
     exit();
-}
-
-if ($strVarAction == 'redownload') {
-    $helper_script = APPINSTALLPATH . '/helper-scripts/roon-helper-actions.sh';
-    $output = shell_exec($helper_script . ' reinstall');
-    return $output;
 }
 
 if ($strVarAction == 'downloadlogs') {

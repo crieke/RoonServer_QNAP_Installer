@@ -24,11 +24,11 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
 
 <div class="container">
     <div class="roon-template">
-        <h1><?php echo localize("OVERVIEW_HEADLINE"); ?></h1>
+        <!-- <h1><?php echo localize("OVERVIEW_HEADLINE"); ?></h1>
         <p class="lead"><?php echo localize("OVERVIEW_TEXT1"); ?><br>
-            <?php echo localize("OVERVIEW_TEXT2"); ?></p>
+            <?php echo localize("OVERVIEW_TEXT2"); ?></p>-->
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-8">
                 <div class="card">
                     <div class="card-body">
                         <span class="fa-stack fa-2x">
@@ -38,21 +38,18 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                         <h5 class="card-title">Roon Server</h5>
                         <p class="card-text">
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_STATUS"); ?>
-                                :</b> <?php if (isRunning()) {
-                                echo '<span data-toggle="tooltip" title="' . localize("OVERVIEW_ROONSERVER_PANEL_PID") .': ' . isRunning("getpid") . '" style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
+                                :</b> <?php if (strlen(isRunning()) > 1 ) {
+                                echo '<span data-bs-toggle="tooltip" data-bs-title="' . localize("OVERVIEW_ROONSERVER_PANEL_CONTAINER_ID") .': ' . isRunning() . '" style="color: green;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_RUNNING") . '</span>';
                             } else {
                                 echo '<span style="color: red;">' . localize("OVERVIEW_ROONSERVER_PANEL_STATUS_STOPPED") . '</span>';
                             } ?><br>
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION"); ?>
-                                :</b> <?php echo $RoonVersion[1]; ?><br>
+                                :</b> <?php echo getRoonServerVersion()[1]; ?><br>
                             <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_QPKG_VERSION"); ?>
-                                :</b> <?php echo $qpkg_conf['RoonServer']['Version']; ?><br>
-                            <b><?php echo "ffmpeg"; ?>
-                                :</b>
-                                <span id="ffmpeg" class="getModal" data-toggle="tooltip" title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_VERSION");?>: <?php echo $ffmpegVersion; ?>"><button class="btn btn-xs btn-outline-dark"><i style="color:#aaaaaa;" class="fas fa-cog"></i> <?php echo $customFfmpeg ? localize('MODAL_FFMPEG_USER_SUPPLIED_VERSION') : localize('MODAL_FFMPEG_SYSTEM_DEFAULT'); ?></button></span>
+                                :</b> <?php echo $qpkg_conf['RoonServer']['Version']; ?></span>
                         </p>
                             <h5><?php echo localize("OVERVIEW_ROONSERVER_PANEL_SUBHEAD_DATABASE"); ?></h5>
-                            <span data-toggle="tooltip" title="<?php echo $dblocation; ?>">
+                            <span data-bs-toggle="tooltip" data-bs-title="<?php echo $dblocation; ?>">
                                 <b><?php echo localize("OVERVIEW_ROONSERVER_PANEL_LOCATION"); ?>: </b><?php echo $dblocation; ?>
                             </span>
                             <div class="progress" style="height: 20px;">
@@ -61,92 +58,63 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
                             <p>
                             <?php echo $db_perc . '% ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_OF") . ' ' . displayStorage($db_vol_cap) . ' ' . localize("OVERVIEW_ROONSERVER_PANEL_SPACE_USED") . '.'; ?>
                         </p>
-                        <span id="log" class="getModal">
-                            <a href="#"
-                               class="btn btn-light btn-icon float-left"
-                               data-toggle="tooltip"
-                               title="<?php echo localize("MODAL_LOGFILES_ICON_TOOLTIP"); ?>">
-                                <i class="fas fa-ambulance"></i>
-                            </a>
-                        </span>
-                        <span id="setStorage" class="getModal">
-                            <a href="#"
-                               class="btn btn-primary float-right"
-                               data-toggle="tooltip"
-                               title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP"); ?>">
-                                <?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION"); ?>
-                            </a>
-                        </span>
-                        <span id="reinstall" class="getModal">
-                            <a href="#"
-                               class="btn btn-light btn-icon float-left"
-                               data-toggle="tooltip"
-                               title="<?php echo localize("MODAL_REINSTALL_ICON_TOOLTIP"); ?>">
-                                    <i class="fas fa-box-open"></i>
-                            </a>
-                        </span>
+                        <div class="row">
+                            <span id="log" class="col-2 getModal d-flex justify-content-start">
+                                <a href="#"
+                                class="btn btn-outline-danger"
+                                data-bs-theme="dark"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="<?php echo localize("MODAL_LOGFILES_ICON_TOOLTIP"); ?>">
+                                    <i class="fas fa-ambulance"></i>
+                                </a>
+                            </span>
+                            <span id="setStorage" class="col-9 getModal ms-auto float-end">
+                                <a href="#"
+                                class="btn btn-primary"
+                                data-bs-theme="dark"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="<?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION_TOOLTIP"); ?>">
+                                    <?php echo localize("OVERVIEW_ROONSERVER_PANEL_CHANGE_DB_LOCATION"); ?>
+                                </a>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="card">
                     <div class="card-body">
-                        <?php if (!$multimediaDisabled) {
-                            echo '<span class="fa-stack fa-2x">' .
-                                '<i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>' .
-                                '<i class="fas fa-volume-up fa-stack-1x fa-inverse"></i>' .
-                                '</span>';
-                        } else {
-                            echo '<span class="fa-stack fa-2x">' .
-                                '<i class="fa fa-circle fa-stack-2x" style="color: #dddddd;"></i>' .
-                                '<i class="fas fa-volume-off fa-stack-1x fa-inverse" data-fa-transform="left-3"></i>' .
-                                '<i class="fas fa-times fa-stack-1x fa-inverse" data-fa-transform="shrink-10 right-5" ></i>' .
-                                '</span>';
-                        }
-                        ?>
+                        <span class="fa-stack fa-2x">
+                            <i class="fa fa-circle fa-stack-2x" style="color: #222222;"></i>
+                            <i class="fas fa-cog fa-stack-1x" style="color: #ffffff;"></i>
+                        </span>
+                        <h5><?php echo localize("OVERVIEW_OPTIONS_PANEL_TITLE"); ?></h5>
 
-                        <h5 class="card-title"><?php
-                            if (!$multimediaDisabled) {
-                                echo localize("OVERVIEW_AUDIO_PANEL_HEADLINE");
-                            } else {
-                                echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_HEADLINE");
-                            }
-                            ?></h5>
-                            <?php
-
-                            if (!$multimediaDisabled) {
-                                if (!$multimedia_disabled_on_start) {
-                                    echo '<ul class="list-group">' .
-                                        acardsNice() .
-                                        '</ul><br>' .
-                                        '<span id="alsa" class="getModal">' .
-                                        '<a href="#" ' .
-                                        'class="btn btn-primary" ' .
-                                        'data-toggle="tooltip" ' .
-                                        'data-html="true" ' .
-                                        'title="' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES_TOOLTIP") . '">' .
-                                        '<i class="fas fa-eye"></i> ' . localize("OVERVIEW_AUDIO_PANEL_BTN_AUDIO_DEVICES") .
-                                        '</a>' .
-                                        '</span>';
-                                } else {
-                                    echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION2");
-                                    echo '<div id="restartRoonServerAudioPanel">'.
-                                            '<a id="restartRoonServer" href="#" onclick="restartRoonServerAndRefresh()"></p>' .
-                                                '<div class="fa-4x text-center" style="text-align: center;"><p>' .
-                                                    '<span class="fa-layers fa-fw">' .
-                                                        '<i class="fas fa-circle"></i>' .
-                                                        '<i class="fa-inverse fas fa-redo-alt faa-shake animated" data-fa-transform="shrink-8"></i>' .
-                                                    '</span></p>' .
-                                                '</div>' .
-                                                '<div class="text-center">' .
-                                                    str_replace("'", "\'", localize("MODAL_SETUP_RESTART_ROONSERVER")) .
-                                                '</div>' .
-                                            '</a>'.
-                                        '</div>';
-                                }
-                            } else {
-                                echo localize("OVERVIEW_AUDIO_PANEL_NO_MULTIMEDIA_DESCRIPTION1");
-                            } ?>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="smb_cifs" onchange="changeSettings(this)">
+                                <label class="form-check-label justify-content-start" for="flexSwitchCheckChecked">SMB/CIFS mount support</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="usb_audio" onchange="changeSettings(this)">
+                                <label class="form-check-label justify-content-start" for="flexSwitchCheckChecked" data-bs-toggle="tooltip" data-bs-title="<?php echo localize("OVERVIEW_OPTIONS_PANEL_USB_AUDIO_TOOLTIP"); ?>">USB audio (DAC)</label>
+                            </div>
+                            
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="hdmi_audio" onchange="changeSettings(this)">
+                                <label class="form-check-label justify-content-start text-left" for="flexSwitchCheckChecked">HDMI audio</label>
+                            </div>
+                            
+                        <span id="save" class="getModal">
+                            <a href="#"
+                               id="saveButton"
+                               class="btn btn-primary float-right disabled"
+                               data-bs-toggle="tooltip"
+                               onclick="saveOptions()"
+                               data-bs-title="Save & Restart"
+                               data-bs-theme="dark"
+                               ><?php echo localize("OVERVIEW_OPTIONS_PANEL_SAVE_BTN"); ?>
+                            </a>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -161,20 +129,15 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         echo "false";
     } ?>;
 
-    // Enable Tooltips
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    });
-
     // Action when button for Modal is clicked
     $('.getModal').on('click', function (e) {
 
         // Hide Tooltips when modal opens
         $(function () {
-            $('[data-toggle="tooltip"]').tooltip('dispose')
+            $('[data-bs-toggle="tooltip"]').tooltip('dispose')
         });
 
-        // Check which button fired
+        // Check which button pressed
         e.preventDefault();
         var modalContent = $(this).attr('id');
         $('#modal-content').load("modals.php?s=" + modalContent);
@@ -183,4 +146,61 @@ include_once("/home/httpd/cgi-bin/qpkg/RoonServer/__functions.php");
         $('#modal').modal('show');
         return false;
     });
+    function changeSettings() {
+        var qpkg_options_str = "<?php echo $qpkg_conf_options ?>";
+        var qpkg_options_arr = qpkg_options_str.split(' ');
+        
+        var qnap_opt_arr = [];
+        document.getElementById('smb_cifs').checked && qnap_opt_arr.push("smb_cifs");
+        document.getElementById('usb_audio').checked && qnap_opt_arr.push("usb_audio");
+        document.getElementById('hdmi_audio').checked && qnap_opt_arr.push("hdmi_audio");
+        
+        console.log(qnap_opt_arr.join(' ') == qpkg_options_arr.join(' '));
+        
+            console.log(qnap_opt_arr.join(' ') == qpkg_options_arr.join(' '));
+        
+        if ( qnap_opt_arr.join(' ') == qpkg_options_arr.join(' ') ) {
+            $("#saveButton").addClass("disabled");
+        } else {
+            $("#saveButton").removeClass("disabled");
+        }        
+    }
+    
+ $( document ).ready(function() {
+     var qpkg_options_str = "<?php echo $qpkg_conf_options ?>";
+     
+     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+     
+     if ( qpkg_options_str.length > 0 ) {
+        var qpkg_options_arr = qpkg_options_str.split(' ');
+        
+        for (let conf_option of qpkg_options_arr) {
+            document.getElementById(conf_option).checked = true;
+        }
+    }
+});
+
+
+// Function to download log files
+function saveOptions () {
+        var qnap_options = "";
+        qnap_options += document.getElementById('smb_cifs').checked ? "smb_cifs;" : "" ;
+        qnap_options += document.getElementById('usb_audio').checked ? "usb_audio;" : "" ;
+        qnap_options += document.getElementById('hdmi_audio').checked ? "hdmi_audio;" : "" ;
+        
+        $("#saveButton").addClass("disabled");
+
+        document.getElementById('smb_cifs').checked 
+        var strUrl = '<?php echo NASHOST;?>/cgi-bin/qpkg/RoonServer/ajax/ajax.php?a=setOptions&o=' + qnap_options;
+     
+        $.ajax({
+            url: strUrl,
+            dataType: 'json',
+            success: function (cb_data) {
+                restartRoonServer();
+            }
+        });
+    }
+
 </script>
